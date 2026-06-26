@@ -323,16 +323,17 @@
         const uiTitle = document.getElementById('msg-title');
         const uiBody = document.getElementById('msg-body');
 
-        // Legendas com tempos recalibrados para sincronia instantânea
+        // Legendas sincronizadas com precisão
         const legendasCriador = [
             { tempo: 0.0, texto: "No princípio..." },
             { tempo: 2.2, texto: "Não havia nada." },
             { tempo: 5.5, texto: "Nada além do silêncio de trevas sem fim." },
             { tempo: 11.0, texto: "Mas o criador soprou perante o grande vazio, e sussurrou:" },
-            { tempo: 15.3, texto: "Faça-se a luz.", classe: "luz" } // Adiantado para sincronizar exatamente com o início da fala
+            { tempo: 15.3, texto: "Faça-se a luz.", classe: "luz" }
         ];
 
         let transicaoIniciada = false;
+        let intervalLegendas = null;
 
         window.iniciarIntroducao = () => {
             inicializarAudioEfeitos();
@@ -340,7 +341,10 @@
                 audioCtx.resume();
             }
 
+            // Garante que o estado anterior do loop de legendas e variáveis foi limpo
+            if (intervalLegendas) clearInterval(intervalLegendas);
             transicaoIniciada = false;
+
             document.getElementById('intro').style.opacity = '0';
             setTimeout(() => {
                 document.getElementById('intro').style.display = 'none';
@@ -349,13 +353,17 @@
                 screenNarrativa.style.display = 'flex';
                 screenNarrativa.style.opacity = '1';
 
+                // Reseta o texto da legenda anterior
+                document.getElementById('legenda-texto').innerText = "";
+                document.getElementById('legenda-texto').classList.remove('show', 'luz');
+
                 audioCriadorTag.currentTime = 0;
                 audioCriadorTag.volume = 1.0;
                 audioCriadorTag.play().catch(e => console.log("Erro áudio introdução:", e));
             }, 1500);
 
             // Relógio de sincronia contínua de alta precisão
-            const intervalLegendas = setInterval(() => {
+            intervalLegendas = setInterval(() => {
                 const tempoAtual = audioCriadorTag.currentTime;
                 let legendaAtiva = null;
 
@@ -378,13 +386,12 @@
                     }
                 }
 
-                // LÓGICA DE TRANSIÇÃO INDEPENDENTE: Se já passou do tempo da fala final, agenda o fim perfeito
+                // Lógica de transição independente
                 if (tempoAtual >= 15.3 && !transicaoIniciada) {
                     transicaoIniciada = true;
                     
-                    // Espera a frase ser dita por inteiro e mantém o impacto por 3.5 segundos na tela escura
                     setTimeout(() => {
-                        clearInterval(intervalLegendas);
+                        if (intervalLegendas) clearInterval(intervalLegendas);
                         const screenNarrativa = document.getElementById('narrativa-screen');
                         screenNarrativa.style.opacity = '0';
 
@@ -402,6 +409,7 @@
             document.getElementById('nav-container').style.display = 'flex';
             document.getElementById('hud').style.opacity = '1';
             
+            audioTag.currentTime = 0; // Garante que a música comece exatamente do começo
             audioTag.volume = 0.3; 
             audioTag.play().catch(e => console.log("Erro música principal:", e));
             mudarFoco('earth');
@@ -573,11 +581,19 @@
                 document.getElementById('btn-finale').classList.remove('show');
                 document.getElementById('nav-menu').classList.remove('hidden');
                 
+                // CORREÇÃO CRÍTICA DO BUG DE LOOP:
+                // Pausa e zera todas as tracks de música para não vazar nada antes da hora no recomeço
                 audioTag.pause();
                 audioTag.currentTime = 0;
+                audioCriadorTag.pause();
+                audioCriadorTag.currentTime = 0;
+                if (intervalLegendas) clearInterval(intervalLegendas);
+                transicaoIniciada = false;
 
-                // Oculta o canvas novamente antes de recomeçar
+                // Oculta o canvas novamente e o HUD para aguardar a nova introdução
                 document.querySelector('canvas').classList.remove('show');
+                document.getElementById('nav-container').style.display = 'none';
+                document.getElementById('hud').style.opacity = '0';
 
                 const intro = document.getElementById('intro');
                 intro.style.display = 'flex';
@@ -741,10 +757,10 @@
 
         const textos = {
             galaxy: { title: "Nossa Via-Láctea 🌌", body: "Olha que lindo tudo girando junto! No meio desse tanto de poeira e mistério, o universo caprichou na nossa história. Saber que você existe faz tudo parecer perfeito." },
-            sun: { title: "O Sol: Nosso Combustível ☀️", body: "O Sol é a estrella que dá energia para todo o espaço. Ele é o combustível do que eu sinto por você: enquanto ele continuar brilhando forte, nosso amor vai ser eterno." },
+            sun: { title: "O Sol: Nosso Combustível ☀️", body: "O Sol é a estrela que dá energia para todo o espaço. Ele é o combustível do que eu sinto por você: enquanto ele continuar brilhando forte, nosso amor vai ser eterno." },
             mercurio: { title: "Mercúrio", body: "Ele corre super rápido em volta do Sol. É igualzinho à velocidade que o meu coração bate toda vez que chega uma mensagem sua no meu celular!" },
             venus: { title: "Vênus", body: "O planeta mais brilhante do céu. Ele me lembra muito o brilho dos seus olhos quando a gente conversa e faz planos para o nosso futuro." },
-            earth: { title: "Planeta Terra 🌍", body: "Existem bilhões de pessoas nesse mundo inteiro, mas foi com você que meu coração decidiu bater mais forte. É um milagre lindo a gente ter se encontrado no meio di tanta gente." },
+            earth: { title: "Planeta Terra 🌍", body: "Existem bilhões de pessoas nesse mundo inteiro, mas foi com você que meu coração decidiu bater mais forte. É um milagre lindo a gente ter se encontrado no meio de tanta gente." },
             marte: { title: "Marte", body: "Marte é forte e cheio de cor. Ele me lembra a nossa força para fazer tudo dar certo e construir uma história linda passo a passo." },
             jupiter: { title: "Júpiter", body: "Júpiter é o maior planeta de todos, cabe tudo lá dentro! Mas sabia que ele ainda é pequeno perto do tamanho do futuro que eu imagino do seu lado?" },
             saturno: { title: "Saturno da Minha Maria ✨💍", body: "Esse é o planeta mais lindo do universo por causa desses anéis. Como ele é o meu preferido, coloquei o seu nome brilhando nele. Você é a dona do meu lugar favorito no espaço." },
