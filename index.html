@@ -2,94 +2,84 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Nosso Universo</title>
+    <title>Nosso Universo - Nossa História</title>
     <style>
-        body { margin: 0; background: #000; color: #fff; font-family: 'Montserrat', sans-serif; overflow: hidden; }
-        canvas { display: block; }
-        #text-container {
-            position: absolute; top: 50px; width: 100%; text-align: center;
-            pointer-events: none; transition: opacity 1s;
-        }
+        body { margin: 0; background: radial-gradient(circle at center, #1b2735 0%, #090a0f 100%); color: white; font-family: 'Georgia', serif; overflow: hidden; }
+        canvas { display: block; filter: contrast(1.2) brightness(1.1); }
+        #overlay { position: absolute; top: 10%; width: 100%; text-align: center; transition: opacity 1.5s; pointer-events: none; text-shadow: 0 0 10px rgba(255,255,255,0.5); }
     </style>
 </head>
 <body>
-    <div id="text-container">
-        <h1 id="main-msg">Você é o meu mundo</h1>
-        <p id="sub-msg">Role para descobrir o tamanho do meu amor</p>
-    </div>
-    <canvas id="canvas"></canvas>
 
-    <script>
-        const canvas = document.getElementById('canvas');
-        const ctx = canvas.getContext('2d');
-        let zoom = 1000;
-        let targetZoom = 1000;
+<div id="overlay">
+    <h1 id="title">Nosso Pequeno Ponto</h1>
+    <p id="desc">Entre bilhões de estrelas, o destino nos cruzou.</p>
+</div>
 
-        function draw() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-            zoom += (targetZoom - zoom) * 0.05;
+<canvas id="c"></canvas>
 
-            ctx.fillStyle = "#050505";
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+<script>
+    const canvas = document.getElementById('c'), ctx = canvas.getContext('2d');
+    let zoom = 5000, targetZoom = 5000;
+    
+    // Dados para física simples de órbita
+    const planets = [
+        { dist: 150, size: 5, color: '#ffcc00', speed: 0.02 }, // Mercúrio
+        { dist: 250, size: 10, color: '#e6b800', speed: 0.015 }, // Vênus
+        { dist: 400, size: 12, color: '#2277ff', speed: 0.01 }, // Terra
+        { dist: 600, size: 9, color: '#ff4422', speed: 0.008 }  // Marte
+    ];
 
-            ctx.save();
-            ctx.translate(canvas.width/2, canvas.height/2);
-            ctx.scale(zoom/1000, zoom/1000);
+    function draw() {
+        canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+        zoom += (targetZoom - zoom) * 0.03;
+        ctx.fillStyle = "#020205"; ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        ctx.save();
+        ctx.translate(canvas.width/2, canvas.height/2);
+        ctx.scale(zoom/1000, zoom/1000);
 
-            // 1. VIA LÁCTEA (Fundo)
-            if (zoom < 800) {
-                ctx.fillStyle = "rgba(255, 255, 255, 0.05)";
-                ctx.beginPath(); ctx.arc(0, 0, 800, 0, Math.PI*2); ctx.fill();
-            }
-
-            // 2. SISTEMA SOLAR
-            if (zoom < 2000) {
-                // Órbitas
-                ctx.strokeStyle = "rgba(255,255,255,0.1)";
-                for(let i=1; i<5; i++) { ctx.beginPath(); ctx.arc(0, 0, i*150, 0, Math.PI*2); ctx.stroke(); }
-                // Planetas
-                drawPlanet(150, 'red', 8); drawPlanet(300, 'gold', 12); 
-            }
-
-            // 3. TERRA (O foco principal)
-            const grad = ctx.createRadialGradient(-15, -15, 5, 0, 0, 50);
-            grad.addColorStop(0, '#77aaff'); grad.addColorStop(1, '#002266');
-            ctx.fillStyle = grad;
-            ctx.beginPath(); ctx.arc(0, 0, 50, 0, Math.PI*2); ctx.fill();
-            
-            // "Pessoas" (Pontinhos de luz brilhando)
-            ctx.fillStyle = "white";
-            for(let i=0; i<200; i++) {
-                let angle = i * 0.3;
-                ctx.fillRect(Math.cos(angle)*45, Math.sin(angle)*45, 1, 1);
-            }
-
-            ctx.restore();
-
-            // Lógica de Romantismo nas Mensagens
-            const msg = document.getElementById('main-msg');
-            const sub = document.getElementById('sub-msg');
-            
-            if (zoom > 800) { msg.innerText = "Você é o meu mundo"; sub.innerText = "Em meio a bilhões de pessoas, você é a única."; }
-            else if (zoom > 300) { msg.innerText = "Nosso Sistema Solar"; sub.innerText = "Mas nada brilha mais que o nosso encontro."; }
-            else { msg.innerText = "Infinito"; sub.innerText = "Meu amor por você atravessa galáxias."; }
-            
-            document.getElementById('text-container').style.opacity = zoom < 200 ? 0.3 : 1;
-
-            requestAnimationFrame(draw);
+        // Galáxia (via Láctea)
+        if (zoom < 800) {
+            ctx.shadowBlur = 50; ctx.shadowColor = "#4444ff";
+            ctx.fillStyle = "rgba(200, 200, 255, 0.1)";
+            ctx.beginPath(); ctx.ellipse(0, 0, 500, 200, Math.PI/4, 0, Math.PI*2); ctx.fill();
         }
 
-        function drawPlanet(dist, color, size) {
-            ctx.fillStyle = color;
-            ctx.beginPath(); ctx.arc(dist, 0, size, 0, Math.PI*2); ctx.fill();
+        // Sistema Solar
+        if (zoom < 3000) {
+            ctx.shadowBlur = 0;
+            planets.forEach(p => {
+                let angle = Date.now() * p.speed * 0.1;
+                ctx.strokeStyle = "rgba(255,255,255,0.05)";
+                ctx.beginPath(); ctx.arc(0, 0, p.dist, 0, Math.PI*2); ctx.stroke();
+                ctx.fillStyle = p.color;
+                ctx.beginPath(); ctx.arc(Math.cos(angle)*p.dist, Math.sin(angle)*p.dist, p.size, 0, Math.PI*2); ctx.fill();
+            });
         }
 
-        window.addEventListener('wheel', (e) => {
-            targetZoom = Math.max(50, Math.min(targetZoom - e.deltaY * 2, 3000));
-        });
+        // Terra (O centro do nosso amor)
+        ctx.shadowBlur = 20; ctx.shadowColor = "#3399ff";
+        let earthGrad = ctx.createRadialGradient(-10, -10, 5, 0, 0, 50);
+        earthGrad.addColorStop(0, '#77aaff'); earthGrad.addColorStop(1, '#001133');
+        ctx.fillStyle = earthGrad;
+        ctx.beginPath(); ctx.arc(0, 0, 50, 0, Math.PI*2); ctx.fill();
 
-        draw();
-    </script>
+        ctx.restore();
+
+        // Narrativa dinâmica
+        if (zoom > 2000) { title.innerText = "Nosso Mundo"; desc.innerText = "Tudo começou aqui, onde nos encontramos."; }
+        else if (zoom > 500) { title.innerText = "A Imensidão"; desc.innerText = "O sistema solar é imenso, mas nosso amor é infinito."; }
+        else { title.innerText = "Via Láctea"; desc.innerText = "Um universo inteiro conspirando por nós dois."; }
+
+        requestAnimationFrame(draw);
+    }
+
+    window.addEventListener('wheel', (e) => {
+        targetZoom = Math.max(50, Math.min(targetZoom - e.deltaY * 2, 5000));
+    });
+
+    draw();
+</script>
 </body>
 </html>
