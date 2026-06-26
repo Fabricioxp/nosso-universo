@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Nosso Universo Privado</title>
+    <title>Universo da Maria</title>
     <style>
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background-color: #010105; font-family: 'Segoe UI', Roboto, sans-serif; }
         
@@ -20,7 +20,7 @@
         #msg-body { font-size: 0.95rem; margin: 0; color: #e5def0; font-weight: 400; line-height: 1.5; }
 
         /* Menu de Navegação Otimizado */
-        #nav-container { position: absolute; top: 15px; left: 50%; transform: translateX(-50%); z-index: 20; display: flex; flex-direction: column; align-items: center; gap: 8px; width: 90%; max-width: 700px; }
+        #nav-container { position: absolute; top: 15px; left: 50%; transform: translateX(-50%); z-index: 20; display: flex; flex-direction: column; align-items: center; gap: 8px; width: 90%; max-width: 750px; }
         #nav-menu { display: flex; gap: 6px; background: rgba(5, 3, 10, 0.6); padding: 6px 12px; border-radius: 30px; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.08); flex-wrap: wrap; justify-content: center; transition: all 0.4s ease; max-height: 200px; overflow: hidden; }
         #nav-menu.hidden { max-height: 0; padding: 0; border: none; opacity: 0; pointer-events: none; }
         
@@ -37,13 +37,14 @@
 
     <div id="intro">
         <h1>O Universo de Nós Dois</h1>
-        <p>Um espaço inteirinho criado para te mostrar que mesmo antes do nosso primeiro abraço acontecer, você já é o meu mundo.</p>
+        <p>Um espaço inteirinho criado para te mostrar que você mudou completamente a minha vida. Você é o meu mundo.</p>
         <button id="btn-start" onclick="iniciar()">Iniciar Passeio</button>
     </div>
 
     <div id="nav-container">
         <button id="toggle-menu" onclick="AlternarMenu()">Esconder Painel 👁️</button>
         <div id="nav-menu">
+            <button class="nav-btn" onclick="mudarFoco('galaxy')">🌌 Via-Láctea</button>
             <button class="nav-btn" onclick="mudarFoco('sun')">☀️ Sol</button>
             <button class="nav-btn" onclick="mudarFoco('mercurio')">Mercúrio</button>
             <button class="nav-btn" onclick="mudarFoco('venus')">Vênus</button>
@@ -78,11 +79,14 @@
         const loader = new THREE.TextureLoader();
         let focoAtual = 'earth';
         
-        const posicoesGlobais = { sun: new THREE.Vector3(20000, 0, 0) };
+        const posicoesGlobais = { 
+            sun: new THREE.Vector3(20000, 0, 0),
+            galaxy: new THREE.Vector3(0, 4000, 0) // Ponto de vista de cima para ver a galáxia inteira
+        };
 
-        // 2. VIA LÁCTEA REALISTA ESPIRALADA
+        // 2. VIA LÁCTEA REALISTA ESPIRALADA COM EFEITO PULSANTE
         const galaxyGeometry = new THREE.BufferGeometry();
-        const gPoints = 160000;
+        const gPoints = 170000;
         const gPositions = new Float32Array(gPoints * 3);
         const gColors = new Float32Array(gPoints * 3);
         
@@ -96,14 +100,14 @@
             const theta = ((i % arms) / arms) * Math.PI * 2 + (r * 0.00006); 
 
             const spread = Math.pow(Math.random(), 2) * (Math.random() < 0.5 ? 1 : -1) * r * 0.12;
-            const ySpread = (Math.random() - 0.5) * (65000 - r) * 0.05;
+            const ySpread = (Math.random() - 0.5) * (65000 - r) * 0.04;
 
             gPositions[i3] = Math.cos(theta) * r + spread;
             gPositions[i3+1] = ySpread;
             gPositions[i3+2] = Math.sin(theta) * r + (Math.random() - 0.5) * r * 0.12;
 
             const finalCol = colCore.clone().lerp(colArm, r / 65000);
-            if(Math.random() > 0.95) finalCol.addScalar(0.4); 
+            if(Math.random() > 0.96) finalCol.addScalar(0.4); 
             
             gColors[i3] = finalCol.r;
             gColors[i3+1] = finalCol.g;
@@ -125,6 +129,17 @@
         });
         const galaxy = new THREE.Points(galaxyGeometry, galaxyMaterial);
         scene.add(galaxy);
+
+        // Estrelas cadentes românticas cruzando o fundo do espaço
+        const lineMat = new THREE.LineBasicMaterial({ color: 0xff758c, transparent: true, opacity: 0.6, blending: THREE.AdditiveBlending });
+        const shootingStars = [];
+        for(let i=0; i<4; i++) {
+            const lineGeo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0,0,0), new THREE.Vector3(-300, -150, -300)]);
+            const line = new THREE.Line(lineGeo, lineMat);
+            line.position.set((Math.random()-0.5)*40000, (Math.random()-0.5)*10000, (Math.random()-0.5)*40000);
+            scene.add(line);
+            shootingStars.push({ mesh: line, speed: 20 + Math.random()*20 });
+        }
 
         // 3. GRUPO DO SISTEMA SOLAR
         const solarSystem = new THREE.Group();
@@ -158,31 +173,19 @@
             return geo;
         }
 
-        // Criando a Terra com cor padrão bonita (Evita tela preta sem internet)
         const earthGroup = new THREE.Group();
-        const earthMat = new THREE.MeshStandardMaterial({
-            color: 0x2b82c9,
-            roughness: 0.4
-        });
-        // Tenta carregar a textura, se falhar mantém o azul lindo acima
+        const earthMat = new THREE.MeshStandardMaterial({ color: 0x2b82c9, roughness: 0.4 });
         loader.load('https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/planets/earth_atmos_2048.jpg', (tex) => {
-            earthMat.map = tex;
-            earthMat.color.setHex(0xffffff);
-            earthMat.needsUpdate = true;
+            earthMat.map = tex; earthMat.color.setHex(0xffffff); earthMat.needsUpdate = true;
         });
 
         const earth = new THREE.Mesh(new THREE.SphereGeometry(7.5, 64, 64), earthMat);
         earthGroup.add(earth);
 
-        // Lua de Coração Rochosa Vermelha
         const heartMoonGeo = gerarGeometriaCoracao3D();
-        const heartMoonMat = new THREE.MeshStandardMaterial({
-            color: 0xff3355, roughness: 0.9, metalness: 0.1,
-            bumpScale: 0.15
-        });
+        const heartMoonMat = new THREE.MeshStandardMaterial({ color: 0xff3355, roughness: 0.9, metalness: 0.1, bumpScale: 0.15 });
         loader.load('https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/water/waterbump.chile.jpg', (tex) => {
-            heartMoonMat.bumpMap = tex;
-            heartMoonMat.needsUpdate = true;
+            heartMoonMat.bumpMap = tex; heartMoonMat.needsUpdate = true;
         });
 
         const heartMoon = new THREE.Mesh(heartMoonGeo, heartMoonMat);
@@ -190,18 +193,16 @@
         earthGroup.add(heartMoon);
         solarSystem.add(earthGroup);
 
-        // 5. SATURNO (O MAIS LINDO) COM O NOME "MARIA"
+        // 5. SATURNO COM O NOME "MARIA"
         const saturnoGroup = new THREE.Group();
         const saturnoMesh = new THREE.Mesh(new THREE.SphereGeometry(13.5, 64, 64), new THREE.MeshStandardMaterial({ color: 0xe2bf7d, roughness: 0.5 }));
         saturnoGroup.add(saturnoMesh);
 
-        // Anel Gigante e Lindo de Saturno
         const rGeo = new THREE.RingGeometry(16, 30, 64);
         const rMat = new THREE.MeshStandardMaterial({ color: 0xd2af6d, side: THREE.DoubleSide, transparent: true, opacity: 0.75 });
         const rMesh = new THREE.Mesh(rGeo, rMat); rMesh.rotation.x = Math.PI/2.2;
         saturnoGroup.add(rMesh);
 
-        // Nome MARIA Flutuando com brilho rosa suave em cima do planeta
         const nameCanvas = document.createElement('canvas'); nameCanvas.width = 512; nameCanvas.height = 128;
         const nCtx = nameCanvas.getContext('2d');
         nCtx.fillStyle = 'rgba(0,0,0,0)'; nCtx.fillRect(0,0,512,128);
@@ -212,7 +213,7 @@
         const nameTex = new THREE.CanvasTexture(nameCanvas);
         const nameSpriteMat = new THREE.SpriteMaterial({ map: nameTex, transparent: true });
         const nameSprite = new THREE.Sprite(nameSpriteMat);
-        nameSprite.position.set(0, 22, 0); // Fica voando sobre o planeta
+        nameSprite.position.set(0, 22, 0); 
         nameSprite.scale.set(35, 9, 1);
         saturnoGroup.add(nameSprite);
         solarSystem.add(saturnoGroup);
@@ -223,8 +224,8 @@
             { name: 'venus', size: 5.8, dist: 95, color: 0xe3bb87, speed: 0.003 },
             { name: 'marte', size: 4.0, dist: 195, color: 0xc1440e, speed: 0.0016 },
             { name: 'jupiter', size: 17.5, dist: 260, color: 0xd4a373, speed: 0.001 },
-            { name: 'urano', size: 9.0, dist: 420, color: 0x3ae5d9, speed: 0.0005 }, // Azul Lindo (Dela)
-            { name: 'netuno', size: 8.5, dist: 500, color: 0x7832cc, speed: 0.0003 }, // Roxinho Lindo (Seu)
+            { name: 'urano', size: 9.0, dist: 420, color: 0x3ae5d9, speed: 0.0005 }, // Azul Dela
+            { name: 'netuno', size: 8.5, dist: 500, color: 0x7832cc, speed: 0.0003 }, // Seu Roxo
             { name: 'plutao', size: 1.5, dist: 560, color: 0x8a7b68, speed: 0.0002 }
         ];
 
@@ -240,25 +241,25 @@
         meshesPlanetas['earth'] = { group: earthGroup, mesh: earth, dist: 145, angle: 1, speed: 0.002 };
         meshesPlanetas['saturno'] = { group: saturnoGroup, mesh: saturnoMesh, dist: 340, angle: 5, speed: 0.0008 };
 
-        // 7. TEXTOS SIMPLES, LINDOS E ADAPTADOS PARA VOCÊS DOIS
+        // 7. TEXTOS SIMPLES, LINDOS E REVISADOS
         const textos = {
-            sun: { title: "O Sol: Nosso Combustível ☀️", body: "O Sol é o que dá energia para tudo no espaço. Eu fiz dele o combustível do que eu sinto por você: enquanto ele continuar brilhando forte lá no céu, o nosso amor vai ser eterno e nunca vai acabar." },
-            mercurio: { title: "Mercúrio", body: "Ele é o planeta mais rapidinho de todos. Lembra a velocidade que o meu coração bate toda vez que eu vejo uma mensagem sua no celular." },
-            venus: { title: "Vênus", body: "Um planeta que brilha muito no céu, parecendo uma estrela. Ele me lembra a luz que você trouxe para a minha vida desde que a gente começou a se falar." },
-            earth: { title: "A Terra e a nossa Lua ❤️", body: "A gente ainda não se viu pessoalmente, mas moramos no mesmo planeta! E para deixar ele a nossa cara, mudei a Lua para o formato de um coração de rocha puro, pra vigiar a gente até o dia do nosso encontro." },
-            marte: { title: "Marte", body: "O planeta vermelho, cheio de energia. Ele representa a nossa força para vencer qualquer distância e fazer tudo dar certo entre nós." },
-            jupiter: { title: "Júpiter", body: "Esse planeta é gigante e pesado! Mas sabia que, mesmo ele sendo o maior de todos, ele ainda é menor do que a vontade que eu tenho de te abraçar bem forte pela primeira vez." },
-            saturno: { title: "Saturno da Minha Maria ✨💍", body: "Esse é o planeta mais lindo de todos por causa desses anéis maravilhosos. Como ele é o meu preferido, coloquei o seu nome brilhando nele. Você é a dona do meu pedaço favorito do universo." },
-            urano: { title: "Urano Azul-Piscina 💎", body: "Esse é o planeta de gelo que eu separei especialmente para você, porque ele tem a sua cor preferida. Ele é todo lindo, calmo e traz uma paz enorme só de olhar, igualzinho a você." },
-            netuno: { title: "Netuno Roxo Cósmico 🔮", body: "Esse aqui é o outro planeta de gelo, só que com a minha cor preferida. Viu como o meu planeta roxo e o seu planeta azul ficam perfeitos combinando lado a lado no espaço?" },
-            plutao: { title: "Plutão 🤏", body: "Plutão é tão pequenininho que nem consideram ele um planeta direito kkkkk. Olhei para ele e lembrei de você, minha baixinha linda! Mas o tamanho dele não importa, o carinho por ele é gigante, igual ao meu por você." },
-            universo: { title: "A Imensidão do Espaço", body: "Olha como todas essas estrelas formam caminhos lindos no céu. A distância entre nós pode parecer grande, mas ela fica minúscula perto do tamanho do nosso amor." }
+            galaxy: { title: "Nossa Via-Láctea 🌌", body: "Olha que lindo tudo girando junto! No meio desse tanto de poeira e mistério, o universo caprichou na nossa história. Saber que você existe faz tudo parecer perfeito." },
+            sun: { title: "O Sol: Nosso Combustível ☀️", body: "O Sol é a estrela que dá energia para todo o espaço. Ele é o combustível do que eu sinto por você: enquanto ele continuar brilhando forte, nosso amor vai ser eterno." },
+            mercurio: { title: "Mercúrio", body: "Ele corre super rápido em volta do Sol. É igualzinho à velocidade que o meu coração bate toda vez que chega uma mensagem sua no meu celular!" },
+            venus: { title: "Vênus", body: "O planeta mais brilhante do céu. Ele me lembra muito o brilho dos seus olhos quando a gente conversa e faz planos para o nosso futuro." },
+            earth: { title: "Planeta Terra 🌍", body: "Existem bilhões de pessoas nesse mundo inteiro, mas foi com você que meu coração decidiu bater mais forte. É um milagre lindo a gente ter se encontrado no meio de tanta gente." },
+            marte: { title: "Marte", body: "Marte é forte e cheio de cor. Ele me lembra a nossa força para fazer tudo dar certo e construir uma história linda passo a passo." },
+            jupiter: { title: "Júpiter", body: "Júpiter é o maior planeta de todos, cabe tudo lá dentro! Mas sabia que ele ainda é pequeno perto do tamanho do futuro que eu imagino do seu lado?" },
+            saturno: { title: "Saturno da Minha Maria ✨💍", body: "Esse é o planeta mais lindo do universo por causa desses anéis. Como ele é o meu preferido, coloquei o seu nome brilhando nele. Você é a dona do meu lugar favorito no espaço." },
+            urano: { title: "Urano Azul-Piscina 💎", body: "Esse planeta de gelo tem a sua cor preferida! Ele é todo lindo, passa uma paz enorme só de olhar e me faz lembrar do quanto seu carinho me faz bem." },
+            netuno: { title: "Netuno Roxo Cósmico 🔮", body: "Esse aqui tem a minha cor preferida. Viu como o meu planeta roxo e o seu planeta azul combinam perfeitamente juntos no espaço? Fomos feitos um para o outro." },
+            plutao: { title: "Plutão 🤏", body: "Plutão é bem pequenininho e fica lá no cantinho dele kkkk. Olhei para ele e lembrei de você, minha baixinha! Mas o tamanho não importa, meu carinho por você é gigante!" }
         };
 
         // CONTROLES
         const controls = new OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true; controls.dampingFactor = 0.05;
-        controls.minDistance = 10; controls.maxDistance = 120000;
+        controls.minDistance = 10; controls.maxDistance = 150000;
 
         camera.position.set(20140, 15, 25);
         controls.target.set(20140, 0, 0);
@@ -285,9 +286,19 @@
                 uiTitle.innerText = textos[alvo].title;
                 uiBody.innerText = textos[alvo].body;
             }
+
+            if(alvo === 'galaxy') {
+                camera.position.set(0, 55000, 65000);
+                controls.target.set(0, 0, 0);
+            }
         };
 
         window.alinharCamera = () => {
+            if(focoAtual === 'galaxy') {
+                camera.position.set(0, 55000, 65000);
+                controls.target.set(0, 0, 0);
+                return;
+            }
             const p = obterPosicaoFoco();
             const offset = (focoAtual === 'sun' || focoAtual === 'saturno') ? 65 : 25;
             camera.position.set(p.x + offset, p.y + 10, p.z + offset);
@@ -308,6 +319,7 @@
         };
 
         function obterPosicaoFoco() {
+            if(focoAtual === 'galaxy') return new THREE.Vector3(0,0,0);
             if(focoAtual === 'sun') return solarSystem.position;
             const p = posicoesGlobais[focoAtual];
             return p ? p : solarSystem.position;
@@ -320,17 +332,29 @@
             const tempo = Date.now() * 0.0005;
 
             sun.rotation.y += 0.001;
+            
+            // Galáxia com efeito de núcleo pulsante leve
             galaxy.rotation.y += 0.00015;
+            const pulse = 1 + Math.sin(tempo * 2) * 0.03;
+            galaxy.scale.set(pulse, 1, pulse);
 
-            // Movimento da lua de coração ao redor da Terra
+            // Estrelas cadentes cruzando
+            shootingStars.forEach(s => {
+                s.mesh.position.x -= s.speed;
+                s.mesh.position.z -= s.speed;
+                if(s.mesh.position.x < -60000) {
+                    s.mesh.position.set(Math.random()*40000, (Math.random()-0.5)*10000, Math.random()*40000);
+                }
+            });
+
+            // Movimento da lua de coração
             heartMoon.position.x = Math.cos(tempo * 2.5) * 16;
             heartMoon.position.z = Math.sin(tempo * 2.5) * 16;
             heartMoon.rotation.y += 0.01;
 
-            // Fazer o nome da Maria olhar sempre para a câmera (Efeito Billboard perfeito)
             nameSprite.lookAt(camera.position);
 
-            // Mover os planetas nas órbitas
+            // Mover os planetas
             for(let chave in meshesPlanetas) {
                 const p = meshesPlanetas[chave];
                 p.angle += p.speed;
@@ -343,12 +367,16 @@
             }
 
             const alvoCam = obterPosicaoFoco();
-            controls.target.lerp(alvoCam, 0.08);
+            if(focoAtual !== 'galaxy') {
+                controls.target.lerp(alvoCam, 0.08);
+            } else {
+                controls.target.lerp(new THREE.Vector3(0,0,0), 0.05);
+            }
 
-            // Se afastar muito no zoom, muda o texto para a galáxia
-            if(camera.position.distanceTo(alvoCam) > 2200) {
-                uiTitle.innerText = textos.universo.title;
-                uiBody.innerText = textos.universo.body;
+            // Se afastar demais vira texto da galáxia automaticamente
+            if(focoAtual !== 'galaxy' && camera.position.distanceTo(alvoCam) > 3000) {
+                uiTitle.innerText = textos.galaxy.title;
+                uiBody.innerText = textos.galaxy.body;
             }
 
             controls.update();
