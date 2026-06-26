@@ -103,7 +103,6 @@
         const loader = new THREE.TextureLoader();
         let focoAtual = 'earth';
         let explodindo = false;
-        let tempoExplosao = 0;
         
         let audioCtx, audioSource, filterNode, gainNode;
         const audioTag = document.getElementById('musica-fundo');
@@ -168,7 +167,7 @@
 
             const angle1 = Math.random() * Math.PI * 2;
             const angle2 = Math.acos((Math.random() * 2) - 1);
-            const speed = 280 + Math.random() * 600; 
+            const speed = 320 + Math.random() * 680; 
             gVelocities[i3] = Math.sin(angle2) * Math.cos(angle1) * speed;
             gVelocities[i3+1] = Math.sin(angle2) * Math.sin(angle1) * speed;
             gVelocities[i3+2] = Math.cos(angle2) * speed;
@@ -381,10 +380,9 @@
             }
         };
 
-        // EXECUTOR DO FIM DO MUNDO RÍTMICO
+        // DISPARADOR DO BIG BANG SINCRONIZADO POR SEGUNDOS REAIS
         window.dispararExplosao = () => {
             explodindo = true;
-            tempoExplosao = 0;
             focoAtual = 'galaxy'; 
             
             inicializarAudioEfeitos();
@@ -401,32 +399,32 @@
             overlay.style.backgroundColor = '#ffffff';
             overlay.style.transition = 'none'; 
 
-            // Dá play no áudio especial enviado por você
+            // Configura e toca o arquivo final.mp3 (18 segundos)
             audioExploTag.currentTime = 0;
             audioExploTag.volume = 1.0;
             audioExploTag.play().catch(e => console.log("Erro ao tocar áudio final:", e));
 
-            // Aplica os filtros na trilha de fundo original para ela sumir em sintonia
+            // Fade-out da música principal coordenado perfeitamente com a entrada do colapso
             if (filterNode && gainNode && audioCtx) {
                 filterNode.frequency.setValueAtTime(filterNode.frequency.value, audioCtx.currentTime);
-                filterNode.frequency.exponentialRampToValueAtTime(70, audioCtx.currentTime + 6.0); 
+                filterNode.frequency.exponentialRampToValueAtTime(70, audioCtx.currentTime + 4.0); 
                 
                 gainNode.gain.setValueAtTime(gainNode.gain.value, audioCtx.currentTime);
-                gainNode.gain.linearRampToValueAtTime(0.0, audioCtx.currentTime + 6.5); 
+                gainNode.gain.linearRampToValueAtTime(0.0, audioCtx.currentTime + 4.5); 
             }
 
-            // Tempo total ajustado precisamente para o tamanho e dissipação do arquivo final.mp3 (~18 segundos)
+            // Garante o tempo exato de fim de áudio (18.0 segundos)
             setTimeout(() => {
-                overlay.style.transition = 'opacity 3s cubic-bezier(0.1, 0.8, 0.2, 1)';
+                overlay.style.transition = 'opacity 2.5s cubic-bezier(0.1, 0.8, 0.2, 1)';
                 overlay.style.backgroundColor = '#010105'; 
 
                 document.getElementById('toggle-audio').innerText = "Pausar Música ⏸️";
 
                 explodindo = false;
-                tempoExplosao = 0;
                 planetasVistos.clear();
                 controls.enabled = true;
                 
+                // Reseta os filtros de áudio para o padrão limpo
                 if (filterNode && gainNode) {
                     filterNode.frequency.setValueAtTime(22000, audioCtx.currentTime);
                     gainNode.gain.setValueAtTime(1.0, audioCtx.currentTime);
@@ -438,7 +436,7 @@
                 });
                 document.querySelector('.nav-btn[data-id="earth"]').classList.add('active');
 
-                // Restaura o universo de fábrica
+                // Restaura todas as dimensões do universo
                 solarSystem.position.set(20000, 0, 0);
                 sun.scale.set(1, 1, 1);
                 sunMat.color.setHex(0xffa033);
@@ -480,9 +478,9 @@
                 document.getElementById('btn-finale').classList.remove('show');
                 document.getElementById('nav-menu').classList.remove('hidden');
                 
-                // Reinicia a trilha padrão do site
-                audioTag.volume = 0.3;
-                audioTag.play().catch(() => {});
+                // CORREÇÃO DO BUG: Para a música não começar sozinha na intro, apenas deixamos pronta
+                audioTag.pause();
+                audioTag.currentTime = 0;
 
                 const intro = document.getElementById('intro');
                 intro.style.display = 'flex';
@@ -513,63 +511,65 @@
             const tempo = Date.now() * 0.0005;
 
             if (explodindo) {
-                tempoExplosao += 1;
+                // Captura os segundos atuais direto do áudio final.mp3
+                const segs = audioExploTag.currentTime;
                 
-                if (tempoExplosao < 410) {
-                    // TIMING 1: COLAPSO GRAVITACIONAL (0s a 6.8s) -> Segue a trituração do áudio
+                if (segs < 3.5) {
+                    // PARTE 1: ATRITO INICIAL (0s a 3.5s) -> Vibração leve
+                    galaxy.rotation.y += 0.005;
+                    const tremor = Math.sin(Date.now() * 0.05) * 8;
+                    solarSystem.position.x += tremor;
+                }
+                else if (segs >= 3.5 && segs < 6.8) {
+                    // PARTE 2: O COLAPSO ACELERADO (3.5s a 6.8s) -> Puxando tudo
                     const posAttr = galaxyGeometry.attributes.position;
                     for (let i = 0; i < gPoints; i++) {
                         const i3 = i * 3;
-                        posAttr.array[i3] *= 0.989; 
-                        posAttr.array[i3+2] *= 0.989;
-                        posAttr.array[i3+1] *= 0.984; 
+                        posAttr.array[i3] *= 0.982; 
+                        posAttr.array[i3+2] *= 0.982;
+                        posAttr.array[i3+1] *= 0.978; 
                     }
                     posAttr.needsUpdate = true;
                     
-                    galaxy.rotation.y += 0.01;
-                    solarSystem.position.lerp(new THREE.Vector3(0, 0, 0), 0.007);
+                    galaxy.rotation.y += 0.025;
+                    solarSystem.position.lerp(new THREE.Vector3(0, 0, 0), 0.015);
                     
                     for(let chave in meshesPlanetas) {
                         const p = meshesPlanetas[chave];
-                        if (p.dist > 0.5) p.dist -= (p.originalDist * 0.0055);
-                        p.angle += p.speed * 1.8;
+                        if (p.dist > 0.5) p.dist -= (p.originalDist * 0.012);
+                        p.angle += p.speed * 2.5;
                         p.group.position.x = Math.cos(p.angle) * p.dist;
                         p.group.position.z = Math.sin(p.angle) * p.dist;
                     }
 
-                    // Faz a música principal ir cortando conforme o colapso avança
-                    if(tempoExplosao === 390) {
-                        audioTag.pause();
-                        audioTag.currentTime = 0;
-                    }
+                    // Força corte definitivo do som antigo
+                    if(audioTag.volume > 0) audioTag.volume = 0;
                 } 
-                else if (tempoExplosao >= 410 && tempoExplosao < 550) {
-                    // TIMING 2: O MOMENTO DO SILÊNCIO ABSOLUTO (6.8s a 9.2s) -> Pausa dramática no áudio
+                else if (segs >= 6.8 && segs < 9.2) {
+                    // PARTE 3: O MOMENTO DO VÁCUO E SILÊNCIO (6.8s a 9.2s) -> Contração total
                     sun.scale.set(0,0,0);
                     for(let chave in meshesPlanetas) meshesPlanetas[chave].mesh.scale.set(0,0,0);
                     
-                    // Contração extrema da matéria no centro no frame mudo do áudio
                     const posAttr = galaxyGeometry.attributes.position;
                     for (let i = 0; i < gPoints; i++) {
                         const i3 = i * 3;
-                        posAttr.array[i3] *= 0.8; 
-                        posAttr.array[i3+1] *= 0.8;
-                        posAttr.array[i3+2] *= 0.8;
+                        posAttr.array[i3] *= 0.72; 
+                        posAttr.array[i3+1] *= 0.72;
+                        posAttr.array[i3+2] *= 0.72;
                     }
                     posAttr.needsUpdate = true;
 
-                    // Ligeiro avanço lento da câmera no vácuo
-                    camera.position.y -= 30;
-                    camera.position.z -= 30;
+                    // Zoom sutil e dramático na câmera vazia
+                    camera.position.y -= 45;
+                    camera.position.z -= 45;
                 }
-                else {
-                    // TIMING 3: O EXTREMO ESTOURO DO BIG BANG (A partir de 9.2s) -> Sincronizado com o boom violento
+                else if (segs >= 9.2) {
+                    // PARTE 4 & 5: O ESTOURO E DISSIPAÇÃO DO BIG BANG (9.2s até 18s) -> Expansão Extrema
                     const posAttr = galaxyGeometry.attributes.position;
                     const colAttr = galaxyGeometry.attributes.color;
-                    const framesDesdeEstouro = (tempoExplosao - 550);
-
-                    // Força física expansiva de progressão veloz
-                    const multiplicadorVelocidade = 0.04 + (framesDesdeEstouro * 0.002);
+                    
+                    const tempoDesdeEstouro = (segs - 9.2);
+                    const multiplicadorVelocidade = 0.05 + (tempoDesdeEstouro * 0.04);
 
                     for (let i = 0; i < gPoints; i++) {
                         const i3 = i * 3;
@@ -577,25 +577,25 @@
                         posAttr.array[i3+1] += gVelocities[i3+1] * multiplicadorVelocidade;
                         posAttr.array[i3+2] += gVelocities[i3+2] * multiplicadorVelocidade;
 
-                        // TRANSFORMAÇÃO CÓSMICA: Estrelas incandescentes azuis e brancas de alta energia
-                        if(framesDesdeEstouro < 80) {
-                            colAttr.array[i3] = Math.min(colAttr.array[i3] + 0.08, 1.0);
-                            colAttr.array[i3+1] = Math.min(colAttr.array[i3+1] + 0.12, 1.0);
+                        // Brilho elétrico azul e branco de altíssima temperatura
+                        if(tempoDesdeEstouro < 2.0) {
+                            colAttr.array[i3] = Math.min(colAttr.array[i3] + 0.15, 1.0);
+                            colAttr.array[i3+1] = Math.min(colAttr.array[i3+1] + 0.2, 1.0);
                             colAttr.array[i3+2] = 1.0; 
                         }
                     }
                     posAttr.needsUpdate = true;
                     colAttr.needsUpdate = true;
 
-                    // Expande o tamanho de renderização dos pontos preenchendo a tela do celular
-                    if (galaxyMaterial.size < 900) {
-                        galaxyMaterial.size += 12.0;
+                    // Aumenta o tamanho volumétrico de cada estrela para engolir o display
+                    if (galaxyMaterial.size < 1100) {
+                        galaxyMaterial.size += 20.0;
                     }
 
-                    // FADE DO CLARÃO BRANCO: Ocorre de modo suave, acompanhando o eco final do som
-                    if (framesDesdeEstouro > 60) {
+                    // Transição suave para a cortina branca ocorrendo nos segundos finais
+                    if (tempoDesdeEstouro > 1.5) {
                         overlay.style.pointerEvents = 'auto';
-                        const opacidadeBranco = Math.min((framesDesdeEstouro - 60) / 160, 1);
+                        const opacidadeBranco = Math.min((tempoDesdeEstouro - 1.5) / 3.5, 1);
                         overlay.style.opacity = opacidadeBranco;
                     }
                 }
@@ -654,7 +654,6 @@
             renderer.setSize(window.innerWidth, window.innerHeight);
         });
 
-        // TEXTOS PADRÃO DO SITE
         const textos = {
             galaxy: { title: "Nossa Via-Láctea 🌌", body: "Olha que lindo tudo girando junto! No meio desse tanto de poeira e mistério, o universo caprichou na nossa história. Saber que você existe faz tudo parecer perfeito." },
             sun: { title: "O Sol: Nosso Combustível ☀️", body: "O Sol é a estrela que dá energia para todo o espaço. Ele é o combustível do que eu sinto por você: enquanto ele continuar brilhando forte, nosso amor vai ser eterno." },
