@@ -104,7 +104,7 @@
         let focoAtual = 'earth';
         let explodindo = false;
         
-        // Variáveis de controle de câmera estável e tremor
+        // Bases estáticas para guardar o vetor real de animação da câmara antes do tremor
         const cameraPosBase = new THREE.Vector3();
         const cameraTargetBase = new THREE.Vector3();
         let intensidadeTremor = 0;
@@ -172,7 +172,7 @@
 
             const angle1 = Math.random() * Math.PI * 2;
             const angle2 = Math.acos((Math.random() * 2) - 1);
-            const speed = 400 + Math.random() * 800; // Aumentada a dispersão física do Big Bang
+            const speed = 700 + Math.random() * 1100; 
             gVelocities[i3] = Math.sin(angle2) * Math.cos(angle1) * speed;
             gVelocities[i3+1] = Math.sin(angle2) * Math.sin(angle1) * speed;
             gVelocities[i3+2] = Math.cos(angle2) * speed;
@@ -385,7 +385,6 @@
             }
         };
 
-        // ENTRADA DA CINEMÁTICA DO BIG BANG COM EFEITOS ESPECIAIS AVANÇADOS
         window.dispararExplosao = () => {
             explodindo = true;
             focoAtual = 'galaxy'; 
@@ -398,12 +397,9 @@
 
             controls.enabled = false; 
             
-            // Grava a base estável da câmera antes de aplicar a distorção física de tela tremendo
-            cameraPosBase.set(0, 42000, 48000);
+            // Fixa a base imóvel da câmara
+            cameraPosBase.set(0, 45000, 50000);
             cameraTargetBase.set(0, 0, 0);
-            camera.position.copy(cameraPosBase);
-            controls.target.copy(cameraTargetBase);
-            controls.update();
 
             overlay.style.opacity = '0';
             overlay.style.backgroundColor = '#ffffff';
@@ -415,12 +411,12 @@
 
             if (filterNode && gainNode && audioCtx) {
                 filterNode.frequency.setValueAtTime(filterNode.frequency.value, audioCtx.currentTime);
-                filterNode.frequency.exponentialRampToValueAtTime(60, audioCtx.currentTime + 3.8); 
+                filterNode.frequency.exponentialRampToValueAtTime(40, audioCtx.currentTime + 3.5); 
                 gainNode.gain.setValueAtTime(gainNode.gain.value, audioCtx.currentTime);
-                gainNode.gain.linearRampToValueAtTime(0.0, audioCtx.currentTime + 4.2); 
+                gainNode.gain.linearRampToValueAtTime(0.0, audioCtx.currentTime + 4.0); 
             }
 
-            // Temporizador de fim (18.0 segundos)
+            // Mantido o tempo completo de 18.0 segundos pedido originalmente
             setTimeout(() => {
                 overlay.style.transition = 'opacity 2.5s cubic-bezier(0.1, 0.8, 0.2, 1)';
                 overlay.style.backgroundColor = '#010105'; 
@@ -443,7 +439,7 @@
                 });
                 document.querySelector('.nav-btn[data-id="earth"]').classList.add('active');
 
-                // Restaura o Universo de Fábrica
+                // Reset do Universo
                 solarSystem.position.set(20000, 0, 0);
                 sun.scale.set(1, 1, 1);
                 sunMat.color.setHex(0xffa033);
@@ -519,135 +515,122 @@
             if (explodindo) {
                 const segs = audioExploTag.currentTime;
                 
-                if (segs < 3.5) {
-                    // CENA 1: ATRITO INICIAL (0s a 3.5s) -> Ruído e Tremor Leve na Galáxia
-                    intensidadeTremor = 18; 
-                    galaxy.rotation.y += 0.008;
-
-                    // Pulsação térmica instável da galáxia mudando para vermelho/rosa agressivo
-                    const colAttr = galaxyGeometry.attributes.color;
-                    for (let i = 0; i < gPoints; i++) {
-                        const i3 = i * 3;
-                        colAttr.array[i3] = Math.min(colAttr.array[i3] + 0.01, 1.0); // Mais vermelho
-                        colAttr.array[i3+2] *= 0.99; // Reduz azul
-                    }
-                    colAttr.needsUpdate = true;
-                }
-                else if (segs >= 3.5 && segs < 6.8) {
-                    // CENA 2: SUPERNOVA E SUCÇÃO ACELERADA (3.5s a 6.8s) -> Tremor Médio-Alto
-                    intensidadeTremor = 45; 
+                // 1. ANTES DA EXPLOSÃO: ENCOLHIMENTO MÁXIMO (0s a 3.8s)
+                if (segs < 3.8) {
+                    intensidadeTremor = 25; // Vibração de tensão gravitacional
                     
                     const posAttr = galaxyGeometry.attributes.position;
+                    const colAttr = galaxyGeometry.attributes.color;
+                    
+                    // Tudo encolhe de forma violenta em direção ao centro puro (Ponto Zero)
                     for (let i = 0; i < gPoints; i++) {
                         const i3 = i * 3;
-                        posAttr.array[i3] *= 0.978; 
-                        posAttr.array[i3+2] *= 0.978;
-                        posAttr.array[i3+1] *= 0.972; 
+                        posAttr.array[i3] *= 0.965; 
+                        posAttr.array[i3+1] *= 0.96;
+                        posAttr.array[i3+2] *= 0.965;
+
+                        // Mudança de Cor Progressiva: Transição para vermelho instável de sobrecarga
+                        colAttr.array[i3] = Math.min(colAttr.array[i3] + 0.015, 1.0);
+                        colAttr.array[i3+1] *= 0.95;
+                        colAttr.array[i3+2] *= 0.94;
                     }
                     posAttr.needsUpdate = true;
+                    colAttr.needsUpdate = true;
                     
-                    galaxy.rotation.y += 0.035;
-                    solarSystem.position.lerp(new THREE.Vector3(0, 0, 0), 0.025);
+                    galaxy.rotation.y += 0.05;
+                    solarSystem.position.lerp(new THREE.Vector3(0, 0, 0), 0.04);
                     
-                    // Planetas inflam e piscam antes de sumir na gravidade central
                     for(let chave in meshesPlanetas) {
-                        const p = meshesPlanetas[chave];
-                        if (p.dist > 0.5) p.dist -= (p.originalDist * 0.016);
-                        p.angle += p.speed * 3.5;
-                        p.group.position.x = Math.cos(p.angle) * p.dist;
-                        p.group.position.z = Math.sin(p.angle) * p.dist;
-                        p.mesh.scale.addScalar(0.04); // Inflamento de colapso
+                        meshesPlanetas[chave].dist *= 0.95;
+                        meshesPlanetas[chave].mesh.scale.multiplyScalar(0.97); // Planetas diminuem até sumir
                     }
-                    sun.scale.addScalar(0.09);
-
+                    sun.scale.multiplyScalar(0.96);
                     if(audioTag.volume > 0) audioTag.volume = 0;
-                } 
-                else if (segs >= 6.8 && segs < 9.2) {
-                    // CENA 3: SINGULARIDADE E SILÊNCIO (6.8s a 9.2s) -> Sem tremor, vácuo absoluto
-                    intensidadeTremor = 0; 
-                    
+                }
+                // 2. VÁCUO ABSOLUTO DA SINGULARIDADE (3.8s a 4.2s)
+                else if (segs >= 3.8 && segs < 4.2) {
+                    intensidadeTremor = 0; // Silêncio físico e total imobilidade
                     sun.scale.set(0,0,0);
                     for(let chave in meshesPlanetas) meshesPlanetas[chave].mesh.scale.set(0,0,0);
                     
-                    // Tudo espremido em um único pixel super denso no centro puro
                     const posAttr = galaxyGeometry.attributes.position;
-                    const colAttr = galaxyGeometry.attributes.color;
                     for (let i = 0; i < gPoints; i++) {
                         const i3 = i * 3;
-                        posAttr.array[i3] *= 0.65; 
-                        posAttr.array[i3+1] *= 0.65;
-                        posAttr.array[i3+2] *= 0.65;
-                        
-                        // Fica azul-neon incandescente no ponto crítico
-                        colAttr.array[i3] = 0.1;
-                        colAttr.array[i3+1] = 0.8;
-                        colAttr.array[i3+2] = 1.0;
+                        posAttr.array[i3] *= 0.4; posAttr.array[i3+1] *= 0.4; posAttr.array[i3+2] *= 0.4;
                     }
                     posAttr.needsUpdate = true;
-                    colAttr.needsUpdate = true;
-
-                    // Avanço lento e misterioso de aproximação de câmera no escuro
-                    cameraPosBase.y -= 70;
-                    cameraPosBase.z -= 70;
                 }
-                else if (segs >= 9.2) {
-                    // CENA 4 & 5: O EXTREMO ESTOURO DO BIG BANG (9.2s em diante) -> TERREMOTO DE TELA
-                    const tempoDesdeEstouro = (segs - 9.2);
-                    
-                    // O tremor diminui progressivamente conforme a onda de choque se dissipa
-                    intensidadeTremor = Math.max(140 - (tempoDesdeEstouro * 25), 5); 
+                // 3. PRIMEIRA GRANDE EXPLOSÃO (4.2s a 9.0s)
+                else if (segs >= 4.2 && segs < 9.0) {
+                    const tEstouro1 = (segs - 4.2);
+                    intensidadeTremor = Math.max(220 - (tEstouro1 * 35), 60); // Terremoto total de tela ativa!
 
                     const posAttr = galaxyGeometry.attributes.position;
                     const colAttr = galaxyGeometry.attributes.color;
                     
-                    // Progressão veloz de expansão física
-                    const multiplicadorVelocidade = 0.06 + (tempoDesdeEstouro * 0.05);
-
                     for (let i = 0; i < gPoints; i++) {
                         const i3 = i * 3;
-                        posAttr.array[i3] += gVelocities[i3] * multiplicadorVelocidade;
-                        posAttr.array[i3+1] += gVelocities[i3+1] * multiplicadorVelocidade;
-                        posAttr.array[i3+2] += gVelocities[i3+2] * multiplicadorVelocidade;
+                        // Expansão veloz para fora baseado no vetor físico
+                        posAttr.array[i3] += gVelocities[i3] * 0.055;
+                        posAttr.array[i3+1] += gVelocities[i3+1] * 0.055;
+                        posAttr.array[i3+2] += gVelocities[i3+2] * 0.055;
 
-                        // EFEITO CROMÁTICO DE ONDA DE CHOQUE: Fica oscilando as cores rapidamente com a explosão
-                        if(tempoDesdeEstouro < 2.5) {
-                            colAttr.array[i3] = Math.sin(tempoDesdeEstouro * 15 + i) * 0.5 + 0.5; // Vermelho oscilante
-                            colAttr.array[i3+1] = Math.min(colAttr.array[i3+1] + 0.3, 1.0);     // Ciano brilhante
-                            colAttr.array[i3+2] = 1.0; 
-                        }
+                        // Mudança de cores frenética: Ondas de choque alternando entre Ciano, Azul e Roxo
+                        colAttr.array[i3] = Math.sin(tEstouro1 * 10 + i) * 0.5 + 0.5; 
+                        colAttr.array[i3+1] = 0.85; 
+                        colAttr.array[i3+2] = 1.0; 
                     }
                     posAttr.needsUpdate = true;
                     colAttr.needsUpdate = true;
 
-                    // As partículas se expandem massivamente preenchendo o display do celular
-                    if (galaxyMaterial.size < 1300) {
-                        galaxyMaterial.size += 25.0;
-                    }
+                    if (galaxyMaterial.size < 700) galaxyMaterial.size += 30.0;
+                }
+                // 4. SEGUNDA GRANDE EXPLOSÃO / EXPANSÃO MÁXIMA (9.0s a 18.0s)
+                else if (segs >= 9.0) {
+                    const tEstouro2 = (segs - 9.0);
+                    intensidadeTremor = Math.max(260 - (tEstouro2 * 25), 15); // Segundo pico massivo de tremor de câmara
 
-                    // Ativação rítmica do flash branco cobrindo a tela nos instantes de eco
-                    if (tempoDesdeEstouro > 1.2) {
+                    const posAttr = galaxyGeometry.attributes.position;
+                    const colAttr = galaxyGeometry.attributes.color;
+                    
+                    for (let i = 0; i < gPoints; i++) {
+                        const i3 = i * 3;
+                        // Arremesso duplo em super-velocidade
+                        posAttr.array[i3] += gVelocities[i3] * 0.11;
+                        posAttr.array[i3+1] += gVelocities[i3+1] * 0.11;
+                        posAttr.array[i3+2] += gVelocities[i3+2] * 0.11;
+
+                        // Tudo passa a brilhar em Branco Incandescente puro e Rosa Choque com o calor térmico
+                        colAttr.array[i3] = 1.0; 
+                        colAttr.array[i3+1] = Math.sin(tEstouro2 * 4) * 0.4 + 0.6; 
+                        colAttr.array[i3+2] = 1.0; 
+                    }
+                    posAttr.needsUpdate = true;
+                    colAttr.needsUpdate = true;
+
+                    if (galaxyMaterial.size < 1800) galaxyMaterial.size += 45.0;
+
+                    // Ativação gradual do clarão luminoso cobrindo a transição na reta final
+                    if (tEstouro2 > 3.0) {
                         overlay.style.pointerEvents = 'auto';
-                        const opacidadeBranco = Math.min((tempoDesdeEstouro - 1.2) / 3.2, 1);
+                        const opacidadeBranco = Math.min((tEstouro2 - 3.0) / 4.0, 1);
                         overlay.style.opacity = opacidadeBranco;
                     }
                 }
 
-                // MOTOR APLICADOR DO TREMOR DE TELA (CAMERA SHAKE EFFECT)
+                // APLICAÇÃO REAL E SEGURA DO TREMOR NA CÂMARA (Executado após qualquer reescrita orbital)
                 if (intensidadeTremor > 0) {
                     camera.position.x = cameraPosBase.x + (Math.random() - 0.5) * intensidadeTremor;
                     camera.position.y = cameraPosBase.y + (Math.random() - 0.5) * intensidadeTremor;
                     camera.position.z = cameraPosBase.z + (Math.random() - 0.5) * intensidadeTremor;
                     
-                    controls.target.x = cameraTargetBase.x + (Math.random() - 0.5) * (intensidadeTremor * 0.3);
-                    controls.target.y = cameraTargetBase.y + (Math.random() - 0.5) * (intensidadeTremor * 0.3);
-                    controls.target.z = cameraTargetBase.z + (Math.random() - 0.5) * (intensidadeTremor * 0.3);
-                } else {
-                    camera.position.copy(cameraPosBase);
-                    controls.target.copy(cameraTargetBase);
+                    controls.target.x = cameraTargetBase.x + (Math.random() - 0.5) * (intensidadeTremor * 0.25);
+                    controls.target.y = cameraTargetBase.y + (Math.random() - 0.5) * (intensidadeTremor * 0.25);
+                    controls.target.z = cameraTargetBase.z + (Math.random() - 0.5) * (intensidadeTremor * 0.25);
                 }
 
             } else {
-                // Comportamento normal e estável fora da explosão
+                // Modo estável normal
                 sun.rotation.y += 0.001;
                 galaxy.rotation.y += 0.00015;
                 const pulse = 1 + Math.sin(tempo * 2) * 0.03;
@@ -687,9 +670,12 @@
             const alvoCam = obterPosicaoFoco();
             if(!explodindo) {
                 controls.target.lerp(alvoCam, 0.08);
+                controls.update();
+            } else {
+                // Na explosão atualizamos os controlos em cima do vetor estático para não quebrar o tremor matemático
+                controls.update();
             }
 
-            controls.update();
             renderer.render(scene, camera);
         }
 
@@ -701,7 +687,7 @@
 
         const textos = {
             galaxy: { title: "Nossa Via-Láctea 🌌", body: "Olha que lindo tudo girando junto! No meio desse tanto de poeira e mistério, o universo caprichou na nossa história. Saber que você existe faz tudo parecer perfeito." },
-            sun: { title: "O Sol: Nosso Combustível ☀️", body: "O Sol é a estrella que dá energia para todo o espaço. Ele é o combustível do que eu sinto por você: enquanto ele continuar brilhando forte, nosso amor vai ser eterno." },
+            sun: { title: "O Sol: Nosso Combustível ☀️", body: "O Sol é a estrela que dá energia para todo o espaço. Ele é o combustível do que eu sinto por você: enquanto ele continuar brilhando forte, nosso amor vai ser eterno." },
             mercurio: { title: "Mercúrio", body: "Ele corre super rápido em volta do Sol. É igualzinho à velocidade que o meu coração bate toda vez que chega uma mensagem sua no meu celular!" },
             venus: { title: "Vênus", body: "O planeta mais brilhante do céu. Ele me lembra muito o brilho dos seus olhos quando a gente conversa e faz planos para o nosso futuro." },
             earth: { title: "Planeta Terra 🌍", body: "Existem bilhões de pessoas nesse mundo inteiro, mas foi com você que meu coração decidiu bater mais forte. É um milagre lindo a gente ter se encontrado no meio de tanta gente." },
