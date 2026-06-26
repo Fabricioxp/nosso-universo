@@ -28,12 +28,17 @@
         .nav-btn:hover, .nav-btn.active { color: #fff; background: rgba(255, 107, 139, 0.35); text-shadow: 0 0 5px #fff; }
         .nav-btn.align-btn { background: linear-gradient(45deg, #ff6b8b, #ff8e53); color: white; font-weight: bold; }
         
-        /* Botão Lindo de Esconder/Mostrar */
-        #toggle-menu { background: rgba(255, 107, 139, 0.2); border: 1px solid rgba(255, 107, 139, 0.4); color: #ff9ebb; padding: 4px 14px; border-radius: 20px; cursor: pointer; font-size: 0.75rem; font-weight: 600; letter-spacing: 1px; backdrop-filter: blur(5px); transition: all 0.3s; }
-        #toggle-menu:hover { background: rgba(255, 107, 139, 0.4); color: #fff; }
+        /* Controles de Topo (Esconder e Som) */
+        .top-controls { display: flex; gap: 10px; }
+        .top-btn { background: rgba(255, 107, 139, 0.2); border: 1px solid rgba(255, 107, 139, 0.4); color: #ff9ebb; padding: 4px 14px; border-radius: 20px; cursor: pointer; font-size: 0.75rem; font-weight: 600; letter-spacing: 1px; backdrop-filter: blur(5px); transition: all 0.3s; }
+        .top-btn:hover { background: rgba(255, 107, 139, 0.4); color: #fff; }
     </style>
 </head>
 <body>
+
+    <audio id="musica-fundo" loop>
+        <source src="principal.mp3" type="audio/mpeg">
+    </audio>
 
     <div id="intro">
         <h1>O Universo de Nós Dois</h1>
@@ -42,7 +47,10 @@
     </div>
 
     <div id="nav-container">
-        <button id="toggle-menu" onclick="AlternarMenu()">Esconder Painel 👁️</button>
+        <div class="top-controls">
+            <button id="toggle-menu" class="top-btn" onclick="AlternarMenu()">Esconder Painel 👁️</button>
+            <button id="toggle-audio" class="top-btn" onclick="AlternarAudio()">Pausar Música ⏸️</button>
+        </div>
         <div id="nav-menu">
             <button class="nav-btn" onclick="mudarFoco('galaxy')">🌌 Via-Láctea</button>
             <button class="nav-btn" onclick="mudarFoco('sun')">☀️ Sol</button>
@@ -81,10 +89,10 @@
         
         const posicoesGlobais = { 
             sun: new THREE.Vector3(20000, 0, 0),
-            galaxy: new THREE.Vector3(0, 4000, 0) // Ponto de vista de cima para ver a galáxia inteira
+            galaxy: new THREE.Vector3(0, 4000, 0)
         };
 
-        // 2. VIA LÁCTEA REALISTA ESPIRALADA COM EFEITO PULSANTE
+        // 2. VIA LÁCTEA
         const galaxyGeometry = new THREE.BufferGeometry();
         const gPoints = 170000;
         const gPositions = new Float32Array(gPoints * 3);
@@ -130,7 +138,7 @@
         const galaxy = new THREE.Points(galaxyGeometry, galaxyMaterial);
         scene.add(galaxy);
 
-        // Estrelas cadentes românticas cruzando o fundo do espaço
+        // Estrelas cadentes
         const lineMat = new THREE.LineBasicMaterial({ color: 0xff758c, transparent: true, opacity: 0.6, blending: THREE.AdditiveBlending });
         const shootingStars = [];
         for(let i=0; i<4; i++) {
@@ -141,7 +149,7 @@
             shootingStars.push({ mesh: line, speed: 20 + Math.random()*20 });
         }
 
-        // 3. GRUPO DO SISTEMA SOLAR
+        // 3. SISTEMA SOLAR
         const solarSystem = new THREE.Group();
         solarSystem.position.set(20000, 0, 0);
         scene.add(solarSystem);
@@ -150,13 +158,13 @@
         const sunLight = new THREE.PointLight(0xfff5ea, 3, 80000);
         solarSystem.add(sunLight);
 
-        // O SOL - COMBUSTÍVEL DO AMOR
+        // O SOL
         const sun = new THREE.Mesh(new THREE.SphereGeometry(35, 64, 64), new THREE.MeshBasicMaterial({ color: 0xffa033 }));
         const sunGlow = new THREE.Mesh(new THREE.SphereGeometry(39, 32, 32), new THREE.MeshBasicMaterial({ color: 0xff5500, transparent: true, opacity: 0.3, side: THREE.BackSide }));
         sun.add(sunGlow);
         solarSystem.add(sun);
 
-        // 4. LUA DE CORAÇÃO REALISTA DA TERRA
+        // 4. TERRA E LUA DE CORAÇÃO
         function gerarGeometriaCoracao3D() {
             const x = 0, y = 0;
             const shape = new THREE.Shape();
@@ -218,14 +226,14 @@
         saturnoGroup.add(nameSprite);
         solarSystem.add(saturnoGroup);
 
-        // 6. ADICIONANDO TODOS OS OUTROS PLANETAS
+        // 6. PLANETAS
         const infoPlanetas = [
             { name: 'mercurio', size: 2.5, dist: 60, color: 0x999999, speed: 0.004 },
             { name: 'venus', size: 5.8, dist: 95, color: 0xe3bb87, speed: 0.003 },
             { name: 'marte', size: 4.0, dist: 195, color: 0xc1440e, speed: 0.0016 },
             { name: 'jupiter', size: 17.5, dist: 260, color: 0xd4a373, speed: 0.001 },
-            { name: 'urano', size: 9.0, dist: 420, color: 0x3ae5d9, speed: 0.0005 }, // Azul Dela
-            { name: 'netuno', size: 8.5, dist: 500, color: 0x7832cc, speed: 0.0003 }, // Seu Roxo
+            { name: 'urano', size: 9.0, dist: 420, color: 0x3ae5d9, speed: 0.0005 },
+            { name: 'netuno', size: 8.5, dist: 500, color: 0x7832cc, speed: 0.0003 },
             { name: 'plutao', size: 1.5, dist: 560, color: 0x8a7b68, speed: 0.0002 }
         ];
 
@@ -241,7 +249,7 @@
         meshesPlanetas['earth'] = { group: earthGroup, mesh: earth, dist: 145, angle: 1, speed: 0.002 };
         meshesPlanetas['saturno'] = { group: saturnoGroup, mesh: saturnoMesh, dist: 340, angle: 5, speed: 0.0008 };
 
-        // 7. TEXTOS SIMPLES, LINDOS E REVISADOS
+        // 7. TEXTOS
         const textos = {
             galaxy: { title: "Nossa Via-Láctea 🌌", body: "Olha que lindo tudo girando junto! No meio desse tanto de poeira e mistério, o universo caprichou na nossa história. Saber que você existe faz tudo parecer perfeito." },
             sun: { title: "O Sol: Nosso Combustível ☀️", body: "O Sol é a estrela que dá energia para todo o espaço. Ele é o combustível do que eu sinto por você: enquanto ele continuar brilhando forte, nosso amor vai ser eterno." },
@@ -266,9 +274,15 @@
 
         const uiTitle = document.getElementById('msg-title');
         const uiBody = document.getElementById('msg-body');
+        const audioTag = document.getElementById('musica-fundo');
 
         window.iniciar = () => {
             document.getElementById('intro').style.opacity = '0';
+            
+            // CONFIGURAÇÃO DO SOM DELICADO (Volume 30%)
+            audioTag.volume = 0.3; 
+            audioTag.play().catch(e => console.log("O áudio precisou de clique:", e));
+
             setTimeout(() => {
                 document.getElementById('intro').style.display = 'none';
                 document.getElementById('hud').style.opacity = '1';
@@ -318,6 +332,18 @@
             }
         };
 
+        // BOTÃO DE TOCAR / PARAR A MÚSICA
+        window.AlternarAudio = () => {
+            const btn = document.getElementById('toggle-audio');
+            if (audioTag.paused) {
+                audioTag.play();
+                btn.innerText = "Pausar Música ⏸️";
+            } else {
+                audioTag.pause();
+                btn.innerText = "Tocar Música ▶️";
+            }
+        };
+
         function obterPosicaoFoco() {
             if(focoAtual === 'galaxy') return new THREE.Vector3(0,0,0);
             if(focoAtual === 'sun') return solarSystem.position;
@@ -333,12 +359,11 @@
 
             sun.rotation.y += 0.001;
             
-            // Galáxia com efeito de núcleo pulsante leve
             galaxy.rotation.y += 0.00015;
             const pulse = 1 + Math.sin(tempo * 2) * 0.03;
             galaxy.scale.set(pulse, 1, pulse);
 
-            // Estrelas cadentes cruzando
+            // Estrelas cadentes
             shootingStars.forEach(s => {
                 s.mesh.position.x -= s.speed;
                 s.mesh.position.z -= s.speed;
@@ -347,7 +372,7 @@
                 }
             });
 
-            // Movimento da lua de coração
+            // Movimento da lua
             heartMoon.position.x = Math.cos(tempo * 2.5) * 16;
             heartMoon.position.z = Math.sin(tempo * 2.5) * 16;
             heartMoon.rotation.y += 0.01;
@@ -373,7 +398,6 @@
                 controls.target.lerp(new THREE.Vector3(0,0,0), 0.05);
             }
 
-            // Se afastar demais vira texto da galáxia automaticamente
             if(focoAtual !== 'galaxy' && camera.position.distanceTo(alvoCam) > 3000) {
                 uiTitle.innerText = textos.galaxy.title;
                 uiBody.innerText = textos.galaxy.body;
