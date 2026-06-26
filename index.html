@@ -48,7 +48,7 @@
 
     <div id="fade-overlay"></div>
 
-    <audio id="musica-fundo" loop>
+    <audio id="musica-fundo" loop crossorigin="anonymous">
         <source src="principal.mp3" type="audio/mpeg">
     </audio>
 
@@ -100,8 +100,27 @@
         let focoAtual = 'earth';
         let explodindo = false;
         let tempoExplosao = 0;
-        let escalaGalaxiaOriginal = 1;
         
+        // Setup Web Audio API para os efeitos na música
+        let audioCtx, audioSource, filterNode;
+        const audioTag = document.getElementById('musica-fundo');
+
+        function inicializarAudioEfeitos() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                audioSource = audioCtx.createMediaElementSource(audioTag);
+                filterNode = audioCtx.createBiquadFilter();
+                
+                // Configura o filtro padrão (Passa tudo sem alterar)
+                filterNode.type = 'lowpass';
+                filterNode.frequency.setValueAtTime(22000, audioCtx.currentTime); 
+                
+                // Conecta os nós: Tag de Áudio -> Filtro Abafador -> Alto-falantes
+                audioSource.connect(filterNode);
+                filterNode.connect(audioCtx.destination);
+            }
+        }
+
         const planetasParaVerificar = ['galaxy', 'sun', 'mercurio', 'venus', 'earth', 'marte', 'jupiter', 'saturno', 'urano', 'netuno', 'plutao'];
         let planetasVistos = new Set();
 
@@ -252,21 +271,6 @@
         meshesPlanetas['earth'] = { group: earthGroup, mesh: earth, dist: 145, angle: 1, speed: 0.002, originalDist: 145 };
         meshesPlanetas['saturno'] = { group: saturnoGroup, mesh: saturnoMesh, dist: 340, angle: 5, speed: 0.0008, originalDist: 340 };
 
-        // TEXTOS
-        const textos = {
-            galaxy: { title: "Nossa Via-Láctea 🌌", body: "Olha que lindo tudo girando junto! No meio desse tanto de poeira e mistério, o universo caprichou na nossa história. Saber que você existe faz tudo parecer perfeito." },
-            sun: { title: "O Sol: Nosso Combustível ☀️", body: "O Sol é a estrela que dá energia para todo o espaço. Ele é o combustível do que eu sinto por você: enquanto ele continuar brilhando forte, nosso amor vai ser eterno." },
-            mercurio: { title: "Mercúrio", body: "Ele corre super rápido em volta do Sol. É igualzinho à velocidade que o meu coração bate toda vez que chega uma mensagem sua no meu celular!" },
-            venus: { title: "Vênus", body: "O planeta mais brilhante do céu. Ele me lembra muito o brilho dos seus olhos quando a gente conversa e faz planos para o nosso futuro." },
-            earth: { title: "Planeta Terra 🌍", body: "Existem bilhões de pessoas nesse mundo inteiro, mas foi com você que meu coração decidiu bater mais forte. É um milagre lindo a gente ter se encontrado no meio de tanta gente." },
-            marte: { title: "Marte", body: "Marte é forte e cheio de cor. Ele me lembra a nossa força para fazer tudo dar certo e construir uma história linda passo a passo." },
-            jupiter: { title: "Júpiter", body: "Júpiter é o maior planeta de todos, cabe tudo lá dentro! Mas sabia que ele ainda é pequeno perto do tamanho do futuro que eu imagino do seu lado?" },
-            saturno: { title: "Saturno da Minha Maria ✨💍", body: "Esse é o planeta mais lindo do universo por causa desses anéis. Como ele é o meu preferido, coloquei o seu nome brilhando nele. Você é a dona do meu lugar favorito no espaço." },
-            urano: { title: "Urano Azul-Piscina 💎", body: "Esse planeta de gelo tem a sua cor preferida! Ele é todo lindo, passa uma paz enorme só de olhar e me faz lembrar do quanto seu carinho me faz bem." },
-            netuno: { title: "Netuno Roxo Cósmico 🔮", body: "Esse aqui tem a minha cor preferida. Viu como o meu planeta roxo e o seu planeta azul combinam perfeitamente juntos no espaço? Fomos feitos um para o outro." },
-            plutao: { title: "Plutão 🤏", body: "Plutão é bem pequenininho e fica lá no cantinho dele kkkk. Olhei para ele e lembrei de você, minha baixinha! Mas o tamanho não importa, meu carinho por você é gigante!" }
-        };
-
         const controls = new OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true; controls.dampingFactor = 0.05;
         controls.minDistance = 10; controls.maxDistance = 100000;
@@ -276,9 +280,12 @@
 
         const uiTitle = document.getElementById('msg-title');
         const uiBody = document.getElementById('msg-body');
-        const audioTag = document.getElementById('musica-fundo');
 
         window.iniciar = () => {
+            inicializarAudioEfeitos();
+            if (audioCtx && audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
             document.getElementById('intro').style.opacity = '0';
             audioTag.volume = 0.3; 
             audioTag.play().catch(e => console.log("Erro áudio:", e));
@@ -359,36 +366,45 @@
             }
         };
 
-        // O NOVO COLAPSO DA VIA LÁCTEA INTEIRA EM CÂMERA LENTA
+        // COLAPSO COM TRANSIÇÃO DE ÁUDIO ABAFADO
         window.dispararExplosao = () => {
             explodindo = true;
             tempoExplosao = 0;
             focoAtual = 'galaxy'; 
             
-            // Limpa tudo da tela imediatamente
+            inicializarAudioEfeitos();
+
             document.getElementById('nav-container').style.display = 'none';
             document.getElementById('hud').style.opacity = '0'; 
 
-            // CÂMERA TRAVADA EXATAMENTE NA POSIÇÃO DO SEU PRINT PARA O SHOW DE MOBILE
             controls.enabled = false; 
             camera.position.set(0, 48000, 52000); 
             controls.target.set(0, 0, 0); 
             controls.update();
 
-            // Etapa 2: O clarão branco do Big Bang acontece após 8.5 segundos de colapso lento e lindo
+            // EFEITO DE ÁUDIO COGNITIVO: Vai abafando o som progressivamente durante os 8.5 segundos de queda
+            if (filterNode && audioCtx) {
+                // Aplica uma rampa linear diminuindo a frequência máxima até 180Hz (som super surdo/subterrâneo)
+                filterNode.frequency.setValueAtTime(filterNode.frequency.value, audioCtx.currentTime);
+                filterNode.frequency.linearRampToValueAtTime(180, audioCtx.currentTime + 7.5);
+            }
+
+            // Etapa 2: O clarão branco acontece (aos 8.5 segundos)
             setTimeout(() => {
                 const overlay = document.getElementById('fade-overlay');
                 overlay.style.backgroundColor = '#ffffff'; 
                 overlay.style.pointerEvents = 'auto';
                 overlay.style.opacity = '1';
 
+                // CORTE DO SOM: No momento do Big Bang Branco, a música desliga na hora, gerando um silêncio impactante
+                audioTag.pause();
+                audioTag.currentTime = 0;
+
                 // Etapa 3: Fade out para o preto e reinicialização completa
                 setTimeout(() => {
                     overlay.style.transition = 'opacity 1.5s ease-in-out';
                     overlay.style.backgroundColor = '#010105'; 
 
-                    audioTag.pause();
-                    audioTag.currentTime = 0;
                     document.getElementById('toggle-audio').innerText = "Pausar Música ⏸️";
 
                     explodindo = false;
@@ -396,19 +412,24 @@
                     planetasVistos.clear();
                     controls.enabled = true;
                     
+                    // Reseta o filtro de áudio de volta ao normal (cristalino) para o reinício
+                    if (filterNode) {
+                        filterNode.frequency.setValueAtTime(22000, audioCtx.currentTime);
+                    }
+
                     document.querySelectorAll('.nav-btn').forEach(btn => {
                         btn.classList.remove('visto');
                         btn.classList.remove('active');
                     });
                     document.querySelector('.nav-btn[data-id="earth"]').classList.add('active');
 
-                    // Restaura tudo ao estado original estável
+                    // Restaura corpos celestes ao padrão estável
                     solarSystem.position.set(20000, 0, 0);
                     sun.scale.set(1, 1, 1);
                     sunMat.color.setHex(0xffa033);
                     galaxy.scale.set(1, 1, 1);
+                    galaxyMaterial.color.setRGB(1, 1, 1);
                     
-                    // Restaura a geometria da galáxia
                     const posAttr = galaxyGeometry.attributes.position;
                     for (let i = 0; i < gPoints; i++) {
                         const i3 = i * 3;
@@ -449,7 +470,7 @@
 
                 }, 3000); 
 
-            }, 8500); // 8.5 segundos apreciando a Via-Láctea sugar tudo lentamente antes do Big Bang
+            }, 8500); 
         };
 
         function obterPosicaoFoco() {
@@ -468,25 +489,19 @@
                 tempoExplosao += 1;
                 
                 if (tempoExplosao < 240) {
-                    // FASE 1: O GRANDE COLAPSO DA VIA LÁCTEA (CÂMERA LENTA)
-                    // Os fragmentos (partículas) da Galáxia começam a encolher e girar em direção ao centro de coordenadas (0,0,0)
+                    // FASE 1: O GRANDE COLAPSO DA VIA LÁCTEA
                     const posAttr = galaxyGeometry.attributes.position;
                     for (let i = 0; i < gPoints; i++) {
                         const i3 = i * 3;
-                        // Puxa as coordenadas X e Z em direção ao centro da espiral bem devagar
                         posAttr.array[i3] *= 0.985;
                         posAttr.array[i3+2] *= 0.985;
-                        posAttr.array[i3+1] *= 0.98; // Achata o plano vertical
+                        posAttr.array[i3+1] *= 0.98; 
                     }
                     posAttr.needsUpdate = true;
                     
-                    // A galáxia inteira acelera sua rotação de forma majestosa
                     galaxy.rotation.y += 0.015;
-
-                    // O Sistema Solar inteiro também cai e espirala em direção ao buraco negro central (0,0,0)
                     solarSystem.position.lerp(new THREE.Vector3(0, 0, 0), 0.012);
                     
-                    // Os planetas perdem suas órbitas e caem direto no Sol enquanto o sistema solar despenca
                     for(let chave in meshesPlanetas) {
                         const p = meshesPlanetas[chave];
                         if (p.dist > 1) p.dist -= (p.originalDist * 0.01);
@@ -495,17 +510,14 @@
                         p.group.position.z = Math.sin(p.angle) * p.dist;
                     }
                     
-                    // O Sol pulsa acumulando energia de toda a galáxia que está sendo sugada
                     const pulseG = Math.abs(Math.sin(tempoExplosao * 0.08));
                     sunMat.color.setRGB(1, 0.2 + pulseG * 0.6, 0.4);
                 } 
                 else {
                     // FASE 2: O BIG BANG COLORIDO NO CENTRO DA TELA
-                    // Após todos os fragmentos colidirem no centro, uma Supernova de cores explode na cara da câmera
                     galaxy.scale.addScalar(0.4);
                     sun.scale.addScalar(0.8);
                     
-                    // Cores neon psicodélicas e brilhantes piscando no espetáculo final
                     const rG = Math.abs(Math.sin(tempo * 12));
                     const bG = Math.abs(Math.cos(tempo * 12));
                     sunMat.color.setRGB(rG, 0.4, bG);
@@ -513,7 +525,6 @@
                 }
 
             } else {
-                // Rotação regular estável em tempo de navegação
                 sun.rotation.y += 0.001;
                 galaxy.rotation.y += 0.00015;
                 const pulse = 1 + Math.sin(tempo * 2) * 0.03;
@@ -554,7 +565,6 @@
             if(!explodindo) {
                 controls.target.lerp(alvoCam, 0.08);
             } else {
-                // Trava o alvo da câmera exatamente no ponto zero (o epicentro da Via-Láctea)
                 controls.target.set(0, 0, 0); 
             }
 
@@ -567,6 +577,21 @@
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
         });
+
+        // TEXTOS PADRÃO DO SITE
+        const textos = {
+            galaxy: { title: "Nossa Via-Láctea 🌌", body: "Olha que lindo tudo girando junto! No meio desse tanto de poeira e mistério, o universo caprichou na nossa história. Saber que você existe faz tudo parecer perfeito." },
+            sun: { title: "O Sol: Nosso Combustível ☀️", body: "O Sol é a estrela que dá energia para todo o espaço. Ele é o combustível do que eu sinto por você: enquanto ele continuar brilhando forte, nosso amor vai ser eterno." },
+            mercurio: { title: "Mercúrio", body: "Ele corre super rápido em volta do Sol. É igualzinho à velocidade que o meu coração bate toda vez que chega uma mensagem sua no meu celular!" },
+            venus: { title: "Vênus", body: "O planeta mais brilhante do céu. Ele me lembra muito o brilho dos seus olhos quando a gente conversa e faz planos para o nosso futuro." },
+            earth: { title: "Planeta Terra 🌍", body: "Existem bilhões de pessoas nesse mundo inteiro, mas foi com você que meu coração decidiu bater mais forte. É um milagre lindo a gente ter se encontrado no meio de tanta gente." },
+            marte: { title: "Marte", body: "Marte é forte e cheio de cor. Ele me lembra a nossa força para fazer tudo dar certo e construir uma história linda passo a passo." },
+            jupiter: { title: "Júpiter", body: "Júpiter é o maior planeta de todos, cabe tudo lá dentro! Mas sabia que ele ainda é pequeno perto do tamanho do futuro que eu imagino do seu lado?" },
+            saturno: { title: "Saturno da Minha Maria ✨💍", body: "Esse é o planeta mais lindo do universo por causa desses anéis. Como ele é o meu preferido, coloquei o seu nome brilhando nele. Você é a dona do meu lugar favorito no espaço." },
+            urano: { title: "Urano Azul-Piscina 💎", body: "Esse planeta de gelo tem a sua cor preferida! Ele é todo lindo, passa uma paz enorme só de olhar e me faz lembrar do quanto seu carinho me faz bem." },
+            netuno: { title: "Netuno Roxo Cósmico 🔮", body: "Esse aqui tem a minha cor preferida. Viu como o meu planeta roxo e o seu planeta azul combinam perfeitamente juntos no espaço? Fomos feitos um para o outro." },
+            plutao: { title: "Plutão 🤏", body: "Plutão é bem pequenininho e fica lá no cantinho dele kkkk. Olhei para ele e lembrei de você, minha baixinha! Mas o tamanho não importa, meu carinho por você é gigante!" }
+        };
 
         animate();
     </script>
