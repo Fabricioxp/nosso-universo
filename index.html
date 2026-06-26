@@ -2,78 +2,94 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Nossa Jornada no Universo</title>
+    <title>Nosso Universo</title>
     <style>
-        body { margin: 0; background: #000; color: white; font-family: 'Arial', sans-serif; overflow: hidden; }
+        body { margin: 0; background: #000; color: #fff; font-family: 'Montserrat', sans-serif; overflow: hidden; }
         canvas { display: block; }
-        #overlay {
-            position: absolute; top: 10%; width: 100%; text-align: center;
+        #text-container {
+            position: absolute; top: 50px; width: 100%; text-align: center;
             pointer-events: none; transition: opacity 1s;
         }
-        h1 { font-size: 2rem; }
-        p { font-size: 1.2rem; }
     </style>
 </head>
 <body>
+    <div id="text-container">
+        <h1 id="main-msg">Você é o meu mundo</h1>
+        <p id="sub-msg">Role para descobrir o tamanho do meu amor</p>
+    </div>
+    <canvas id="canvas"></canvas>
 
-<div id="overlay">
-    <h1 id="title">Nós dois</h1>
-    <p id="subtitle">Em meio a bilhões, nos encontramos.</p>
-</div>
-<canvas id="canvas"></canvas>
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        let zoom = 1000;
+        let targetZoom = 1000;
 
-<script>
-    const canvas = document.getElementById('canvas');
-    const ctx = canvas.getContext('2d');
-    const title = document.getElementById('title');
-    const subtitle = document.getElementById('subtitle');
-    
-    let zoom = 500; // Começa no zoom máximo
-    let stars = Array.from({length: 1000}, () => ({x: Math.random()*2000-1000, y: Math.random()*2000-1000}));
+        function draw() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            zoom += (targetZoom - zoom) * 0.05;
 
-    function draw() {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-        ctx.fillStyle = "black";
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = "#050505";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        ctx.save();
-        ctx.translate(canvas.width/2, canvas.height/2);
-        ctx.scale(zoom/100, zoom/100);
+            ctx.save();
+            ctx.translate(canvas.width/2, canvas.height/2);
+            ctx.scale(zoom/1000, zoom/1000);
 
-        // Desenhar Estrelas/Universo
-        ctx.fillStyle = "white";
-        stars.forEach(s => ctx.fillRect(s.x, s.y, 1, 1));
+            // 1. VIA LÁCTEA (Fundo)
+            if (zoom < 800) {
+                ctx.fillStyle = "rgba(255, 255, 255, 0.05)";
+                ctx.beginPath(); ctx.arc(0, 0, 800, 0, Math.PI*2); ctx.fill();
+            }
 
-        // Terra
-        ctx.beginPath();
-        ctx.arc(0, 0, 50, 0, Math.PI * 2);
-        ctx.fillStyle = "#2244ff";
-        ctx.fill();
+            // 2. SISTEMA SOLAR
+            if (zoom < 2000) {
+                // Órbitas
+                ctx.strokeStyle = "rgba(255,255,255,0.1)";
+                for(let i=1; i<5; i++) { ctx.beginPath(); ctx.arc(0, 0, i*150, 0, Math.PI*2); ctx.stroke(); }
+                // Planetas
+                drawPlanet(150, 'red', 8); drawPlanet(300, 'gold', 12); 
+            }
 
-        ctx.restore();
-        
-        // Lógica de Mensagens baseada no Zoom
-        if (zoom > 400) {
-            title.innerText = "Nós dois";
-            subtitle.innerText = "Em meio a tantas pessoas, nos encontramos.";
-        } else if (zoom > 100) {
-            title.innerText = "Nosso Planeta";
-            subtitle.innerText = "Uma raridade em meio à imensidão.";
-        } else {
-            title.innerText = "O Universo";
-            subtitle.innerText = "Nada é maior do que o que sentimos.";
+            // 3. TERRA (O foco principal)
+            const grad = ctx.createRadialGradient(-15, -15, 5, 0, 0, 50);
+            grad.addColorStop(0, '#77aaff'); grad.addColorStop(1, '#002266');
+            ctx.fillStyle = grad;
+            ctx.beginPath(); ctx.arc(0, 0, 50, 0, Math.PI*2); ctx.fill();
+            
+            // "Pessoas" (Pontinhos de luz brilhando)
+            ctx.fillStyle = "white";
+            for(let i=0; i<200; i++) {
+                let angle = i * 0.3;
+                ctx.fillRect(Math.cos(angle)*45, Math.sin(angle)*45, 1, 1);
+            }
+
+            ctx.restore();
+
+            // Lógica de Romantismo nas Mensagens
+            const msg = document.getElementById('main-msg');
+            const sub = document.getElementById('sub-msg');
+            
+            if (zoom > 800) { msg.innerText = "Você é o meu mundo"; sub.innerText = "Em meio a bilhões de pessoas, você é a única."; }
+            else if (zoom > 300) { msg.innerText = "Nosso Sistema Solar"; sub.innerText = "Mas nada brilha mais que o nosso encontro."; }
+            else { msg.innerText = "Infinito"; sub.innerText = "Meu amor por você atravessa galáxias."; }
+            
+            document.getElementById('text-container').style.opacity = zoom < 200 ? 0.3 : 1;
+
+            requestAnimationFrame(draw);
         }
 
-        requestAnimationFrame(draw);
-    }
+        function drawPlanet(dist, color, size) {
+            ctx.fillStyle = color;
+            ctx.beginPath(); ctx.arc(dist, 0, size, 0, Math.PI*2); ctx.fill();
+        }
 
-    window.addEventListener('wheel', (e) => {
-        zoom -= e.deltaY * 0.1;
-        zoom = Math.max(10, Math.min(zoom, 1000));
-    });
+        window.addEventListener('wheel', (e) => {
+            targetZoom = Math.max(50, Math.min(targetZoom - e.deltaY * 2, 3000));
+        });
 
-    draw();
-</script>
+        draw();
+    </script>
 </body>
 </html>
