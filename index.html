@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Nossa Jornada no Universo</title>
+    <style>
+        body { margin: 0; background: #000; color: white; font-family: 'Arial', sans-serif; overflow: hidden; }
+        canvas { display: block; }
+        #overlay {
+            position: absolute; top: 10%; width: 100%; text-align: center;
+            pointer-events: none; transition: opacity 1s;
+        }
+        h1 { font-size: 2rem; }
+        p { font-size: 1.2rem; }
+    </style>
+</head>
+<body>
+
+<div id="overlay">
+    <h1 id="title">Nós dois</h1>
+    <p id="subtitle">Em meio a bilhões, nos encontramos.</p>
+</div>
+<canvas id="canvas"></canvas>
+
+<script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const title = document.getElementById('title');
+    const subtitle = document.getElementById('subtitle');
+    
+    let zoom = 500; // Começa no zoom máximo
+    let stars = Array.from({length: 1000}, () => ({x: Math.random()*2000-1000, y: Math.random()*2000-1000}));
+
+    function draw() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        ctx.fillStyle = "black";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        ctx.save();
+        ctx.translate(canvas.width/2, canvas.height/2);
+        ctx.scale(zoom/100, zoom/100);
+
+        // Desenhar Estrelas/Universo
+        ctx.fillStyle = "white";
+        stars.forEach(s => ctx.fillRect(s.x, s.y, 1, 1));
+
+        // Terra
+        ctx.beginPath();
+        ctx.arc(0, 0, 50, 0, Math.PI * 2);
+        ctx.fillStyle = "#2244ff";
+        ctx.fill();
+
+        ctx.restore();
+        
+        // Lógica de Mensagens baseada no Zoom
+        if (zoom > 400) {
+            title.innerText = "Nós dois";
+            subtitle.innerText = "Em meio a tantas pessoas, nos encontramos.";
+        } else if (zoom > 100) {
+            title.innerText = "Nosso Planeta";
+            subtitle.innerText = "Uma raridade em meio à imensidão.";
+        } else {
+            title.innerText = "O Universo";
+            subtitle.innerText = "Nada é maior do que o que sentimos.";
+        }
+
+        requestAnimationFrame(draw);
+    }
+
+    window.addEventListener('wheel', (e) => {
+        zoom -= e.deltaY * 0.1;
+        zoom = Math.max(10, Math.min(zoom, 1000));
+    });
+
+    draw();
+</script>
+</body>
+</html>
