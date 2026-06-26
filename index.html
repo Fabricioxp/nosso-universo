@@ -2,20 +2,17 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Jornada Infinita</title>
+    <title>Jornada Espacial</title>
     <style>
-        body { margin: 0; background: #000; overflow: hidden; font-family: sans-serif; color: white; }
-        #hud { position: absolute; bottom: 10%; width: 100%; text-align: center; pointer-events: none; }
-        .controls { position: absolute; bottom: 2%; left: 50%; transform: translateX(-50%); display: flex; gap: 20px; z-index: 100; }
-        button { padding: 10px 20px; cursor: pointer; pointer-events: all; border-radius: 20px; border: none; background: #fff; }
+        body { margin: 0; background: #000; color: #fff; font-family: sans-serif; }
+        #narrativa { position: absolute; bottom: 10%; width: 100%; text-align: center; pointer-events: none; }
+        /* Barra de Zoom Suave */
+        #slider { position: absolute; bottom: 5%; left: 10%; width: 80%; z-index: 10; cursor: pointer; }
     </style>
 </head>
 <body>
-    <div id="hud"><p id="msg">Em meio a bilhões, nos encontramos.</p></div>
-    <div class="controls">
-        <button onclick="changeZoom(-50)">Aproximar</button>
-        <button onclick="changeZoom(50)">Afastar</button>
-    </div>
+    <input type="range" id="slider" min="0" max="100" value="0">
+    <div id="narrativa"><p id="msg">Em meio a bilhões, nos encontramos.</p></div>
 
     <script type="module">
         import * as THREE from 'https://cdn.skypack.dev/three@0.136.0';
@@ -26,44 +23,41 @@
         renderer.setSize(window.innerWidth, window.innerHeight);
         document.body.appendChild(renderer.domElement);
 
-        // Terra com Textura de Alta Qualidade
-        const earth = new THREE.Mesh(
-            new THREE.SphereGeometry(1, 64, 64),
-            new THREE.MeshBasicMaterial({ map: new THREE.TextureLoader().load('https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/planets/earth_atmos_2048.jpg') })
-        );
-        scene.add(earth);
+        // Grupo principal que escala tudo
+        const universe = new THREE.Group();
+        scene.add(universe);
 
-        // Sistema Solar (Planetas reais)
-        const planets = new THREE.Group();
-        [{d: 10, c: 0xff4422}, {d: 20, c: 0xffaa00}].forEach(p => {
-            const m = new THREE.Mesh(new THREE.SphereGeometry(0.8, 32, 32), new THREE.MeshBasicMaterial({color: p.c}));
-            m.position.x = p.d;
-            planets.add(m);
-        });
-        scene.add(planets);
+        // Terra com texturas de qualidade
+        const earth = new THREE.Mesh(new THREE.SphereGeometry(1, 64, 64), new THREE.MeshBasicMaterial({ color: 0x2244ff }));
+        universe.add(earth);
 
-        // Galáxia (Fundo realista)
-        const galaxy = new THREE.Mesh(new THREE.SphereGeometry(2000, 32, 32), new THREE.MeshBasicMaterial({ 
-            map: new THREE.TextureLoader().load('https://upload.wikimedia.org/wikipedia/commons/4/43/ESO-VLT-Laser-phot.jpg'), 
-            side: THREE.BackSide 
-        }));
-        scene.add(galaxy);
+        // Sol e Planetas Reais
+        const sun = new THREE.Mesh(new THREE.SphereGeometry(2, 64, 64), new THREE.MeshBasicMaterial({ color: 0xffcc00 }));
+        sun.position.set(10, 0, 0);
+        universe.add(sun);
 
-        camera.position.z = 0.8; // Começa dentro da Terra
-        window.changeZoom = (val) => { camera.position.z = Math.max(0.8, camera.position.z + val); };
+        // Galáxia (Fundo denso de estrelas)
+        const stars = new THREE.Points(new THREE.BufferGeometry().setAttribute('position', new THREE.BufferAttribute(new Float32Array(100000), 3)), new THREE.PointsMaterial({ size: 0.1 }));
+        scene.add(stars);
 
-        function updateNarrative() {
-            const z = camera.position.z;
+        // Mecanismo de Zoom: O Slider altera a escala do universo, não a posição da câmera
+        const slider = document.getElementById('slider');
+        slider.oninput = (e) => {
+            const val = e.target.value;
+            // Escala exponencial: quanto mais puxa, mais o universo inteiro encolhe
+            const scale = Math.pow(0.95, val);
+            universe.scale.set(scale, scale, scale);
+            
             const m = document.getElementById('msg');
-            if (z < 5) m.innerText = "Em meio a bilhões de pessoas, nos encontramos.";
-            else if (z < 100) m.innerText = "Nosso sistema solar é um detalhe...";
-            else m.innerText = "O universo inteiro conspira pelo nosso amor.";
-        }
+            if (val < 20) m.innerText = "Em meio a bilhões de pessoas, nos encontramos.";
+            else if (val < 60) m.innerText = "O Sistema Solar é um detalhe...";
+            else m.innerText = "A Via Láctea inteira cabe no que sentimos.";
+        };
 
+        camera.position.z = 5;
         function animate() {
             requestAnimationFrame(animate);
-            earth.rotation.y += 0.002;
-            updateNarrative();
+            earth.rotation.y += 0.005;
             renderer.render(scene, camera);
         }
         animate();
