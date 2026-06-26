@@ -5,8 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Universo da Maria</title>
     <style>
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background-color: #010105; font-family: 'Segoe UI', Roboto, sans-serif; }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background-color: #000000; font-family: 'Segoe UI', Roboto, sans-serif; }
         
+        /* Oculta o canvas do 3D inicialmente para não vazar a imagem da Terra */
+        canvas { opacity: 0; transition: opacity 2s ease-in-out; display: block; }
+        canvas.show { opacity: 1; }
+
         /* Tela de Introdução Inicial */
         #intro { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at center, #11091c 0%, #010105 100%); z-index: 1000; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; text-align: center; transition: opacity 1.5s ease-in-out; opacity: 1; }
         #intro h1 { font-size: 2.5rem; margin-bottom: 15px; font-weight: 300; letter-spacing: 4px; text-transform: uppercase; background: linear-gradient(45deg, #ff6b8b, #ff8e53); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
@@ -18,7 +22,7 @@
         #narrativa-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: #000000; z-index: 1500; display: none; align-items: center; justify-content: center; color: white; text-align: center; transition: opacity 1.5s ease-in-out; }
         #legenda-texto { font-size: 1.6rem; max-width: 80%; font-weight: 300; line-height: 1.6; letter-spacing: 2px; color: #e5def0; opacity: 0; transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out; transform: translateY(10px); text-shadow: 0 0 10px rgba(255,255,255,0.2); }
         #legenda-texto.show { opacity: 1; transform: translateY(0); }
-        #legenda-texto.luz { background: linear-gradient(45deg, #fff, #ff9ebb); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 400; text-shadow: 0 0 20px rgba(255,158,187,0.6); font-style: italic; }
+        #legenda-texto.luz { background: linear-gradient(45deg, #fff, #ff9ebb); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 400; text-shadow: 0 0 25px rgba(255,158,187,0.8); font-style: italic; font-size: 2rem; }
 
         /* HUD Delicado */
         #hud { position: absolute; bottom: 25px; left: 50%; transform: translateX(-50%); width: 85%; max-width: 480px; text-align: center; color: white; z-index: 10; pointer-events: none; opacity: 0; transition: opacity 0.8s, transform 0.8s; background: rgba(6, 3, 11, 0.75); padding: 15px 25px; border-radius: 16px; border: 1px solid rgba(255, 107, 139, 0.25); box-shadow: 0 10px 30px rgba(0,0,0,0.8); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); }
@@ -26,7 +30,7 @@
         #msg-body { font-size: 0.9rem; margin: 0; color: #e5def0; font-weight: 400; line-height: 1.5; }
 
         /* Menu de Navegação */
-        #nav-container { position: absolute; top: 15px; left: 50%; transform: translateX(-50%); z-index: 20; display: flex; flex-direction: column; align-items: center; gap: 8px; width: 90%; max-width: 750px; }
+        #nav-container { position: absolute; top: 15px; left: 50%; transform: translateX(-50%); z-index: 20; display: flex; flex-direction: column; align-items: center; gap: 8px; width: 90%; max-width: 750px; display: none; }
         #nav-menu { display: flex; gap: 6px; background: rgba(5, 3, 10, 0.6); padding: 6px 12px; border-radius: 30px; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.08); flex-wrap: wrap; justify-content: center; transition: all 0.4s ease; max-height: 200px; overflow: hidden; }
         #nav-menu.hidden { max-height: 0; padding: 0; border: none; opacity: 0; pointer-events: none; }
         
@@ -319,17 +323,15 @@
         const uiTitle = document.getElementById('msg-title');
         const uiBody = document.getElementById('msg-body');
 
-        // Sincronização e exibição das legendas da introdução baseadas no tempo real
+        // Sincronização corrigida milimetricamente com base no áudio real criador.mp3
         const legendasCriador = [
             { tempo: 0.0, texto: "No princípio..." },
-            { tempo: 3.0, texto: "Não havia nada." },
-            { tempo: 6.0, texto: "Nada além do silêncio de trevas sem fim." },
-            { tempo: 12.0, texto: "Mas o criador soprou perante o grande vazio, e sussurrou:" },
-            { tempo: 17.0, texto: "Faça-se a luz.", classe: "luz" },
-            { tempo: 20.5, texto: "" } 
+            { tempo: 2.2, texto: "Não havia nada." },
+            { tempo: 5.5, texto: "Nada além do silêncio de trevas sem fim." },
+            { tempo: 11.2, texto: "Mas o criador soprou perante o grande vazio, e sussurrou:" },
+            { tempo: 17.2, texto: "Faça-se a luz.", classe: "luz" }
         ];
 
-        // NOVA FUNÇÃO: Inicia a tela preta com a narrativa dramática e legendas organizadas
         window.iniciarIntroducao = () => {
             inicializarAudioEfeitos();
             if (audioCtx && audioCtx.state === 'suspended') {
@@ -349,7 +351,7 @@
                 audioCriadorTag.play().catch(e => console.log("Erro áudio introdução:", e));
             }, 1500);
 
-            // Gerenciador do tempo das legendas na tela preta
+            // Gerenciador preciso do tempo das legendas
             const intervalLegendas = setInterval(() => {
                 const tempoAtual = audioCriadorTag.currentTime;
                 let legendaAtiva = null;
@@ -367,31 +369,36 @@
                         
                         setTimeout(() => {
                             elLegenda.innerText = legendaAtiva.texto;
-                            if (legendaAtiva.texto !== "") {
-                                if (legendaAtiva.classe) elLegenda.classList.add(legendaAtiva.classe);
-                                elLegenda.classList.add('show');
-                            }
-                        }, 250);
+                            if (legendaAtiva.classe) elLegenda.classList.add(legendaAtiva.classe);
+                            elLegenda.classList.add('show');
+                        }, 200);
                     }
                 }
-            }, 100);
+            }, 50);
 
-            // Quando o áudio do criador terminar, faz o fade-out e inicia o universo na Terra normalmente
+            // Espera o áudio acabar TOTALMENTE e segura um pouco mais a frase "Faça-se a luz" na tela escura
             audioCriadorTag.onended = () => {
                 clearInterval(intervalLegendas);
-                const screenNarrativa = document.getElementById('narrativa-screen');
-                screenNarrativa.style.opacity = '0';
-
+                
+                // Segura o impacto final do "Faça-se a luz" por mais 2.5 segundos de forma cinematográfica
                 setTimeout(() => {
-                    screenNarrativa.style.display = 'none';
-                    iniciarUniversoNormal();
-                }, 1500);
+                    const screenNarrativa = document.getElementById('narrativa-screen');
+                    screenNarrativa.style.opacity = '0';
+
+                    setTimeout(() => {
+                        screenNarrativa.style.display = 'none';
+                        iniciarUniversoNormal();
+                    }, 1500);
+                }, 2500);
             };
         };
 
-        // Continuação do fluxo clássico pós-introdução na Terra com música normal
         function iniciarUniversoNormal() {
+            // Ativa o canvas e os menus apenas neste momento
+            document.querySelector('canvas').classList.add('show');
+            document.getElementById('nav-container').style.display = 'flex';
             document.getElementById('hud').style.opacity = '1';
+            
             audioTag.volume = 0.3; 
             audioTag.play().catch(e => console.log("Erro música principal:", e));
             mudarFoco('earth');
@@ -566,6 +573,9 @@
                 audioTag.pause();
                 audioTag.currentTime = 0;
 
+                // Oculta o canvas novamente antes de voltar para o menu inicial
+                document.querySelector('canvas').classList.remove('show');
+
                 const intro = document.getElementById('intro');
                 intro.style.display = 'flex';
                 intro.style.opacity = '1';
@@ -728,7 +738,7 @@
 
         const textos = {
             galaxy: { title: "Nossa Via-Láctea 🌌", body: "Olha que lindo tudo girando junto! No meio desse tanto de poeira e mistério, o universo caprichou na nossa história. Saber que você existe faz tudo parecer perfeito." },
-            sun: { title: "O Sol: Nosso Combustível ☀️", body: "O Sol é a estrella que dá energia para todo o espaço. Ele é o combustível do que eu sinto por você: enquanto ele continuar brilhando forte, nosso amor vai ser eterno." },
+            sun: { title: "O Sol: Nosso Combustível ☀️", body: "O Sol é a estrela que dá energia para todo o espaço. Ele é o combustível do que eu sinto por você: enquanto ele continuar brilhando forte, nosso amor vai ser eterno." },
             mercurio: { title: "Mercúrio", body: "Ele corre super rápido em volta do Sol. É igualzinho à velocidade que o meu coração bate toda vez que chega uma mensagem sua no meu celular!" },
             venus: { title: "Vênus", body: "O planeta mais brilhante do céu. Ele me lembra muito o brilho dos seus olhos quando a gente conversa e faz planos para o nosso futuro." },
             earth: { title: "Planeta Terra 🌍", body: "Existem bilhões de pessoas nesse mundo inteiro, mas foi com você que meu coração decidiu bater mais forte. É um milagre lindo a gente ter se encontrado no meio di tanta gente." },
