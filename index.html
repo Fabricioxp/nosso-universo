@@ -40,7 +40,7 @@
         #btn-finale.show { display: inline-block; animation: pulsarBotao 1.5s infinite alternate; }
         @keyframes pulsarBotao { from { box-shadow: 0 0 8px rgba(46,204,113,0.6); transform: scale(1); } to { box-shadow: 0 0 20px rgba(26,188,156,1); transform: scale(1.04); } }
 
-        /* Overlay de Flash Cinematográfico */
+        /* Overlay de Transições */
         #fade-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: #fff; z-index: 2000; opacity: 0; pointer-events: none; }
     </style>
 </head>
@@ -104,7 +104,6 @@
         let focoAtual = 'earth';
         let explodindo = false;
         
-        // Vetores base estáveis para calcular o tremor cinematográfico
         const cameraPosBase = new THREE.Vector3();
         const cameraTargetBase = new THREE.Vector3();
         let intensidadeTremor = 0;
@@ -173,8 +172,7 @@
 
             const angle1 = Math.random() * Math.PI * 2;
             const angle2 = Math.acos((Math.random() * 2) - 1);
-            // Velocidade de dispersão configurada para explosão épica de 4s
-            const speed = 1900 + Math.random() * 2600; 
+            const speed = 1600 + Math.random() * 2400; 
             gVelocities[i3] = Math.sin(angle2) * Math.cos(angle1) * speed;
             gVelocities[i3+1] = Math.sin(angle2) * Math.sin(angle1) * speed;
             gVelocities[i3+2] = Math.cos(angle2) * speed;
@@ -387,7 +385,6 @@
             }
         };
 
-        // DISPARADOR DO EVENTO DE 4 SEGUNDOS SINCRONIZADO FRAME A FRAME
         window.dispararExplosao = () => {
             explodindo = true;
             focoAtual = 'galaxy'; 
@@ -401,11 +398,9 @@
 
             controls.enabled = false; 
             
-            // Fixa a base imóvel da câmara para o motor de tremor atuar por cima de forma violenta
             cameraPosBase.set(0, 42000, 47000);
             cameraTargetBase.set(0, 0, 0);
 
-            // Reseta overlays de efeitos
             overlay.style.opacity = '0';
             overlay.style.backgroundColor = '#ffffff';
             overlay.style.transition = 'none'; 
@@ -421,8 +416,8 @@
                 gainNode.gain.linearRampToValueAtTime(0.0, audioCtx.currentTime + 1.4); 
             }
 
-            // DURAÇÃO DO COMPRIMENTO DO NOVO ÁUDIO: EXATAMENTE 4 SEGUNDOS
-            setTimeout(() => {
+            // O reset agora aguarda o término completo do áudio (escuta o evento 'ended')
+            audioExploTag.onended = () => {
                 overlay.style.transition = 'opacity 1.5s ease-out';
                 overlay.style.backgroundColor = '#010105'; 
 
@@ -501,11 +496,10 @@
                     overlay.style.pointerEvents = 'none';
                     overlay.style.transition = 'opacity 2.5s cubic-bezier(0.25, 1, 0.5, 1)'; 
                 }, 100);
-
-            }, 4000); 
+            };
         };
 
-        function obterPosicaoFoco() {
+        function obtenerPosicaoFoco() {
             if(focoAtual === 'galaxy') return new THREE.Vector3(0,0,0);
             if(focoAtual === 'sun') return solarSystem.position;
             const p = posicoesGlobais[focoAtual];
@@ -519,89 +513,85 @@
 
             if (explodindo) {
                 const segs = audioExploTag.currentTime;
+                const duracaoTotal = audioExploTag.duration || 4.0; // Captura dinamicamente o fim real do áudio
                 
-                // 🔊 PARTE 1 DO ÁUDIO (0.0s a 1.2s): O COLAPSO RÁPIDO DO GRAVE DO SUCÇÃO
+                // 🔊 ENQUANTO SUCÇÃO/GRAVE ESTÁ SUBINDO (0.0s até o Impacto Metálico em 1.2s)
                 if (segs < 1.2) {
-                    intensidadeTremor = 15; // Tremor de tensão gravitacional leve
+                    intensidadeTremor = 18; 
                     
                     const posAttr = galaxyGeometry.attributes.position;
                     const colAttr = galaxyGeometry.attributes.color;
                     
-                    // Contração massiva hiper-veloz em direção ao centro geométrico
                     for (let i = 0; i < gPoints; i++) {
                         const i3 = i * 3;
-                        posAttr.array[i3] *= 0.91; 
-                        posAttr.array[i3+1] *= 0.90;
-                        posAttr.array[i3+2] *= 0.91;
+                        posAttr.array[i3] *= 0.93; 
+                        posAttr.array[i3+1] *= 0.92;
+                        posAttr.array[i3+2] *= 0.93;
 
-                        // Cores mudam para um Vermelho Instável super concentrado
-                        colAttr.array[i3] = Math.min(colAttr.array[i3] + 0.04, 1.0);
-                        colAttr.array[i3+1] *= 0.88;
-                        colAttr.array[i3+2] *= 0.86;
+                        colAttr.array[i3] = Math.min(colAttr.array[i3] + 0.03, 1.0);
+                        colAttr.array[i3+1] *= 0.89;
+                        colAttr.array[i3+2] *= 0.87;
                     }
                     posAttr.needsUpdate = true;
                     colAttr.needsUpdate = true;
                     
-                    galaxy.rotation.y += 0.09;
-                    solarSystem.position.lerp(new THREE.Vector3(0, 0, 0), 0.09);
+                    galaxy.rotation.y += 0.07;
+                    solarSystem.position.lerp(new THREE.Vector3(0, 0, 0), 0.08);
                     
                     for(let chave in meshesPlanetas) {
-                        meshesPlanetas[chave].dist *= 0.88;
-                        meshesPlanetas[chave].mesh.scale.multiplyScalar(0.92);
+                        meshesPlanetas[chave].dist *= 0.89;
+                        meshesPlanetas[chave].mesh.scale.multiplyScalar(0.93);
                     }
-                    sun.scale.multiplyScalar(0.91);
+                    sun.scale.multiplyScalar(0.92);
                     if(audioTag.volume > 0) audioTag.volume = 0;
                 }
-                // 🔊 PARTE 2 DO ÁUDIO (1.2s a 4.0s): ESTOURO DO BIG BANG + REVERBERAÇÃO CINEMATOGRÁFICA
-                else if (segs >= 1.2) {
+                // 🔊 EXPANSÃO DO BIG BANG (A partir do Impacto em 1.2s até o final absoluto do som)
+                else {
                     const tExplo = (segs - 1.2);
                     
-                    // Super Tremor de Câmera Absoluto (Fricção e onda de choque sísmica)
-                    intensidadeTremor = Math.max(280 - (tExplo * 85), 35); 
+                    // Tremor violento que vai suavizando linearmente conforme o som se espalha
+                    intensidadeTremor = Math.max(290 - (tExplo * 75), 25); 
 
-                    // GERAÇÃO DO FLASH DE CINEMA NO EXATO MOMENTO DO ESTOURO (1.2s)
                     if (!flashDisparado) {
                         overlay.style.opacity = '1';
-                        overlay.style.transition = 'none'; // Flash imediato
+                        overlay.style.transition = 'none';
                         flashDisparado = true;
-                        
-                        // Solavanco de câmera recuando pelo impacto
-                        cameraPosBase.set(0, 52000, 58000); 
+                        cameraPosBase.set(0, 54000, 60000); 
                     } else {
-                        // Dissipação suave do clarão branco cinemático
-                        overlay.style.transition = 'opacity 1.2s cubic-bezier(0.25, 1, 0.5, 1)';
-                        overlay.style.opacity = Math.max(1 - (tExplo * 0.9), 0);
+                        overlay.style.transition = 'opacity 1.4s cubic-bezier(0.25, 1, 0.5, 1)';
+                        overlay.style.opacity = Math.max(1 - (tExplo * 0.8), 0);
                     }
 
                     const posAttr = galaxyGeometry.attributes.position;
                     const colAttr = galaxyGeometry.attributes.color;
                     
+                    // Diminuição progressiva da força de arrasto para criar uma dissipação fluida
+                    const fatorDesaceleracao = Math.max(1.0 - (tExplo * 0.22), 0.15);
+
                     for (let i = 0; i < gPoints; i++) {
                         const i3 = i * 3;
-                        // Expansão radial violenta
-                        posAttr.array[i3] += gVelocities[i3] * 0.045;
-                        posAttr.array[i3+1] += gVelocities[i3+1] * 0.045;
-                        posAttr.array[i3+2] += gVelocities[i3+2] * 0.045;
+                        posAttr.array[i3] += gVelocities[i3] * 0.048 * fatorDesaceleracao;
+                        posAttr.array[i3+1] += gVelocities[i3+1] * 0.048 * fatorDesaceleracao;
+                        posAttr.array[i3+2] += gVelocities[i3+2] * 0.048 * fatorDesaceleracao;
 
-                        // MUDANÇA DE CORES CROMÁTICA: Do Branco Incandescente para o Azul Cósmico Neon
-                        colAttr.array[i3] = Math.max(1 - tExplo * 0.4, 0.3); // Decai o canal vermelho
-                        colAttr.array[i3+1] = Math.min(0.5 + tExplo * 0.3, 0.9); 
-                        colAttr.array[i3+2] = 1.0; // Mantém azul no máximo
+                        // Gradiente de cores: Branco Cósmico -> Tons Ciano e Azul Elétrico
+                        colAttr.array[i3] = Math.max(1 - tExplo * 0.35, 0.25);
+                        colAttr.array[i3+1] = Math.min(0.5 + tExplo * 0.25, 0.95); 
+                        colAttr.array[i3+2] = 1.0; 
                     }
                     posAttr.needsUpdate = true;
                     colAttr.needsUpdate = true;
 
-                    if (galaxyMaterial.size < 2200) galaxyMaterial.size += 75.0;
+                    if (galaxyMaterial.size < 2500) galaxyMaterial.size += 65.0;
 
-                    // Escurecimento de fechamento de cena nos últimos instantes (Último 0.8s)
-                    if (segs > 3.2) {
+                    // O escurecimento final (Fade Out) agora se adapta dinamicamente aos últimos 0.9 segundos do áudio
+                    if (segs > (duracaoTotal - 0.9)) {
                         overlay.style.backgroundColor = '#010105';
-                        overlay.style.transition = 'opacity 0.7s linear';
-                        overlay.style.opacity = Math.min((segs - 3.2) / 0.8, 1);
+                        overlay.style.transition = 'opacity 0.8s linear';
+                        overlay.style.opacity = Math.min((segs - (duracaoTotal - 0.9)) / 0.9, 1);
                     }
                 }
 
-                // MOTOR ATIVO DE TREMOR (CAMERA SHAKE) RE-ESTRUTURADO APÓS OS CONTROLES
                 if (intensidadeTremor > 0) {
                     camera.position.x = cameraPosBase.x + (Math.random() - 0.5) * intensidadeTremor;
                     camera.position.y = cameraPosBase.y + (Math.random() - 0.5) * intensidadeTremor;
@@ -613,7 +603,6 @@
                 }
 
             } else {
-                // Modo estável normal
                 sun.rotation.y += 0.001;
                 galaxy.rotation.y += 0.00015;
                 const pulse = 1 + Math.sin(tempo * 2) * 0.03;
@@ -631,7 +620,6 @@
                 }
             }
 
-            // Estrelas cadentes
             shootingStars.forEach(s => {
                 s.mesh.position.x -= s.speed;
                 s.mesh.position.z -= s.speed;
