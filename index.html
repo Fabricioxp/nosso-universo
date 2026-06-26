@@ -41,7 +41,7 @@
         @keyframes pulsarBotao { from { box-shadow: 0 0 8px rgba(46,204,113,0.6); transform: scale(1); } to { box-shadow: 0 0 20px rgba(26,188,156,1); transform: scale(1.04); } }
 
         /* Cortina e Flash do Big Bang */
-        #fade-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: #fff; z-index: 2000; opacity: 0; pointer-events: none; transition: opacity 2s cubic-bezier(0.25, 1, 0.5, 1); }
+        #fade-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: #fff; z-index: 2000; opacity: 0; pointer-events: none; transition: opacity 2.5s cubic-bezier(0.25, 1, 0.5, 1); }
     </style>
 </head>
 <body>
@@ -100,6 +100,7 @@
         let focoAtual = 'earth';
         let explodindo = false;
         let tempoExplosao = 0;
+        let escalaGalaxiaOriginal = 1;
         
         const planetasParaVerificar = ['galaxy', 'sun', 'mercurio', 'venus', 'earth', 'marte', 'jupiter', 'saturno', 'urano', 'netuno', 'plutao'];
         let planetasVistos = new Set();
@@ -358,30 +359,30 @@
             }
         };
 
-        // O NOVO COLAPSO GRAVITACIONAL SEGUIDO DE BIG BANG COMPLETO
+        // O NOVO COLAPSO DA VIA LÁCTEA INTEIRA EM CÂMERA LENTA
         window.dispararExplosao = () => {
             explodindo = true;
             tempoExplosao = 0;
-            focoAtual = 'sun'; // Força o alvo no sol instantaneamente
+            focoAtual = 'galaxy'; 
             
-            // Limpeza total da tela
+            // Limpa tudo da tela imediatamente
             document.getElementById('nav-container').style.display = 'none';
             document.getElementById('hud').style.opacity = '0'; 
 
-            // CÂMERA TOTALMENTE FIXA E FOCADA NO SOL (Estilo close-up cinematográfico para celular)
+            // CÂMERA TRAVADA EXATAMENTE NA POSIÇÃO DO SEU PRINT PARA O SHOW DE MOBILE
             controls.enabled = false; 
-            camera.position.set(20000, 110, 230); // Fica de pertinho assistindo o Sol sugar tudo
-            controls.target.set(20000, 0, 0); 
+            camera.position.set(0, 48000, 52000); 
+            controls.target.set(0, 0, 0); 
             controls.update();
 
-            // Etapa 2: Aciona o flash de luz brilhante quando a fusão atinge o ápice (aos 6.5 segundos)
+            // Etapa 2: O clarão branco do Big Bang acontece após 8.5 segundos de colapso lento e lindo
             setTimeout(() => {
                 const overlay = document.getElementById('fade-overlay');
                 overlay.style.backgroundColor = '#ffffff'; 
                 overlay.style.pointerEvents = 'auto';
                 overlay.style.opacity = '1';
 
-                // Etapa 3: Desliga o flash caindo em tela preta e reiniciando
+                // Etapa 3: Fade out para o preto e reinicialização completa
                 setTimeout(() => {
                     overlay.style.transition = 'opacity 1.5s ease-in-out';
                     overlay.style.backgroundColor = '#010105'; 
@@ -401,11 +402,25 @@
                     });
                     document.querySelector('.nav-btn[data-id="earth"]').classList.add('active');
 
-                    // Restaura posições e escalas originais
+                    // Restaura tudo ao estado original estável
                     solarSystem.position.set(20000, 0, 0);
                     sun.scale.set(1, 1, 1);
                     sunMat.color.setHex(0xffa033);
                     galaxy.scale.set(1, 1, 1);
+                    
+                    // Restaura a geometria da galáxia
+                    const posAttr = galaxyGeometry.attributes.position;
+                    for (let i = 0; i < gPoints; i++) {
+                        const i3 = i * 3;
+                        const r = Math.pow(Math.random(), 2.5) * 65000;
+                        const arms = 4;
+                        const theta = ((i % arms) / arms) * Math.PI * 2 + (r * 0.00006);
+                        const spread = Math.pow(Math.random(), 2) * (Math.random() < 0.5 ? 1 : -1) * r * 0.12;
+                        posAttr.array[i3] = Math.cos(theta) * r + spread;
+                        posAttr.array[i3+1] = (Math.random() - 0.5) * (65000 - r) * 0.04;
+                        posAttr.array[i3+2] = Math.sin(theta) * r + (Math.random() - 0.5) * r * 0.12;
+                    }
+                    posAttr.needsUpdate = true;
                     
                     for(let chave in meshesPlanetas) {
                         const p = meshesPlanetas[chave];
@@ -429,12 +444,12 @@
                     setTimeout(() => {
                         overlay.style.opacity = '0';
                         overlay.style.pointerEvents = 'none';
-                        overlay.style.transition = 'opacity 2s cubic-bezier(0.25, 1, 0.5, 1)'; 
+                        overlay.style.transition = 'opacity 2.5s cubic-bezier(0.25, 1, 0.5, 1)'; 
                     }, 500);
 
                 }, 3000); 
 
-            }, 6500); 
+            }, 8500); // 8.5 segundos apreciando a Via-Láctea sugar tudo lentamente antes do Big Bang
         };
 
         function obterPosicaoFoco() {
@@ -452,45 +467,53 @@
             if (explodindo) {
                 tempoExplosao += 1;
                 
-                // 1. O SOL SE TORNA UM CENTRO GRAVITACIONAL INSTÁVEL E VIBRANTE
-                sun.rotation.y += 0.08;
-                
-                if (tempoExplosao < 180) {
-                    // FASE 1: SUGANDO OS PLANETAS (ELES VÃO ENTRANDO EM ESPIRAL ATÉ SUMIREM NO SOL)
+                if (tempoExplosao < 240) {
+                    // FASE 1: O GRANDE COLAPSO DA VIA LÁCTEA (CÂMERA LENTA)
+                    // Os fragmentos (partículas) da Galáxia começam a encolher e girar em direção ao centro de coordenadas (0,0,0)
+                    const posAttr = galaxyGeometry.attributes.position;
+                    for (let i = 0; i < gPoints; i++) {
+                        const i3 = i * 3;
+                        // Puxa as coordenadas X e Z em direção ao centro da espiral bem devagar
+                        posAttr.array[i3] *= 0.985;
+                        posAttr.array[i3+2] *= 0.985;
+                        posAttr.array[i3+1] *= 0.98; // Achata o plano vertical
+                    }
+                    posAttr.needsUpdate = true;
+                    
+                    // A galáxia inteira acelera sua rotação de forma majestosa
+                    galaxy.rotation.y += 0.015;
+
+                    // O Sistema Solar inteiro também cai e espirala em direção ao buraco negro central (0,0,0)
+                    solarSystem.position.lerp(new THREE.Vector3(0, 0, 0), 0.012);
+                    
+                    // Os planetas perdem suas órbitas e caem direto no Sol enquanto o sistema solar despenca
                     for(let chave in meshesPlanetas) {
                         const p = meshesPlanetas[chave];
-                        // Reduz a distância gradativamente até 0 (colisão)
-                        if (p.dist > 2) {
-                            p.dist -= (p.originalDist * 0.015);
-                        } else {
-                            p.dist = 0;
-                            p.mesh.scale.multiplyScalar(0.9); // Planeta desintegra dentro do sol
-                        }
-                        p.angle += p.speed * 12; // Giram muito mais rápido na queda
+                        if (p.dist > 1) p.dist -= (p.originalDist * 0.01);
+                        p.angle += p.speed * 4;
                         p.group.position.x = Math.cos(p.angle) * p.dist;
                         p.group.position.z = Math.sin(p.angle) * p.dist;
-                        p.mesh.rotation.x += 0.1;
                     }
                     
-                    // O Sol pulsa em tons quentes acumulando massa
-                    const pulseG = Math.abs(Math.sin(tempoExplosao * 0.1));
-                    sunMat.color.setRGB(1, 0.3 + pulseG * 0.5, 0);
-                    sun.scale.addScalar(0.005);
-                } else {
-                    // FASE 2: O BIG BANG REAL (O SOL EXPLOODE CORES EM SUPERNOVA ATÉ TOCAR A TELA)
-                    sun.scale.addScalar(0.7); // Expansão massiva cobrindo tudo
+                    // O Sol pulsa acumulando energia de toda a galáxia que está sendo sugada
+                    const pulseG = Math.abs(Math.sin(tempoExplosao * 0.08));
+                    sunMat.color.setRGB(1, 0.2 + pulseG * 0.6, 0.4);
+                } 
+                else {
+                    // FASE 2: O BIG BANG COLORIDO NO CENTRO DA TELA
+                    // Após todos os fragmentos colidirem no centro, uma Supernova de cores explode na cara da câmera
+                    galaxy.scale.addScalar(0.4);
+                    sun.scale.addScalar(0.8);
                     
-                    // Ondas psicodélicas neon gerando efeitos de feixes coloridos
-                    const rG = Math.abs(Math.sin(tempo * 8));
-                    const bG = Math.abs(Math.cos(tempo * 8));
-                    sunMat.color.setRGB(rG, 1, bG);
-                    
-                    galaxy.rotation.y += 0.03;
-                    galaxy.scale.addScalar(0.02);
+                    // Cores neon psicodélicas e brilhantes piscando no espetáculo final
+                    const rG = Math.abs(Math.sin(tempo * 12));
+                    const bG = Math.abs(Math.cos(tempo * 12));
+                    sunMat.color.setRGB(rG, 0.4, bG);
+                    galaxyMaterial.color.setRGB(1, rG, bG);
                 }
 
             } else {
-                // Rotação regular estável
+                // Rotação regular estável em tempo de navegação
                 sun.rotation.y += 0.001;
                 galaxy.rotation.y += 0.00015;
                 const pulse = 1 + Math.sin(tempo * 2) * 0.03;
@@ -517,7 +540,6 @@
                 }
             });
 
-            // Movimento da lua padrão
             if(!explodindo) {
                 moon.position.x = Math.cos(tempo * 2.5) * 16;
                 moon.position.z = Math.sin(tempo * 2.5) * 16;
@@ -532,7 +554,8 @@
             if(!explodindo) {
                 controls.target.lerp(alvoCam, 0.08);
             } else {
-                controls.target.set(20000, 0, 0); // Trava o olho da câmera morto no Sol
+                // Trava o alvo da câmera exatamente no ponto zero (o epicentro da Via-Láctea)
+                controls.target.set(0, 0, 0); 
             }
 
             controls.update();
