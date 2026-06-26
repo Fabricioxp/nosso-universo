@@ -40,7 +40,7 @@
         #btn-finale.show { display: inline-block; animation: pulsarBotao 1.5s infinite alternate; }
         @keyframes pulsarBotao { from { box-shadow: 0 0 8px rgba(46,204,113,0.6); transform: scale(1); } to { box-shadow: 0 0 20px rgba(26,188,156,1); transform: scale(1.04); } }
 
-        /* Overlay de Flash e Transições */
+        /* Overlay de Flash Cinematográfico */
         #fade-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: #fff; z-index: 2000; opacity: 0; pointer-events: none; }
     </style>
 </head>
@@ -104,10 +104,11 @@
         let focoAtual = 'earth';
         let explodindo = false;
         
-        // Bases estáticas para guardar o vetor real de animação da câmara antes do tremor
+        // Vetores base estáveis para calcular o tremor cinematográfico
         const cameraPosBase = new THREE.Vector3();
         const cameraTargetBase = new THREE.Vector3();
         let intensidadeTremor = 0;
+        let flashDisparado = false;
 
         let audioCtx, audioSource, filterNode, gainNode;
         const audioTag = document.getElementById('musica-fundo');
@@ -172,7 +173,8 @@
 
             const angle1 = Math.random() * Math.PI * 2;
             const angle2 = Math.acos((Math.random() * 2) - 1);
-            const speed = 700 + Math.random() * 1100; 
+            // Velocidade de dispersão configurada para explosão épica de 4s
+            const speed = 1900 + Math.random() * 2600; 
             gVelocities[i3] = Math.sin(angle2) * Math.cos(angle1) * speed;
             gVelocities[i3+1] = Math.sin(angle2) * Math.sin(angle1) * speed;
             gVelocities[i3+2] = Math.cos(angle2) * speed;
@@ -385,10 +387,12 @@
             }
         };
 
+        // DISPARADOR DO EVENTO DE 4 SEGUNDOS SINCRONIZADO FRAME A FRAME
         window.dispararExplosao = () => {
             explodindo = true;
             focoAtual = 'galaxy'; 
             intensidadeTremor = 0;
+            flashDisparado = false;
             
             inicializarAudioEfeitos();
 
@@ -397,10 +401,11 @@
 
             controls.enabled = false; 
             
-            // Fixa a base imóvel da câmara
-            cameraPosBase.set(0, 45000, 50000);
+            // Fixa a base imóvel da câmara para o motor de tremor atuar por cima de forma violenta
+            cameraPosBase.set(0, 42000, 47000);
             cameraTargetBase.set(0, 0, 0);
 
+            // Reseta overlays de efeitos
             overlay.style.opacity = '0';
             overlay.style.backgroundColor = '#ffffff';
             overlay.style.transition = 'none'; 
@@ -411,14 +416,14 @@
 
             if (filterNode && gainNode && audioCtx) {
                 filterNode.frequency.setValueAtTime(filterNode.frequency.value, audioCtx.currentTime);
-                filterNode.frequency.exponentialRampToValueAtTime(40, audioCtx.currentTime + 3.5); 
+                filterNode.frequency.exponentialRampToValueAtTime(30, audioCtx.currentTime + 1.2); 
                 gainNode.gain.setValueAtTime(gainNode.gain.value, audioCtx.currentTime);
-                gainNode.gain.linearRampToValueAtTime(0.0, audioCtx.currentTime + 4.0); 
+                gainNode.gain.linearRampToValueAtTime(0.0, audioCtx.currentTime + 1.4); 
             }
 
-            // Mantido o tempo completo de 18.0 segundos pedido originalmente
+            // DURAÇÃO DO COMPRIMENTO DO NOVO ÁUDIO: EXATAMENTE 4 SEGUNDOS
             setTimeout(() => {
-                overlay.style.transition = 'opacity 2.5s cubic-bezier(0.1, 0.8, 0.2, 1)';
+                overlay.style.transition = 'opacity 1.5s ease-out';
                 overlay.style.backgroundColor = '#010105'; 
 
                 document.getElementById('toggle-audio').innerText = "Pausar Música ⏸️";
@@ -439,7 +444,7 @@
                 });
                 document.querySelector('.nav-btn[data-id="earth"]').classList.add('active');
 
-                // Reset do Universo
+                // Restauração completa do Universo
                 solarSystem.position.set(20000, 0, 0);
                 sun.scale.set(1, 1, 1);
                 sunMat.color.setHex(0xffa033);
@@ -495,9 +500,9 @@
                     overlay.style.opacity = '0';
                     overlay.style.pointerEvents = 'none';
                     overlay.style.transition = 'opacity 2.5s cubic-bezier(0.25, 1, 0.5, 1)'; 
-                }, 500);
+                }, 100);
 
-            }, 18000); 
+            }, 4000); 
         };
 
         function obterPosicaoFoco() {
@@ -515,118 +520,96 @@
             if (explodindo) {
                 const segs = audioExploTag.currentTime;
                 
-                // 1. ANTES DA EXPLOSÃO: ENCOLHIMENTO MÁXIMO (0s a 3.8s)
-                if (segs < 3.8) {
-                    intensidadeTremor = 25; // Vibração de tensão gravitacional
+                // 🔊 PARTE 1 DO ÁUDIO (0.0s a 1.2s): O COLAPSO RÁPIDO DO GRAVE DO SUCÇÃO
+                if (segs < 1.2) {
+                    intensidadeTremor = 15; // Tremor de tensão gravitacional leve
                     
                     const posAttr = galaxyGeometry.attributes.position;
                     const colAttr = galaxyGeometry.attributes.color;
                     
-                    // Tudo encolhe de forma violenta em direção ao centro puro (Ponto Zero)
+                    // Contração massiva hiper-veloz em direção ao centro geométrico
                     for (let i = 0; i < gPoints; i++) {
                         const i3 = i * 3;
-                        posAttr.array[i3] *= 0.965; 
-                        posAttr.array[i3+1] *= 0.96;
-                        posAttr.array[i3+2] *= 0.965;
+                        posAttr.array[i3] *= 0.91; 
+                        posAttr.array[i3+1] *= 0.90;
+                        posAttr.array[i3+2] *= 0.91;
 
-                        // Mudança de Cor Progressiva: Transição para vermelho instável de sobrecarga
-                        colAttr.array[i3] = Math.min(colAttr.array[i3] + 0.015, 1.0);
-                        colAttr.array[i3+1] *= 0.95;
-                        colAttr.array[i3+2] *= 0.94;
+                        // Cores mudam para um Vermelho Instável super concentrado
+                        colAttr.array[i3] = Math.min(colAttr.array[i3] + 0.04, 1.0);
+                        colAttr.array[i3+1] *= 0.88;
+                        colAttr.array[i3+2] *= 0.86;
                     }
                     posAttr.needsUpdate = true;
                     colAttr.needsUpdate = true;
                     
-                    galaxy.rotation.y += 0.05;
-                    solarSystem.position.lerp(new THREE.Vector3(0, 0, 0), 0.04);
+                    galaxy.rotation.y += 0.09;
+                    solarSystem.position.lerp(new THREE.Vector3(0, 0, 0), 0.09);
                     
                     for(let chave in meshesPlanetas) {
-                        meshesPlanetas[chave].dist *= 0.95;
-                        meshesPlanetas[chave].mesh.scale.multiplyScalar(0.97); // Planetas diminuem até sumir
+                        meshesPlanetas[chave].dist *= 0.88;
+                        meshesPlanetas[chave].mesh.scale.multiplyScalar(0.92);
                     }
-                    sun.scale.multiplyScalar(0.96);
+                    sun.scale.multiplyScalar(0.91);
                     if(audioTag.volume > 0) audioTag.volume = 0;
                 }
-                // 2. VÁCUO ABSOLUTO DA SINGULARIDADE (3.8s a 4.2s)
-                else if (segs >= 3.8 && segs < 4.2) {
-                    intensidadeTremor = 0; // Silêncio físico e total imobilidade
-                    sun.scale.set(0,0,0);
-                    for(let chave in meshesPlanetas) meshesPlanetas[chave].mesh.scale.set(0,0,0);
+                // 🔊 PARTE 2 DO ÁUDIO (1.2s a 4.0s): ESTOURO DO BIG BANG + REVERBERAÇÃO CINEMATOGRÁFICA
+                else if (segs >= 1.2) {
+                    const tExplo = (segs - 1.2);
                     
-                    const posAttr = galaxyGeometry.attributes.position;
-                    for (let i = 0; i < gPoints; i++) {
-                        const i3 = i * 3;
-                        posAttr.array[i3] *= 0.4; posAttr.array[i3+1] *= 0.4; posAttr.array[i3+2] *= 0.4;
+                    // Super Tremor de Câmera Absoluto (Fricção e onda de choque sísmica)
+                    intensidadeTremor = Math.max(280 - (tExplo * 85), 35); 
+
+                    // GERAÇÃO DO FLASH DE CINEMA NO EXATO MOMENTO DO ESTOURO (1.2s)
+                    if (!flashDisparado) {
+                        overlay.style.opacity = '1';
+                        overlay.style.transition = 'none'; // Flash imediato
+                        flashDisparado = true;
+                        
+                        // Solavanco de câmera recuando pelo impacto
+                        cameraPosBase.set(0, 52000, 58000); 
+                    } else {
+                        // Dissipação suave do clarão branco cinemático
+                        overlay.style.transition = 'opacity 1.2s cubic-bezier(0.25, 1, 0.5, 1)';
+                        overlay.style.opacity = Math.max(1 - (tExplo * 0.9), 0);
                     }
-                    posAttr.needsUpdate = true;
-                }
-                // 3. PRIMEIRA GRANDE EXPLOSÃO (4.2s a 9.0s)
-                else if (segs >= 4.2 && segs < 9.0) {
-                    const tEstouro1 = (segs - 4.2);
-                    intensidadeTremor = Math.max(220 - (tEstouro1 * 35), 60); // Terremoto total de tela ativa!
-
-                    const posAttr = galaxyGeometry.attributes.position;
-                    const colAttr = galaxyGeometry.attributes.color;
-                    
-                    for (let i = 0; i < gPoints; i++) {
-                        const i3 = i * 3;
-                        // Expansão veloz para fora baseado no vetor físico
-                        posAttr.array[i3] += gVelocities[i3] * 0.055;
-                        posAttr.array[i3+1] += gVelocities[i3+1] * 0.055;
-                        posAttr.array[i3+2] += gVelocities[i3+2] * 0.055;
-
-                        // Mudança de cores frenética: Ondas de choque alternando entre Ciano, Azul e Roxo
-                        colAttr.array[i3] = Math.sin(tEstouro1 * 10 + i) * 0.5 + 0.5; 
-                        colAttr.array[i3+1] = 0.85; 
-                        colAttr.array[i3+2] = 1.0; 
-                    }
-                    posAttr.needsUpdate = true;
-                    colAttr.needsUpdate = true;
-
-                    if (galaxyMaterial.size < 700) galaxyMaterial.size += 30.0;
-                }
-                // 4. SEGUNDA GRANDE EXPLOSÃO / EXPANSÃO MÁXIMA (9.0s a 18.0s)
-                else if (segs >= 9.0) {
-                    const tEstouro2 = (segs - 9.0);
-                    intensidadeTremor = Math.max(260 - (tEstouro2 * 25), 15); // Segundo pico massivo de tremor de câmara
 
                     const posAttr = galaxyGeometry.attributes.position;
                     const colAttr = galaxyGeometry.attributes.color;
                     
                     for (let i = 0; i < gPoints; i++) {
                         const i3 = i * 3;
-                        // Arremesso duplo em super-velocidade
-                        posAttr.array[i3] += gVelocities[i3] * 0.11;
-                        posAttr.array[i3+1] += gVelocities[i3+1] * 0.11;
-                        posAttr.array[i3+2] += gVelocities[i3+2] * 0.11;
+                        // Expansão radial violenta
+                        posAttr.array[i3] += gVelocities[i3] * 0.045;
+                        posAttr.array[i3+1] += gVelocities[i3+1] * 0.045;
+                        posAttr.array[i3+2] += gVelocities[i3+2] * 0.045;
 
-                        // Tudo passa a brilhar em Branco Incandescente puro e Rosa Choque com o calor térmico
-                        colAttr.array[i3] = 1.0; 
-                        colAttr.array[i3+1] = Math.sin(tEstouro2 * 4) * 0.4 + 0.6; 
-                        colAttr.array[i3+2] = 1.0; 
+                        // MUDANÇA DE CORES CROMÁTICA: Do Branco Incandescente para o Azul Cósmico Neon
+                        colAttr.array[i3] = Math.max(1 - tExplo * 0.4, 0.3); // Decai o canal vermelho
+                        colAttr.array[i3+1] = Math.min(0.5 + tExplo * 0.3, 0.9); 
+                        colAttr.array[i3+2] = 1.0; // Mantém azul no máximo
                     }
                     posAttr.needsUpdate = true;
                     colAttr.needsUpdate = true;
 
-                    if (galaxyMaterial.size < 1800) galaxyMaterial.size += 45.0;
+                    if (galaxyMaterial.size < 2200) galaxyMaterial.size += 75.0;
 
-                    // Ativação gradual do clarão luminoso cobrindo a transição na reta final
-                    if (tEstouro2 > 3.0) {
-                        overlay.style.pointerEvents = 'auto';
-                        const opacidadeBranco = Math.min((tEstouro2 - 3.0) / 4.0, 1);
-                        overlay.style.opacity = opacidadeBranco;
+                    // Escurecimento de fechamento de cena nos últimos instantes (Último 0.8s)
+                    if (segs > 3.2) {
+                        overlay.style.backgroundColor = '#010105';
+                        overlay.style.transition = 'opacity 0.7s linear';
+                        overlay.style.opacity = Math.min((segs - 3.2) / 0.8, 1);
                     }
                 }
 
-                // APLICAÇÃO REAL E SEGURA DO TREMOR NA CÂMARA (Executado após qualquer reescrita orbital)
+                // MOTOR ATIVO DE TREMOR (CAMERA SHAKE) RE-ESTRUTURADO APÓS OS CONTROLES
                 if (intensidadeTremor > 0) {
                     camera.position.x = cameraPosBase.x + (Math.random() - 0.5) * intensidadeTremor;
                     camera.position.y = cameraPosBase.y + (Math.random() - 0.5) * intensidadeTremor;
                     camera.position.z = cameraPosBase.z + (Math.random() - 0.5) * intensidadeTremor;
                     
-                    controls.target.x = cameraTargetBase.x + (Math.random() - 0.5) * (intensidadeTremor * 0.25);
-                    controls.target.y = cameraTargetBase.y + (Math.random() - 0.5) * (intensidadeTremor * 0.25);
-                    controls.target.z = cameraTargetBase.z + (Math.random() - 0.5) * (intensidadeTremor * 0.25);
+                    controls.target.x = cameraTargetBase.x + (Math.random() - 0.5) * (intensidadeTremor * 0.2);
+                    controls.target.y = cameraTargetBase.y + (Math.random() - 0.5) * (intensidadeTremor * 0.2);
+                    controls.target.z = cameraTargetBase.z + (Math.random() - 0.5) * (intensidadeTremor * 0.2);
                 }
 
             } else {
@@ -672,7 +655,6 @@
                 controls.target.lerp(alvoCam, 0.08);
                 controls.update();
             } else {
-                // Na explosão atualizamos os controlos em cima do vetor estático para não quebrar o tremor matemático
                 controls.update();
             }
 
@@ -690,7 +672,7 @@
             sun: { title: "O Sol: Nosso Combustível ☀️", body: "O Sol é a estrela que dá energia para todo o espaço. Ele é o combustível do que eu sinto por você: enquanto ele continuar brilhando forte, nosso amor vai ser eterno." },
             mercurio: { title: "Mercúrio", body: "Ele corre super rápido em volta do Sol. É igualzinho à velocidade que o meu coração bate toda vez que chega uma mensagem sua no meu celular!" },
             venus: { title: "Vênus", body: "O planeta mais brilhante do céu. Ele me lembra muito o brilho dos seus olhos quando a gente conversa e faz planos para o nosso futuro." },
-            earth: { title: "Planeta Terra 🌍", body: "Existem bilhões de pessoas nesse mundo inteiro, mas foi com você que meu coração decidiu bater mais forte. É um milagre lindo a gente ter se encontrado no meio de tanta gente." },
+            earth: { title: "Planeta Terra 🌍", body: "Existem bilhões de pessoas nesse mundo inteiro, mas foi com você que meu coração decidiu bater mais forte. É um milagre lindo a gente ter se encontrado no meio di tanta gente." },
             marte: { title: "Marte", body: "Marte é forte e cheio de cor. Ele me lembra a nossa força para fazer tudo dar certo e construir uma história linda passo a passo." },
             jupiter: { title: "Júpiter", body: "Júpiter é o maior planeta de todos, cabe tudo lá dentro! Mas sabia que ele ainda é pequeno perto do tamanho do futuro que eu imagino do seu lado?" },
             saturno: { title: "Saturno da Minha Maria ✨💍", body: "Esse é o planeta mais lindo do universo por causa desses anéis. Como ele é o meu preferido, coloquei o seu nome brilhando nele. Você é a dona do meu lugar favorito no espaço." },
