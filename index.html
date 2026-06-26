@@ -52,6 +52,10 @@
         <source src="principal.mp3" type="audio/mpeg">
     </audio>
 
+    <audio id="audio-explosao" crossorigin="anonymous">
+        <source src="final.mp3" type="audio/mpeg">
+    </audio>
+
     <div id="intro">
         <h1>O Universo de Nós Dois</h1>
         <p>Um espaço inteirinho criado para te mostrar que você mudou completamente a minha vida. Você é o meu mundo.</p>
@@ -101,9 +105,9 @@
         let explodindo = false;
         let tempoExplosao = 0;
         
-        // Efeitos Avançados de Áudio Cinema
         let audioCtx, audioSource, filterNode, gainNode;
         const audioTag = document.getElementById('musica-fundo');
+        const audioExploTag = document.getElementById('audio-explosao');
         const overlay = document.getElementById('fade-overlay');
 
         function inicializarAudioEfeitos() {
@@ -118,7 +122,6 @@
                 gainNode = audioCtx.createGain();
                 gainNode.gain.setValueAtTime(1.0, audioCtx.currentTime);
 
-                // Linha de conexões: Som -> Filtro -> Volume -> Saída
                 audioSource.connect(filterNode);
                 filterNode.connect(gainNode);
                 gainNode.connect(audioCtx.destination);
@@ -163,10 +166,9 @@
             gColors[i3+1] = finalCol.g;
             gColors[i3+2] = finalCol.b;
 
-            // Vetores volumétricos e cinemáticos de dispersão esférica pura
             const angle1 = Math.random() * Math.PI * 2;
             const angle2 = Math.acos((Math.random() * 2) - 1);
-            const speed = 250 + Math.random() * 550; 
+            const speed = 280 + Math.random() * 600; 
             gVelocities[i3] = Math.sin(angle2) * Math.cos(angle1) * speed;
             gVelocities[i3+1] = Math.sin(angle2) * Math.sin(angle1) * speed;
             gVelocities[i3+2] = Math.cos(angle2) * speed;
@@ -379,7 +381,7 @@
             }
         };
 
-        // ENCERRAMENTO CINEMA PROLONGADO E ULTRA DETALHADO
+        // EXECUTOR DO FIM DO MUNDO RÍTMICO
         window.dispararExplosao = () => {
             explodindo = true;
             tempoExplosao = 0;
@@ -399,18 +401,23 @@
             overlay.style.backgroundColor = '#ffffff';
             overlay.style.transition = 'none'; 
 
-            // EFEITO DE ÁUDIO CINEMA: Música vai abafando E sumindo em rampa ao mesmo tempo!
+            // Dá play no áudio especial enviado por você
+            audioExploTag.currentTime = 0;
+            audioExploTag.volume = 1.0;
+            audioExploTag.play().catch(e => console.log("Erro ao tocar áudio final:", e));
+
+            // Aplica os filtros na trilha de fundo original para ela sumir em sintonia
             if (filterNode && gainNode && audioCtx) {
                 filterNode.frequency.setValueAtTime(filterNode.frequency.value, audioCtx.currentTime);
-                filterNode.frequency.exponentialRampToValueAtTime(80, audioCtx.currentTime + 5.5); // Super abafado
+                filterNode.frequency.exponentialRampToValueAtTime(70, audioCtx.currentTime + 6.0); 
                 
                 gainNode.gain.setValueAtTime(gainNode.gain.value, audioCtx.currentTime);
-                gainNode.gain.linearRampToValueAtTime(0.0, audioCtx.currentTime + 5.5); // Fade out total
+                gainNode.gain.linearRampToValueAtTime(0.0, audioCtx.currentTime + 6.5); 
             }
 
-            // Duração total estendida da cena para dar peso dramático (16.5 segundos totais)
+            // Tempo total ajustado precisamente para o tamanho e dissipação do arquivo final.mp3 (~18 segundos)
             setTimeout(() => {
-                overlay.style.transition = 'opacity 2.5s cubic-bezier(0.1, 0.8, 0.2, 1)';
+                overlay.style.transition = 'opacity 3s cubic-bezier(0.1, 0.8, 0.2, 1)';
                 overlay.style.backgroundColor = '#010105'; 
 
                 document.getElementById('toggle-audio').innerText = "Pausar Música ⏸️";
@@ -420,7 +427,6 @@
                 planetasVistos.clear();
                 controls.enabled = true;
                 
-                // Reseta os nós de áudio para o padrão limpo e alto no recomeço
                 if (filterNode && gainNode) {
                     filterNode.frequency.setValueAtTime(22000, audioCtx.currentTime);
                     gainNode.gain.setValueAtTime(1.0, audioCtx.currentTime);
@@ -432,7 +438,7 @@
                 });
                 document.querySelector('.nav-btn[data-id="earth"]').classList.add('active');
 
-                // Reseta corpos celestes
+                // Restaura o universo de fábrica
                 solarSystem.position.set(20000, 0, 0);
                 sun.scale.set(1, 1, 1);
                 sunMat.color.setHex(0xffa033);
@@ -453,7 +459,6 @@
                 }
                 posAttr.needsUpdate = true;
                 
-                // Reseta cores originais das partículas
                 const colAttr = galaxyGeometry.attributes.color;
                 for(let i=0; i<gPoints; i++) {
                     const i3 = i*3;
@@ -475,6 +480,10 @@
                 document.getElementById('btn-finale').classList.remove('show');
                 document.getElementById('nav-menu').classList.remove('hidden');
                 
+                // Reinicia a trilha padrão do site
+                audioTag.volume = 0.3;
+                audioTag.play().catch(() => {});
+
                 const intro = document.getElementById('intro');
                 intro.style.display = 'flex';
                 intro.style.opacity = '1';
@@ -488,7 +497,7 @@
                     overlay.style.transition = 'opacity 2.5s cubic-bezier(0.25, 1, 0.5, 1)'; 
                 }, 500);
 
-            }, 16500); 
+            }, 18000); 
         };
 
         function obterPosicaoFoco() {
@@ -506,54 +515,61 @@
             if (explodindo) {
                 tempoExplosao += 1;
                 
-                if (tempoExplosao < 330) {
-                    // FASE 1: O COLAPSO PROLONGADO E DRAMÁTICO (330 frames = ~5.5 segundos sugando lentamente)
+                if (tempoExplosao < 410) {
+                    // TIMING 1: COLAPSO GRAVITACIONAL (0s a 6.8s) -> Segue a trituração do áudio
                     const posAttr = galaxyGeometry.attributes.position;
                     for (let i = 0; i < gPoints; i++) {
                         const i3 = i * 3;
-                        posAttr.array[i3] *= 0.988; // Desacelerado para dar sensação de peso gravitacional
-                        posAttr.array[i3+2] *= 0.988;
-                        posAttr.array[i3+1] *= 0.982; 
+                        posAttr.array[i3] *= 0.989; 
+                        posAttr.array[i3+2] *= 0.989;
+                        posAttr.array[i3+1] *= 0.984; 
                     }
                     posAttr.needsUpdate = true;
                     
-                    galaxy.rotation.y += 0.012;
-                    solarSystem.position.lerp(new THREE.Vector3(0, 0, 0), 0.008);
+                    galaxy.rotation.y += 0.01;
+                    solarSystem.position.lerp(new THREE.Vector3(0, 0, 0), 0.007);
                     
                     for(let chave in meshesPlanetas) {
                         const p = meshesPlanetas[chave];
-                        if (p.dist > 0.5) p.dist -= (p.originalDist * 0.006);
-                        p.angle += p.speed * 2;
+                        if (p.dist > 0.5) p.dist -= (p.originalDist * 0.0055);
+                        p.angle += p.speed * 1.8;
                         p.group.position.x = Math.cos(p.angle) * p.dist;
                         p.group.position.z = Math.sin(p.angle) * p.dist;
                     }
+
+                    // Faz a música principal ir cortando conforme o colapso avança
+                    if(tempoExplosao === 390) {
+                        audioTag.pause();
+                        audioTag.currentTime = 0;
+                    }
                 } 
-                else if (tempoExplosao >= 330 && tempoExplosao < 420) {
-                    // FASE 2: O PONTO ZERO (1.5 segundos de SILÊNCIO TOTAL e contração absoluta antes do estouro)
+                else if (tempoExplosao >= 410 && tempoExplosao < 550) {
+                    // TIMING 2: O MOMENTO DO SILÊNCIO ABSOLUTO (6.8s a 9.2s) -> Pausa dramática no áudio
                     sun.scale.set(0,0,0);
                     for(let chave in meshesPlanetas) meshesPlanetas[chave].mesh.scale.set(0,0,0);
                     
-                    // Segura o áudio desligado no momento zero
-                    audioTag.pause();
-                    audioTag.currentTime = 0;
-
+                    // Contração extrema da matéria no centro no frame mudo do áudio
                     const posAttr = galaxyGeometry.attributes.position;
                     for (let i = 0; i < gPoints; i++) {
                         const i3 = i * 3;
-                        posAttr.array[i3] *= 0.85; 
-                        posAttr.array[i3+1] *= 0.85;
-                        posAttr.array[i3+2] *= 0.85;
+                        posAttr.array[i3] *= 0.8; 
+                        posAttr.array[i3+1] *= 0.8;
+                        posAttr.array[i3+2] *= 0.8;
                     }
                     posAttr.needsUpdate = true;
+
+                    // Ligeiro avanço lento da câmera no vácuo
+                    camera.position.y -= 30;
+                    camera.position.z -= 30;
                 }
                 else {
-                    // FASE 3: O VERDADEIRO BIG BANG (Expansão super-maciça acelerada)
+                    // TIMING 3: O EXTREMO ESTOURO DO BIG BANG (A partir de 9.2s) -> Sincronizado com o boom violento
                     const posAttr = galaxyGeometry.attributes.position;
                     const colAttr = galaxyGeometry.attributes.color;
-                    const framesDesdeEstouro = (tempoExplosao - 420);
+                    const framesDesdeEstouro = (tempoExplosao - 550);
 
-                    // Aceleração progressiva hiperbólica das partículas explodindo
-                    const multiplicadorVelocidade = 0.02 + (framesDesdeEstouro * 0.0015);
+                    // Força física expansiva de progressão veloz
+                    const multiplicadorVelocidade = 0.04 + (framesDesdeEstouro * 0.002);
 
                     for (let i = 0; i < gPoints; i++) {
                         const i3 = i * 3;
@@ -561,25 +577,25 @@
                         posAttr.array[i3+1] += gVelocities[i3+1] * multiplicadorVelocidade;
                         posAttr.array[i3+2] += gVelocities[i3+2] * multiplicadorVelocidade;
 
-                        // TRANSFORMAÇÃO DE COR CINEMA: Partículas brilham em ciano/branco ultra incandescente
-                        if(framesDesdeEstouro < 60) {
-                            colAttr.array[i3] = Math.min(colAttr.array[i3] + 0.05, 1.0);
-                            colAttr.array[i3+1] = Math.min(colAttr.array[i3+1] + 0.08, 1.0);
-                            colAttr.array[i3+2] = 1.0;
+                        // TRANSFORMAÇÃO CÓSMICA: Estrelas incandescentes azuis e brancas de alta energia
+                        if(framesDesdeEstouro < 80) {
+                            colAttr.array[i3] = Math.min(colAttr.array[i3] + 0.08, 1.0);
+                            colAttr.array[i3+1] = Math.min(colAttr.array[i3+1] + 0.12, 1.0);
+                            colAttr.array[i3+2] = 1.0; 
                         }
                     }
                     posAttr.needsUpdate = true;
                     colAttr.needsUpdate = true;
 
-                    // Engrossa o brilho das estrelas para preencher o volume da tela inteira
-                    if (galaxyMaterial.size < 750) {
-                        galaxyMaterial.size += 8.0;
+                    // Expande o tamanho de renderização dos pontos preenchendo a tela do celular
+                    if (galaxyMaterial.size < 900) {
+                        galaxyMaterial.size += 12.0;
                     }
 
-                    // FADE DO CLARÃO BRANCO: Ocorre de forma gradual e orgânica acompanhando o impacto
-                    if (framesDesdeEstouro > 40) {
+                    // FADE DO CLARÃO BRANCO: Ocorre de modo suave, acompanhando o eco final do som
+                    if (framesDesdeEstouro > 60) {
                         overlay.style.pointerEvents = 'auto';
-                        const opacidadeBranco = Math.min((framesDesdeEstouro - 40) / 140, 1);
+                        const opacidadeBranco = Math.min((framesDesdeEstouro - 60) / 160, 1);
                         overlay.style.opacity = opacidadeBranco;
                     }
                 }
@@ -641,7 +657,7 @@
         // TEXTOS PADRÃO DO SITE
         const textos = {
             galaxy: { title: "Nossa Via-Láctea 🌌", body: "Olha que lindo tudo girando junto! No meio desse tanto de poeira e mistério, o universo caprichou na nossa história. Saber que você existe faz tudo parecer perfeito." },
-            sun: { title: "O Sol: Nosso Combustível ☀️", body: "O Sol é a estrella que dá energia para todo o espaço. Ele é o combustível do que eu sinto por você: enquanto ele continuar brilhando forte, nosso amor vai ser eterno." },
+            sun: { title: "O Sol: Nosso Combustível ☀️", body: "O Sol é a estrela que dá energia para todo o espaço. Ele é o combustível do que eu sinto por você: enquanto ele continuar brilhando forte, nosso amor vai ser eterno." },
             mercurio: { title: "Mercúrio", body: "Ele corre super rápido em volta do Sol. É igualzinho à velocidade que o meu coração bate toda vez que chega uma mensagem sua no meu celular!" },
             venus: { title: "Vênus", body: "O planeta mais brilhante do céu. Ele me lembra muito o brilho dos seus olhos quando a gente conversa e faz planos para o nosso futuro." },
             earth: { title: "Planeta Terra 🌍", body: "Existem bilhões de pessoas nesse mundo inteiro, mas foi com você que meu coração decidiu bater mais forte. É um milagre lindo a gente ter se encontrado no meio de tanta gente." },
