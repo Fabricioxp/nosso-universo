@@ -7,7 +7,7 @@
     <style>
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background-color: #000000; font-family: 'Segoe UI', Roboto, sans-serif; }
         
-        /* Oculta o canvas do 3D inicialmente para não vazar a imagem da Terra */
+        /* Oculta o canvas do 3D inicialmente para não vazar a imagem da Terra antes da hora */
         canvas { opacity: 0; transition: opacity 2s ease-in-out; display: block; }
         canvas.show { opacity: 1; }
 
@@ -20,9 +20,9 @@
 
         /* Tela Preta da Narrativa Interativa */
         #narrativa-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: #000000; z-index: 1500; display: none; align-items: center; justify-content: center; color: white; text-align: center; transition: opacity 1.5s ease-in-out; }
-        #legenda-texto { font-size: 1.6rem; max-width: 80%; font-weight: 300; line-height: 1.6; letter-spacing: 2px; color: #e5def0; opacity: 0; transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out; transform: translateY(10px); text-shadow: 0 0 10px rgba(255,255,255,0.2); }
+        #legenda-texto { font-size: 1.6rem; max-width: 80%; font-weight: 300; line-height: 1.6; letter-spacing: 2px; color: #e5def0; opacity: 0; transition: opacity 0.6s ease-in-out, transform 0.6s ease-in-out; transform: translateY(10px); text-shadow: 0 0 10px rgba(255,255,255,0.2); }
         #legenda-texto.show { opacity: 1; transform: translateY(0); }
-        #legenda-texto.luz { background: linear-gradient(45deg, #fff, #ff9ebb); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 400; text-shadow: 0 0 25px rgba(255,158,187,0.8); font-style: italic; font-size: 2rem; }
+        #legenda-texto.luz { background: linear-gradient(45deg, #ffffff, #ffb3c6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 400; text-shadow: 0 0 30px rgba(255,158,187,0.9), 0 0 10px rgba(255,255,255,0.5); font-style: italic; font-size: 2.2rem; transform: scale(1.05); }
 
         /* HUD Delicado */
         #hud { position: absolute; bottom: 25px; left: 50%; transform: translateX(-50%); width: 85%; max-width: 480px; text-align: center; color: white; z-index: 10; pointer-events: none; opacity: 0; transition: opacity 0.8s, transform 0.8s; background: rgba(6, 3, 11, 0.75); padding: 15px 25px; border-radius: 16px; border: 1px solid rgba(255, 107, 139, 0.25); box-shadow: 0 10px 30px rgba(0,0,0,0.8); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); }
@@ -323,13 +323,13 @@
         const uiTitle = document.getElementById('msg-title');
         const uiBody = document.getElementById('msg-body');
 
-        // Sincronização corrigida milimetricamente com base no áudio real criador.mp3
+        // Lista de legendas sincronizadas milimetricamente com o criador.mp3
         const legendasCriador = [
             { tempo: 0.0, texto: "No princípio..." },
             { tempo: 2.2, texto: "Não havia nada." },
             { tempo: 5.5, texto: "Nada além do silêncio de trevas sem fim." },
             { tempo: 11.2, texto: "Mas o criador soprou perante o grande vazio, e sussurrou:" },
-            { tempo: 17.2, texto: "Faça-se a luz.", classe: "luz" }
+            { tempo: 17.1, texto: "Faça-se a luz.", classe: "luz" }
         ];
 
         window.iniciarIntroducao = () => {
@@ -351,7 +351,7 @@
                 audioCriadorTag.play().catch(e => console.log("Erro áudio introdução:", e));
             }, 1500);
 
-            // Gerenciador preciso do tempo das legendas
+            // Gerenciador contínuo de tempo para as legendas
             const intervalLegendas = setInterval(() => {
                 const tempoAtual = audioCriadorTag.currentTime;
                 let legendaAtiva = null;
@@ -371,16 +371,21 @@
                             elLegenda.innerText = legendaAtiva.texto;
                             if (legendaAtiva.classe) elLegenda.classList.add(legendaAtiva.classe);
                             elLegenda.classList.add('show');
-                        }, 200);
+                        }, 150);
                     }
                 }
-            }, 50);
+            }, 30);
 
-            // Espera o áudio acabar TOTALMENTE e segura um pouco mais a frase "Faça-se a luz" na tela escura
+            // LÓGICA ATUALIZADA: Quando o áudio acabar, segura a frase final na tela preta antes da transição
             audioCriadorTag.onended = () => {
                 clearInterval(intervalLegendas);
                 
-                // Segura o impacto final do "Faça-se a luz" por mais 2.5 segundos de forma cinematográfica
+                // Força o texto "Faça-se a luz" a aparecer e ficar brilhando mesmo com o fim do áudio
+                const elLegenda = document.getElementById('legenda-texto');
+                elLegenda.innerText = "Faça-se a luz.";
+                elLegenda.className = "show luz";
+
+                // Espera 3 segundos inteiros para dar o impacto dramático ideal antes do universo abrir
                 setTimeout(() => {
                     const screenNarrativa = document.getElementById('narrativa-screen');
                     screenNarrativa.style.opacity = '0';
@@ -389,12 +394,12 @@
                         screenNarrativa.style.display = 'none';
                         iniciarUniversoNormal();
                     }, 1500);
-                }, 2500);
+                }, 3000);
             };
         };
 
         function iniciarUniversoNormal() {
-            // Ativa o canvas e os menus apenas neste momento
+            // Só revela o 3D e as interfaces agora
             document.querySelector('canvas').classList.add('show');
             document.getElementById('nav-container').style.display = 'flex';
             document.getElementById('hud').style.opacity = '1';
@@ -573,7 +578,7 @@
                 audioTag.pause();
                 audioTag.currentTime = 0;
 
-                // Oculta o canvas novamente antes de voltar para o menu inicial
+                // Oculta o canvas novamente antes de recomeçar
                 document.querySelector('canvas').classList.remove('show');
 
                 const intro = document.getElementById('intro');
