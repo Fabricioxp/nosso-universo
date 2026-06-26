@@ -2,65 +2,66 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Jornada do Nosso Amor</title>
+    <title>Nossa Jornada</title>
     <style>
         body { margin: 0; background: #000; overflow: hidden; font-family: sans-serif; }
-        #narrativa { position: absolute; bottom: 5%; width: 100%; text-align: center; color: #fff; pointer-events: none; }
+        #msg { position: absolute; bottom: 5%; width: 100%; text-align: center; color: white; pointer-events: none; font-size: 20px; transition: 1s; }
     </style>
 </head>
 <body>
-    <div id="narrativa">
-        <h2 id="frase">...</h2>
-    </div>
+    <div id="msg">...</div>
     <script type="module">
         import * as THREE from 'https://cdn.skypack.dev/three@0.136.0';
 
         const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(45, window.innerWidth/window.innerHeight, 0.01, 50000);
+        const camera = new THREE.PerspectiveCamera(45, window.innerWidth/window.innerHeight, 0.1, 20000);
         const renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
         document.body.appendChild(renderer.domElement);
 
-        // 1. TERRA (Com textura real e pontos de luz para representar pessoas)
-        const earth = new THREE.Mesh(new THREE.SphereGeometry(1, 128, 128), new THREE.MeshBasicMaterial({ 
-            map: new THREE.TextureLoader().load('https://eoimages.gsfc.nasa.gov/images/imagerecords/73000/73909/world.topo.bathy.200407.3x5400x2700.jpg') 
-        }));
+        // Terra Realista (Gerada via código com sombreamento)
+        const earth = new THREE.Mesh(new THREE.SphereGeometry(1, 64, 64), new THREE.MeshPhongMaterial({ color: 0x2244ff, shininess: 10 }));
         scene.add(earth);
-
-        // 2. SISTEMA SOLAR (Planetas reais)
-        const system = new THREE.Group();
-        const planets = [{d: 10, c: 0xff4422}, {d: 15, c: 0xffcc00}, {d: 20, c: 0x4488ff}];
-        planets.forEach(p => {
-            const m = new THREE.Mesh(new THREE.SphereGeometry(0.5, 64, 64), new THREE.MeshBasicMaterial({color: p.c}));
-            m.position.x = p.d;
-            system.add(m);
-        });
-        scene.add(system);
-
-        // 3. VIA LÁCTEA (Fundo real)
-        const galaxy = new THREE.Mesh(new THREE.SphereGeometry(5000, 64, 64), new THREE.MeshBasicMaterial({ 
-            map: new THREE.TextureLoader().load('https://upload.wikimedia.org/wikipedia/commons/4/43/ESO-VLT-Laser-phot.jpg'), 
-            side: THREE.BackSide 
-        }));
-        scene.add(galaxy);
-
-        camera.position.z = 1.2; // Começa BEM perto (dentro da escala da Terra)
         
-        let zPos = 1.2;
+        // Iluminação para dar volume
+        const light = new THREE.DirectionalLight(0xffffff, 1);
+        light.position.set(5, 3, 5);
+        scene.add(light);
+        scene.add(new THREE.AmbientLight(0x333333));
+
+        // Sistema Solar (Esferas sólidas)
+        const planets = new THREE.Group();
+        [{d: 5, c: 0xff4422}, {d: 8, c: 0xffcc00}].forEach(p => {
+            const m = new THREE.Mesh(new THREE.SphereGeometry(0.3, 32, 32), new THREE.MeshBasicMaterial({color: p.c}));
+            m.position.x = p.d;
+            planets.add(m);
+        });
+        scene.add(planets);
+
+        // Via Láctea (Fundo denso)
+        const starsGeo = new THREE.BufferGeometry();
+        const pos = new Float32Array(10000 * 3);
+        for(let i=0; i<10000 * 3; i++) pos[i] = (Math.random()-0.5) * 5000;
+        starsGeo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+        const stars = new THREE.Points(starsGeo, new THREE.PointsMaterial({size: 0.5}));
+        scene.add(stars);
+
+        camera.position.z = 1.5; // Começa dentro da Terra
+        let zPos = 1.5;
+
         window.addEventListener('wheel', (e) => {
-            zPos = Math.max(1.2, Math.min(zPos + e.deltaY * 0.1, 4000));
+            zPos = Math.max(1.5, Math.min(zPos + e.deltaY * 0.1, 4000));
             camera.position.z = zPos;
-            
-            const txt = document.getElementById('frase');
-            if (zPos < 5) txt.innerText = "Em meio a bilhões de pessoas, nos encontramos.";
-            else if (zPos < 50) txt.innerText = "Somos apenas um detalhe neste imenso sistema solar.";
-            else txt.innerText = "Nada é mais vasto que o universo que criamos juntos.";
+            const m = document.getElementById('msg');
+            if(zPos < 5) m.innerText = "Em meio a bilhões de pessoas, nos encontramos.";
+            else if(zPos < 200) m.innerText = "Nosso sistema solar é um grão de areia.";
+            else m.innerText = "Nada é maior que o universo que criamos juntos.";
         }, {passive: false});
 
         function animate() {
             requestAnimationFrame(animate);
-            earth.rotation.y += 0.001;
-            system.rotation.y += 0.0005;
+            earth.rotation.y += 0.002;
+            planets.rotation.y += 0.001;
             renderer.render(scene, camera);
         }
         animate();
