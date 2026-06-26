@@ -2,87 +2,89 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Jornada Infinita</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nosso Universo Infinito</title>
     <style>
-        body { margin: 0; background: #000; overflow: hidden; font-family: 'Arial', sans-serif; }
-        #ui { position: absolute; top: 10%; width: 100%; text-align: center; color: white; pointer-events: none; transition: opacity 2s; }
-        #titulo { font-size: 3rem; margin: 0; }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #000; }
+        #interface {
+            position: absolute; top: 10%; width: 100%; text-align: center;
+            color: #fff; pointer-events: none; font-family: 'Segoe UI', sans-serif;
+            transition: opacity 1s ease-in-out;
+        }
     </style>
 </head>
 <body>
-    <div id="ui">
-        <h1 id="titulo">Nós</h1>
-        <p id="sub">Em meio ao infinito, o nosso ponto de encontro.</p>
-    </div>
-    <script type="module">
-        import * as THREE from 'https://cdn.skypack.dev/three@0.136.0';
 
-        // Inicialização de Cena de Alta Complexidade
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(45, window.innerWidth/window.innerHeight, 0.1, 20000);
-        const renderer = new THREE.WebGLRenderer({ antialias: true, logarithmicDepthBuffer: true });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.setPixelRatio(window.devicePixelRatio);
-        document.body.appendChild(renderer.domElement);
+<div id="interface">
+    <h1 id="titulo">Nós</h1>
+    <p id="sub">Em meio a bilhões de pessoas, a sorte de nos encontrarmos.</p>
+</div>
 
-        // 1. TERRA ALTA RESOLUÇÃO (Com atmosfera dinâmica)
-        const earthGroup = new THREE.Group();
-        const loader = new THREE.TextureLoader();
-        const earth = new THREE.Mesh(
-            new THREE.SphereGeometry(1, 128, 128),
-            new THREE.MeshPhongMaterial({ map: loader.load('https://eoimages.gsfc.nasa.gov/images/imagerecords/73000/73909/world.topo.bathy.200407.3x5400x2700.jpg') })
-        );
-        earthGroup.add(earth);
-        scene.add(earthGroup);
+<script type="module">
+    import * as THREE from 'https://cdn.skypack.dev/three@0.136.0';
 
-        // 2. SISTEMA SOLAR (Sistema de órbitas físicas)
-        const orbitGroup = new THREE.Group();
-        const planets = [ {color: 0xff4422, dist: 5, size: 0.2}, {color: 0xffcc00, dist: 8, size: 0.4} ];
-        planets.forEach(p => {
-            const mesh = new THREE.Mesh(new THREE.SphereGeometry(p.size, 32, 32), new THREE.MeshBasicMaterial({ color: p.color }));
-            mesh.position.x = p.dist;
-            orbitGroup.add(mesh);
-        });
-        scene.add(orbitGroup);
+    // --- CONFIGURAÇÃO DO MOTOR ---
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(45, window.innerWidth/window.innerHeight, 0.1, 20000);
+    const renderer = new THREE.WebGLRenderer({ antialias: true, logarithmicDepthBuffer: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
 
-        // 3. VIA LÁCTEA (Sistema de 50.000 partículas)
-        const galaxyGeometry = new THREE.BufferGeometry();
-        const positions = new Float32Array(50000 * 3);
-        for(let i=0; i<50000; i++) {
-            positions[i*3] = (Math.random()-0.5) * 5000;
-            positions[i*3+1] = (Math.random()-0.5) * 5000;
-            positions[i*3+2] = (Math.random()-0.5) * 5000;
-        }
-        galaxyGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-        const galaxy = new THREE.Points(galaxyGeometry, new THREE.PointsMaterial({ size: 0.5, color: 0xffffff, transparent: true, opacity: 0.5 }));
-        scene.add(galaxy);
+    // --- 1. TERRA (O FOCO INICIAL) ---
+    const earthGroup = new THREE.Group();
+    const loader = new THREE.TextureLoader();
+    const earthGeo = new THREE.SphereGeometry(1, 128, 128);
+    const earthMat = new THREE.MeshPhongMaterial({ 
+        map: loader.load('https://eoimages.gsfc.nasa.gov/images/imagerecords/73000/73909/world.topo.bathy.200407.3x5400x2700.jpg'),
+        bumpScale: 0.05
+    });
+    const earth = new THREE.Mesh(earthGeo, earthMat);
+    earthGroup.add(earth);
+    scene.add(earthGroup);
 
-        camera.position.z = 3;
+    // --- 2. SISTEMA SOLAR (PLANO DE PROFUNDIDADE MÉDIO) ---
+    const planetGroup = new THREE.Group();
+    const planetData = [ {dist: 5, size: 0.3, color: 0xff4422}, {dist: 9, size: 0.5, color: 0xffcc00} ];
+    planetData.forEach(data => {
+        const mesh = new THREE.Mesh(new THREE.SphereGeometry(data.size, 64, 64), new THREE.MeshBasicMaterial({ color: data.color }));
+        mesh.position.x = data.dist;
+        planetGroup.add(mesh);
+    });
+    scene.add(planetGroup);
 
-        // Controle de Zoom Escalonado
-        window.addEventListener('wheel', (e) => {
-            camera.position.z += e.deltaY * 0.1;
-            camera.position.z = Math.max(3, Math.min(camera.position.z, 4000));
-            
-            // Lógica narrativa complexa
-            const z = camera.position.z;
-            const tit = document.getElementById('titulo');
-            const sub = document.getElementById('sub');
-            
-            if (z < 20) { tit.innerText = "Nós"; sub.innerText = "A Terra é o lugar onde a gente se achou."; }
-            else if (z < 500) { tit.innerText = "Sistema Solar"; sub.innerText = "Nossa casa é uma raridade."; }
-            else { tit.innerText = "Via Láctea"; sub.innerText = "Perdidos no infinito, mas unidos pelo amor."; }
-        });
+    // --- 3. VIA LÁCTEA (SISTEMA DE PARTÍCULAS DENSO) ---
+    const galaxyGeo = new THREE.BufferGeometry();
+    const count = 80000;
+    const positions = new Float32Array(count * 3);
+    for(let i=0; i<count*3; i++) positions[i] = (Math.random()-0.5) * 8000;
+    galaxyGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    const galaxy = new THREE.Points(galaxyGeo, new THREE.PointsMaterial({ size: 0.5, color: 0xffffff }));
+    scene.add(galaxy);
 
-        // Loop de Renderização Física
-        function animate() {
-            requestAnimationFrame(animate);
-            earth.rotation.y += 0.001;
-            orbitGroup.rotation.y += 0.0005;
-            galaxy.rotation.y += 0.0001;
-            renderer.render(scene, camera);
-        }
-        animate();
-    </script>
+    // --- CONTROLE DE NAVEGAÇÃO E ZOOM ---
+    camera.position.z = 3;
+    let targetZ = 3;
+
+    window.addEventListener('wheel', (e) => {
+        targetZ = Math.max(3, Math.min(targetZ + e.deltaY * 0.2, 5000));
+        
+        // Atualização Dinâmica da Narrativa
+        const tit = document.getElementById('titulo');
+        const sub = document.getElementById('sub');
+        if (targetZ < 20) { tit.innerText = "Nós"; sub.innerText = "Em meio a bilhões, nos encontramos."; }
+        else if (targetZ < 500) { tit.innerText = "Sistema Solar"; sub.innerText = "Tão vasto, mas insignificante perto do que sentimos."; }
+        else { tit.innerText = "Via Láctea"; sub.innerText = "O Universo inteiro conspirou para o nosso encontro."; }
+    }, {passive: false});
+
+    // --- LOOP DE RENDERIZAÇÃO FÍSICA ---
+    function animate() {
+        requestAnimationFrame(animate);
+        camera.position.z += (targetZ - camera.position.z) * 0.05;
+        earth.rotation.y += 0.001;
+        planetGroup.rotation.y += 0.0003;
+        renderer.render(scene, camera);
+    }
+    animate();
+</script>
 </body>
 </html>
