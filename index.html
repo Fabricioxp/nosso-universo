@@ -2,186 +2,201 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nossa Jornada no Universo</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Nosso Universo</title>
     <style>
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background-color: #000; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background-color: #000; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
         
-        /* Tela Inicial de Introdução */
-        #intro { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle, #111 0%, #000 100%); z-index: 999; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; text-align: center; padding: 20px; box-sizing: border-box; transition: opacity 1s ease; }
-        #intro h1 { font-size: 2.5rem; margin-bottom: 20px; font-weight: 300; letter-spacing: 2px; }
-        #intro p { font-size: 1.1rem; max-width: 500px; margin-bottom: 40px; color: #aaa; line-height: 1.6; }
-        #btn-iniciar { padding: 15px 40px; font-size: 1rem; color: #fff; background: transparent; border: 2px solid #fff; border-radius: 30px; cursor: pointer; transition: all 0.3s ease; letter-spacing: 1px; }
-        #btn-iniciar:hover { background: #fff; color: #000; box-shadow: 0 0 20px rgba(255,255,255,0.4); }
+        /* Tela de Introdução */
+        #intro { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at center, #1a1a2e 0%, #000000 100%); z-index: 1000; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; text-align: center; transition: opacity 1.2s ease-in-out; }
+        #intro h1 { font-size: 3rem; margin-bottom: 15px; font-weight: 300; letter-spacing: 3px; text-transform: uppercase; }
+        #intro p { font-size: 1.2rem; max-width: 600px; color: #b0b0b0; margin-bottom: 40px; line-height: 1.5; padding: 0 20px; }
+        #btn-start { padding: 16px 45px; font-size: 1.1rem; color: #fff; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255,255,255,0.3); border-radius: 50px; cursor: pointer; backdrop-filter: blur(5px); transition: all 0.3s; letter-spacing: 1px; text-transform: uppercase; }
+        #btn-start:hover { background: #fff; color: #000; box-shadow: 0 0 25px rgba(255,255,255,0.6); border-color: #fff; }
 
-        /* Interface de Mensagens Bonitas (Estilo NASA HUD) */
-        #hud { position: absolute; bottom: 8%; left: 50%; transform: translateX(-50%); width: 85%; max-width: 600px; text-align: center; color: white; z-index: 10; pointer-events: none; opacity: 0; transition: opacity 1s ease; background: rgba(0, 0, 0, 0.6); padding: 20px 30px; border-radius: 16px; border: 1px solid rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); }
-        #msg-principal { font-size: 1.6rem; font-weight: 600; margin: 0 0 8px 0; letter-spacing: 0.5px; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
-        #msg-sub { font-size: 1rem; margin: 0; color: #ccc; font-weight: 300; line-height: 1.4; }
+        /* Instruções */
+        #tips { position: absolute; top: 20px; width: 100%; text-align: center; color: rgba(255,255,255,0.5); font-size: 0.9rem; letter-spacing: 2px; pointer-events: none; z-index: 10; text-transform: uppercase; opacity: 0; transition: opacity 2s; }
 
-        /* Instrução de navegação no topo */
-        #instrucao { position: absolute; top: 4%; width: 100%; text-align: center; color: rgba(255,255,255,0.4); font-size: 0.85rem; letter-spacing: 1px; pointer-events: none; z-index: 10; text-transform: uppercase; }
+        /* HUD - Painel de Mensagens */
+        #hud { position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 650px; text-align: center; color: white; z-index: 10; pointer-events: none; opacity: 0; transition: opacity 1s, transform 0.5s; background: rgba(10, 10, 15, 0.7); padding: 25px; border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.15); box-shadow: 0 10px 30px rgba(0,0,0,0.5); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+        #msg-title { font-size: 1.8rem; font-weight: 600; margin: 0 0 10px 0; letter-spacing: 1px; background: -webkit-linear-gradient(#fff, #aaa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        #msg-body { font-size: 1.1rem; margin: 0; color: #d0d0d0; font-weight: 300; line-height: 1.5; }
     </style>
 </head>
 <body>
 
     <div id="intro">
-        <h1>Nossa História no Cosmos</h1>
-        <p>Prepare-se para uma viagem pelas escalas do universo, começando do nosso ponto de encontro até a imensidão do infinito.</p>
-        <button id="btn-iniciar" onclick="iniciarNavegacao()">Iniciar Viagem</button>
+        <h1>Nossa História</h1>
+        <p>Uma jornada que começa no meio de uma multidão e se expande até os confins do universo.</p>
+        <button id="btn-start" onclick="iniciar()">Iniciar Jornada</button>
     </div>
 
-    <div id="instrucao">Arraste para girar • Use dois dedos (pinça) para zoom</div>
+    <div id="tips">Gire a tela e use o movimento de pinça para afastar o zoom</div>
+    
     <div id="hud">
-        <h2 id="msg-principal">Em meio a bilhões de pessoas...</h2>
-        <p id="msg-sub">A maior sorte do mundo foi o nosso encontro acontecer bem aqui.</p>
+        <h2 id="msg-title">Nós</h2>
+        <p id="msg-body">Em meio a bilhões de pessoas na Terra, nos encontramos.</p>
     </div>
 
     <script type="module">
         import * as THREE from 'https://cdn.skypack.dev/three@0.136.0';
         import { OrbitControls } from 'https://cdn.skypack.dev/three@0.136.0/examples/jsm/controls/OrbitControls.js';
 
-        // --- Configuração Principal do Motor 3D ---
+        // 1. Configuração do Motor (LogarithmicDepthBuffer é o segredo do zoom infinito)
         const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 150000);
+        const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.01, 1000000);
         const renderer = new THREE.WebGLRenderer({ antialias: true, logarithmicDepthBuffer: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         document.body.appendChild(renderer.domElement);
 
-        // --- Iluminação Realista de Cinema ---
-        const ambientLight = new THREE.AmbientLight(0x333333);
-        scene.add(ambientLight);
-
-        const sunLight = new THREE.PointLight(0xffffff, 2, 50000);
-        sunLight.position.set(0, 0, 0); // Luz saindo do centro do Sol
-        scene.add(sunLight);
-
-        // --- Criando os Detalhes do Sistema Solar (Escala e Aparência Realista) ---
         const loader = new THREE.TextureLoader();
 
-        // 1. O SOL (No centro do universo)
-        const sunGeo = new THREE.SphereGeometry(12, 64, 64);
-        const sunMat = new THREE.MeshBasicMaterial({ color: 0xffaa00 });
+        // 2. Iluminação do Sistema Solar
+        scene.add(new THREE.AmbientLight(0x222222));
+        const sunLight = new THREE.PointLight(0xffffff, 2.5, 100000);
+        scene.add(sunLight); // Luz sai do centro (Sol)
+
+        // 3. O Sol
+        const sunGeo = new THREE.SphereGeometry(15, 64, 64);
+        const sunMat = new THREE.MeshBasicMaterial({ 
+            map: loader.load('https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/planets/earth_atmos_2048.jpg'), // Usando fallback visualmente aceitável
+            color: 0xffaa00 
+        });
         const sun = new THREE.Mesh(sunGeo, sunMat);
         scene.add(sun);
 
-        // 2. A TERRA (Com mapa oficial da NASA)
-        const earthGroup = new THREE.Group();
+        // 4. A Terra (Foco Inicial)
+        const earthSystem = new THREE.Group();
+        earthSystem.position.set(100, 0, 0); // Distância do Sol
+        scene.add(earthSystem);
+
         const earthGeo = new THREE.SphereGeometry(2, 64, 64);
         const earthMat = new THREE.MeshStandardMaterial({
-            map: loader.load('https://eoimages.gsfc.nasa.gov/images/imagerecords/73000/73909/world.topo.bathy.200407.3x5400x2700.jpg'),
-            roughness: 0.6
+            map: loader.load('https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/planets/earth_atmos_2048.jpg'),
+            roughness: 0.7
         });
         const earth = new THREE.Mesh(earthGeo, earthMat);
-        earthGroup.add(earth);
+        earthSystem.add(earth);
 
-        // A Lua orbitando a Terra
-        const moonGeo = new THREE.SphereGeometry(0.5, 32, 32);
-        const moonMat = new THREE.MeshStandardMaterial({ color: 0x888888, roughness: 0.9 });
-        const moon = new THREE.Mesh(moonGeo, moonMat);
-        moon.position.set(6, 0, 0);
-        earthGroup.add(moon);
+        // 4.1 "A Multidão" (Pontos brilhantes na superfície da Terra)
+        const crowdGeo = new THREE.BufferGeometry();
+        const crowdPos = new Float32Array(5000 * 3);
+        for(let i=0; i<5000; i++) {
+            const phi = Math.acos(-1 + (2 * i) / 5000);
+            const theta = Math.sqrt(5000 * Math.PI) * phi;
+            crowdPos[i*3] = 2.02 * Math.cos(theta) * Math.sin(phi);
+            crowdPos[i*3+1] = 2.02 * Math.sin(theta) * Math.sin(phi);
+            crowdPos[i*3+2] = 2.02 * Math.cos(phi);
+        }
+        crowdGeo.setAttribute('position', new THREE.BufferAttribute(crowdPos, 3));
+        const crowdMat = new THREE.PointsMaterial({ color: 0xffddaa, size: 0.02, transparent: true, opacity: 0.8 });
+        const crowd = new THREE.Points(crowdGeo, crowdMat);
+        earthSystem.add(crowd);
 
-        // Posicionar o grupo da Terra afastado do Sol
-        earthGroup.position.set(80, 0, 0);
-        scene.add(earthGroup);
+        // 4.2 A Lua
+        const moon = new THREE.Mesh(new THREE.SphereGeometry(0.5, 32, 32), new THREE.MeshStandardMaterial({ color: 0xaaaaaa, roughness: 1 }));
+        moon.position.set(5, 0, 0);
+        earthSystem.add(moon);
 
-        // 3. OUTROS PLANETAS DO SISTEMA SOLAR
-        const planetsGroup = new THREE.Group();
-        const planetConfigs = [
-            { name: "Marte", size: 1.2, dist: 130, color: 0xc1440e },
-            { name: "Júpiter", size: 6.5, dist: 240, color: 0xb07f35 },
-            { name: "Saturno", size: 5.5, dist: 380, color: 0xe2bf7d },
-            { name: "Urano", size: 3.5, dist: 500, color: 0x4b70dd },
-            { name: "Netuno", size: 3.4, dist: 620, color: 0x274687 }
+        // 5. Outros Planetas do Sistema Solar
+        const planets = [
+            { size: 1.5, dist: 150, color: 0xcc5533 }, // Marte
+            { size: 6.0, dist: 280, color: 0xdda055 }, // Júpiter
+            { size: 5.0, dist: 450, color: 0xebd399 }, // Saturno
+            { size: 3.5, dist: 600, color: 0x66aadd }  // Urano
         ];
-
-        const createdPlanets = [];
-        planetConfigs.forEach(config => {
-            const geo = new THREE.SphereGeometry(config.size, 64, 64);
-            const mat = new THREE.MeshStandardMaterial({ color: config.color, roughness: 0.7 });
-            const mesh = new THREE.Mesh(geo, mat);
-            mesh.position.set(config.dist, 0, 0);
-            planetsGroup.add(mesh);
-            createdPlanets.push({ mesh, dist: config.dist, speed: 0.002 / (config.dist * 0.01) });
+        const planetMeshes = [];
+        planets.forEach(p => {
+            const mesh = new THREE.Mesh(new THREE.SphereGeometry(p.size, 64, 64), new THREE.MeshStandardMaterial({ color: p.color, roughness: 0.6 }));
+            mesh.position.set(p.dist, 0, 0);
+            scene.add(mesh);
+            planetMeshes.push({ mesh: mesh, dist: p.dist, angle: Math.random() * Math.PI * 2, speed: 0.5 / p.dist });
         });
-        scene.add(planetsGroup);
 
-        // 4. A VIA LÁCTEA REALISTA (Domo invertido com foto real do espaço profundo)
-        const galaxyGeo = new THREE.SphereGeometry(40000, 64, 64);
-        const galaxyMat = new THREE.MeshBasicMaterial({
-            map: loader.load('https://upload.wikimedia.org/wikipedia/commons/4/43/ESO-VLT-Laser-phot.jpg'),
-            side: THREE.BackSide
-        });
-        const galaxy = new THREE.Mesh(galaxyGeo, galaxyMat);
+        // 6. Via Láctea (Domo Gigante em Alta Resolução)
+        const galaxy = new THREE.Mesh(
+            new THREE.SphereGeometry(50000, 64, 64),
+            new THREE.MeshBasicMaterial({ 
+                map: loader.load('https://upload.wikimedia.org/wikipedia/commons/thumb/4/43/ESO-VLT-Laser-phot.jpg/2560px-ESO-VLT-Laser-phot.jpg'), 
+                side: THREE.BackSide 
+            })
+        );
         scene.add(galaxy);
 
-        // --- Controles de Navegação da NASA (OrbitControls) ---
+        // 7. Controles de Navegação (OrbitControls estilo NASA)
         const controls = new OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
         controls.dampingFactor = 0.05;
-        controls.maxDistance = 35000; // Permite afastar até ver a Galáxia inteira
-        controls.minDistance = 2.3;    // Permite colar na superfície da Terra
+        controls.minDistance = 2.2; // Limite de aproximação (bem colado na Terra)
+        controls.maxDistance = 45000; // Limite de afastamento (visão total da galáxia)
+        
+        // Posição inicial: grudado na Terra olhando para a multidão
+        camera.position.set(102.2, 0.5, 0); 
+        controls.target.copy(earthSystem.position);
 
-        // Começa BEM de perto (dentro/colado na Terra)
-        camera.position.set(82.2, 0.5, 1);
-        controls.target.set(80, 0, 0); // Foco inicial na Terra
+        // Lógica da Interface
+        const uiTitle = document.getElementById('msg-title');
+        const uiBody = document.getElementById('msg-body');
 
-        // --- Função para Iniciar após a Introdução ---
-        window.iniciarNavegacao = () => {
-            document.getElementById('intro').style.opacity = '0';
+        window.iniciar = () => {
+            const intro = document.getElementById('intro');
+            intro.style.opacity = '0';
             setTimeout(() => {
-                document.getElementById('intro').style.display = 'none';
+                intro.style.display = 'none';
+                document.getElementById('tips').style.opacity = '1';
                 document.getElementById('hud').style.opacity = '1';
-            }, 1000);
+                setTimeout(() => { document.getElementById('tips').style.opacity = '0'; }, 6000);
+            }, 1200);
         };
 
-        // --- Lógica de Atualização das Mensagens HUD Baseado no Zoom ---
-        const msgPrincipal = document.getElementById('msg-principal');
-        const msgSub = document.getElementById('msg-sub');
+        function atualizarNarrativa() {
+            // Calcula a distância real da câmera até a Terra
+            const dist = camera.position.distanceTo(earthSystem.position);
 
-        function atualizarHUD() {
-            // Mede a distância entre a câmera e o centro da Terra
-            const distanciaDaTerra = camera.position.distanceTo(earthGroup.position);
-
-            if (distanciaDaTerra < 15) {
-                msgPrincipal.innerText = "Em meio a bilhões de pessoas...";
-                msgSub.innerText = "A maior sorte do mundo foi o nosso encontro acontecer bem aqui na Terra.";
-            } else if (distanciaDaTerra >= 15 && distanciaDaTerra < 900) {
-                msgPrincipal.innerText = "O Sistema Solar";
-                msgSub.innerText = "Olha o tamanho de tudo isso... e mesmo assim, nada supera a imensidão do que eu sinto por você.";
+            if (dist < 15) {
+                uiTitle.innerText = "Nós";
+                uiBody.innerText = "Em meio a bilhões de pessoas na Terra, o universo permitiu que nos encontrássemos.";
+            } else if (dist >= 15 && dist < 1200) {
+                uiTitle.innerText = "O Sistema Solar";
+                uiBody.innerText = "A Terra, o Sol, os planetas... Tão imensos, mas insignificantes perto do que construímos.";
             } else {
-                msgPrincipal.innerText = "Nossa Via Láctea";
-                msgSub.innerText = "O universo inteiro se torna pequeno e perfeitamente sintonizado quando estamos juntos.";
+                uiTitle.innerText = "A Imensidão";
+                uiBody.innerText = "A Via Láctea inteira e tudo que existe nela é menor do que o nosso amor.";
             }
         }
 
-        // --- Janela Responsiva ---
         window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
         });
 
-        // --- Loop de Renderização e Animação Física ---
+        // Animação e Física
         function animate() {
             requestAnimationFrame(animate);
 
-            // Rotações naturais dos astros
-            earth.rotation.y += 0.002;
-            moon.rotation.y += 0.004;
-            sun.rotation.y += 0.0005;
+            // Rotação dos astros
+            earth.rotation.y += 0.001;
+            moon.rotation.y += 0.005;
+            sun.rotation.y += 0.0002;
+            
+            // "Multidão" cintilando levemente
+            crowd.rotation.y += 0.001;
 
-            // Translação simples dos outros planetas ao redor do Sol
-            createdPlanets.forEach(p => {
-                p.mesh.rotation.y += 0.01;
+            // Translação dos planetas
+            planetMeshes.forEach(p => {
+                p.angle += p.speed;
+                p.mesh.position.x = Math.cos(p.angle) * p.dist;
+                p.mesh.position.z = Math.sin(p.angle) * p.dist;
+                p.mesh.rotation.y += 0.005;
             });
 
-            controls.update(); // Atualiza os movimentos de arrastar e pinça
-            atualizarHUD();    // Atualiza os textos dinamicamente
+            controls.update();
+            atualizarNarrativa();
             renderer.render(scene, camera);
         }
+        
         animate();
     </script>
 </body>
