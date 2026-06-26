@@ -135,22 +135,16 @@
         const planetasParaVerificar = ['galaxy', 'sun', 'mercurio', 'venus', 'earth', 'marte', 'jupiter', 'saturno', 'urano', 'netuno', 'plutao'];
         let planetasVistos = new Set();
 
-        // Inicialização limpa e segura das posições para evitar bugs de sumiço (valores NaN)
         const posicoesGlobais = { 
-            sun: new THREE.Vector3(20000, 0, 0),
-            galaxy: new THREE.Vector3(0, 4000, 0),
-            mercurio: new THREE.Vector3(20060, 0, 0),
-            venus: new THREE.Vector3(20095, 0, 0),
-            earth: new THREE.Vector3(20145, 0, 0),
-            marte: new THREE.Vector3(20195, 0, 0),
-            jupiter: new THREE.Vector3(20260, 0, 0),
-            saturno: new THREE.Vector3(20340, 0, 0),
-            urano: new THREE.Vector3(20420, 0, 0),
-            netuno: new THREE.Vector3(20500, 0, 0),
+            sun: new THREE.Vector3(20000, 0, 0), galaxy: new THREE.Vector3(0, 4000, 0),
+            mercurio: new THREE.Vector3(20060, 0, 0), venus: new THREE.Vector3(20095, 0, 0),
+            earth: new THREE.Vector3(20145, 0, 0), marte: new THREE.Vector3(20195, 0, 0),
+            jupiter: new THREE.Vector3(20260, 0, 0), saturno: new THREE.Vector3(20340, 0, 0),
+            urano: new THREE.Vector3(20420, 0, 0), netuno: new THREE.Vector3(20500, 0, 0),
             plutao: new THREE.Vector3(20560, 0, 0)
         };
 
-        // VIA LÁCTEA
+        // VIA LÁCTEA COORDENADAS E VELOCIDADES
         const galaxyGeometry = new THREE.BufferGeometry();
         const gPoints = 170000;
         const gPositions = new Float32Array(gPoints * 3);
@@ -180,9 +174,10 @@
             gColors[i3+1] = finalCol.g;
             gColors[i3+2] = finalCol.b;
 
+            // Vetores de explosão com velocidade aumentada para fragmentos massivos
             const angle1 = Math.random() * Math.PI * 2;
             const angle2 = Math.acos((Math.random() * 2) - 1);
-            const speed = 2200 + Math.random() * 3000; 
+            const speed = 4000 + Math.random() * 6000; 
             gVelocities[i3] = Math.sin(angle2) * Math.cos(angle1) * speed;
             gVelocities[i3+1] = Math.sin(angle2) * Math.sin(angle1) * speed;
             gVelocities[i3+2] = Math.cos(angle2) * speed;
@@ -408,8 +403,8 @@
 
             controls.enabled = false; 
             
-            // Fixa a base inicial estável da câmera de visualização global
-            cameraPosBase.set(0, 38000, 48000);
+            // Fixa a base estável da câmera para aplicar o tremor puro sobre ela
+            cameraPosBase.set(0, 32000, 43000);
             cameraTargetBase.set(0, 0, 0);
 
             overlay.style.opacity = '0';
@@ -427,7 +422,6 @@
                 gainNode.gain.linearRampToValueAtTime(0.0, audioCtx.currentTime + 1.4); 
             }
 
-            // Sincronização inteligente com o fim dinâmico do áudio
             audioExploTag.onended = () => {
                 overlay.style.transition = 'opacity 1.5s ease-out';
                 overlay.style.backgroundColor = '#010105'; 
@@ -450,7 +444,7 @@
                 });
                 document.querySelector('.nav-btn[data-id="earth"]').classList.add('active');
 
-                // Restauração completa de matrizes do Universo para evitar distorções
+                // Restauração limpa do Universo
                 solarSystem.position.set(20000, 0, 0);
                 solarSystem.scale.set(1, 1, 1);
                 sun.scale.set(1, 1, 1);
@@ -458,6 +452,7 @@
                 galaxy.scale.set(1, 1, 1);
                 galaxyMaterial.color.setRGB(1, 1, 1);
                 galaxyMaterial.size = 110;
+                galaxyMaterial.opacity = 0.85;
                 
                 const posAttr = galaxyGeometry.attributes.position;
                 for (let i = 0; i < gPoints; i++) {
@@ -515,7 +510,6 @@
             if(focoAtual === 'galaxy') return new THREE.Vector3(0,0,0);
             if(focoAtual === 'sun') return solarSystem.position;
             const p = posicoesGlobais[focoAtual];
-            // Fallback protetivo contra valores nulos/indefinidos
             return p ? p : new THREE.Vector3(20000, 0, 0);
         }
 
@@ -528,97 +522,100 @@
                 const segs = audioExploTag.currentTime;
                 const duracaoTotal = audioExploTag.duration || 4.0; 
                 
-                // 🔊 PARTE 1: COLAPSO GRAVITACIONAL E REVOLUÇÃO (0.0s a 1.2s)
+                // 🔊 PARTE 1: SUCÇÃO GRAVITACIONAL ACUMULANDO ENERGIA (0.0s a 1.2s)
                 if (segs < 1.2) {
-                    intensidadeTremor = 20; 
+                    // Tremor sutil pré-explosão (tela tremendo de leve com a pressão acústica)
+                    intensidadeTremor = 45 + (segs * 50); 
                     
                     const posAttr = galaxyGeometry.attributes.position;
                     const colAttr = galaxyGeometry.attributes.color;
                     
-                    // Contração veloz em vórtice espiral para o centro geométrico da cena
                     for (let i = 0; i < gPoints; i++) {
                         const i3 = i * 3;
-                        posAttr.array[i3] *= 0.92; 
-                        posAttr.array[i3+1] *= 0.91;
-                        posAttr.array[i3+2] *= 0.92;
+                        posAttr.array[i3] *= 0.91; 
+                        posAttr.array[i3+1] *= 0.90;
+                        posAttr.array[i3+2] *= 0.91;
 
-                        // Transição progressiva para Vermelho e Laranja Incandescente
-                        colAttr.array[i3] = Math.min(colAttr.array[i3] + 0.04, 1.0);
-                        colAttr.array[i3+1] *= 0.86;
-                        colAttr.array[i3+2] *= 0.84;
+                        colAttr.array[i3] = Math.min(colAttr.array[i3] + 0.05, 1.0);
+                        colAttr.array[i3+1] *= 0.85;
+                        colAttr.array[i3+2] *= 0.82;
                     }
                     posAttr.needsUpdate = true;
                     colAttr.needsUpdate = true;
                     
-                    galaxy.rotation.y += 0.12; // Rotação acelerada de buraco negro
-                    solarSystem.position.lerp(new THREE.Vector3(0, 0, 0), 0.1);
-                    solarSystem.scale.multiplyScalar(0.92);
+                    galaxy.rotation.y += 0.15; 
+                    solarSystem.position.lerp(new THREE.Vector3(0, 0, 0), 0.12);
+                    solarSystem.scale.multiplyScalar(0.90);
                     
                     if(audioTag.volume > 0) audioTag.volume = 0;
                 }
-                // 🔊 PARTE 2: IMPACTO BRANCO + EXPANSÃO REVERBERADA (1.2s até o fim do som)
+                // 🔊 PARTE 2: O IMPACTO METÁLICO ABSOLUTO + ONDA DE CHOQUE REVERBERADA (1.2s até o Fim)
                 else {
                     const tExplo = (segs - 1.2);
                     
-                    // Tremor vigoroso que diminui de forma orgânica simulando ondas de choque
-                    intensidadeTremor = Math.max(340 - (tExplo * 85), 30); 
+                    // 💥 VIBRAÇÃO MÁXIMA DA TELA: O tremor começa violento no impacto e diminui junto com as batidas do som grave!
+                    intensidadeTremor = Math.max(750 - (tExplo * 190), 40); 
 
                     if (!flashDisparado) {
                         overlay.style.opacity = '1';
-                        overlay.style.transition = 'none'; // Disparo seco do Clarão
+                        overlay.style.transition = 'none'; 
                         flashDisparado = true;
                         
-                        // Zoom Out drástico de câmera para registrar o impacto
-                        cameraPosBase.set(0, 65000, 75000); 
+                        // Recuo instantâneo cinematográfico da câmera (Zoom Out de impacto)
+                        cameraPosBase.set(0, 68000, 85000); 
                     } else {
-                        // Dissipação linear suave da luz branca do Big Bang
-                        overlay.style.transition = 'opacity 1.5s cubic-bezier(0.16, 1, 0.3, 1)';
-                        overlay.style.opacity = Math.max(1 - (tExplo * 0.7), 0);
+                        overlay.style.transition = 'opacity 1.6s cubic-bezier(0.1, 0.9, 0.2, 1)';
+                        overlay.style.opacity = Math.max(1 - (tExplo * 0.65), 0);
                     }
 
                     const posAttr = galaxyGeometry.attributes.position;
                     const colAttr = galaxyGeometry.attributes.color;
                     
-                    // Desaceleração física para dar sensação de peso e poeira espacial se acomodando
-                    const fatorDesaceleracao = Math.max(1.1 - (tExplo * 0.25), 0.1);
+                    // Curva de expansão balística: fragmentos explodem super rápidos e desaceleram organicamente
+                    const fatorDesaceleracao = Math.max(1.4 - (tExplo * 0.3), 0.08);
 
                     for (let i = 0; i < gPoints; i++) {
                         const i3 = i * 3;
-                        posAttr.array[i3] += gVelocities[i3] * 0.052 * fatorDesaceleracao;
-                        posAttr.array[i3+1] += gVelocities[i3+1] * 0.052 * fatorDesaceleracao;
-                        posAttr.array[i3+2] += gVelocities[i3+2] * 0.052 * fatorDesaceleracao;
+                        // Expansão veloz tridimensional dos estilhaços cósmicos
+                        posAttr.array[i3] += gVelocities[i3] * 0.055 * fatorDesaceleracao;
+                        posAttr.array[i3+1] += gVelocities[i3+1] * 0.055 * fatorDesaceleracao;
+                        posAttr.array[i3+2] += gVelocities[i3+2] * 0.055 * fatorDesaceleracao;
 
-                        // Mudança cromática: Branco -> Ciano Estelar -> Azul Roxo Cósmico
-                        colAttr.array[i3] = Math.max(1 - tExplo * 0.3, 0.2);
-                        colAttr.array[i3+1] = Math.min(0.4 + tExplo * 0.2, 0.9); 
-                        colAttr.array[i3+2] = 1.0; 
+                        // Gradiente de incandescência para fragmentos: Dourado -> Ciano -> Roxo/Azul Profundo
+                        colAttr.array[i3] = Math.max(1.0 - tExplo * 0.35, 0.15);
+                        colAttr.array[i3+1] = Math.min(0.35 + tExplo * 0.25, 0.85); 
+                        colAttr.array[i3+2] = Math.min(0.2 + tExplo * 0.4, 1.0); 
                     }
                     posAttr.needsUpdate = true;
                     colAttr.needsUpdate = true;
 
-                    if (galaxyMaterial.size < 3200) galaxyMaterial.size += 85.0;
+                    // Aumento massivo do tamanho visual das partículas para simular estilhaços e fragmentos gigantes vindo na tela
+                    if (galaxyMaterial.size < 4000) galaxyMaterial.size += 140.0;
+                    
+                    // Cintilação/Efeito de pulsação caótica de energia nas fagulhas
+                    galaxyMaterial.opacity = 0.4 + Math.sin(segs * 35) * 0.3;
 
-                    // Fade out adaptável sincronizado com o silêncio final do áudio
-                    if (segs > (duracaoTotal - 1.0)) {
+                    // Fade out final sincronizado milimetricamente com o silêncio nos últimos 1.1s
+                    if (segs > (duracaoTotal - 1.1)) {
                         overlay.style.backgroundColor = '#010105';
-                        overlay.style.transition = 'opacity 0.9s ease-in-out';
-                        overlay.style.opacity = Math.min((segs - (duracaoTotal - 1.0)) / 1.0, 1);
+                        overlay.style.transition = 'opacity 1.0s linear';
+                        overlay.style.opacity = Math.min((segs - (duracaoTotal - 1.1)) / 1.1, 1);
                     }
                 }
 
-                // Aplicação correta de tremor em cima do vetor base limpo
+                // 🎬 Execução real do tremor aplicando ruído matemático caótico nos 3 eixos da câmera e do foco
                 if (intensidadeTremor > 0) {
                     camera.position.x = cameraPosBase.x + (Math.random() - 0.5) * intensidadeTremor;
                     camera.position.y = cameraPosBase.y + (Math.random() - 0.5) * intensidadeTremor;
                     camera.position.z = cameraPosBase.z + (Math.random() - 0.5) * intensidadeTremor;
                     
-                    controls.target.x = cameraTargetBase.x + (Math.random() - 0.5) * (intensidadeTremor * 0.15);
-                    controls.target.y = cameraTargetBase.y + (Math.random() - 0.5) * (intensidadeTremor * 0.15);
-                    controls.target.z = cameraTargetBase.z + (Math.random() - 0.5) * (intensidadeTremor * 0.15);
+                    controls.target.x = cameraTargetBase.x + (Math.random() - 0.5) * (intensidadeTremor * 0.25);
+                    controls.target.y = cameraTargetBase.y + (Math.random() - 0.5) * (intensidadeTremor * 0.25);
+                    controls.target.z = cameraTargetBase.z + (Math.random() - 0.5) * (intensidadeTremor * 0.25);
                 }
 
             } else {
-                // Animação estável do Sistema Solar e órbitas normais
+                // Comportamento normal e estável em repouso
                 sun.rotation.y += 0.001;
                 galaxy.rotation.y += 0.00015;
                 const pulse = 1 + Math.sin(tempo * 2) * 0.03;
@@ -631,12 +628,11 @@
                     p.group.position.z = Math.sin(p.angle) * p.dist;
                     p.mesh.rotation.y += 0.008;
 
-                    // Salvamento seguro e contínuo das posições globais dos planetas
                     p.group.getWorldPosition(posicoesGlobais[chave]);
                 }
             }
 
-            // Estrelas cadentes
+            // Estrelas cadentes normais
             shootingStars.forEach(s => {
                 s.mesh.position.x -= s.speed;
                 s.mesh.position.z -= s.speed;
