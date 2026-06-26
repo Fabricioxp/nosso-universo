@@ -3,44 +3,59 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Nosso Universo</title>
+    <title>Nosso Universo Privado</title>
     <style>
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background-color: #000; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background-color: #020208; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
         
         /* Tela de Introdução */
-        #intro { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at center, #1a1a2e 0%, #000 100%); z-index: 1000; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; text-align: center; transition: opacity 1.2s ease-in-out; }
-        #intro h1 { font-size: 3rem; margin-bottom: 15px; font-weight: 300; letter-spacing: 3px; text-transform: uppercase; }
-        #intro p { font-size: 1.2rem; max-width: 600px; color: #b0b0b0; margin-bottom: 40px; line-height: 1.5; padding: 0 20px; }
-        #btn-start { padding: 16px 45px; font-size: 1.1rem; color: #fff; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255,255,255,0.3); border-radius: 50px; cursor: pointer; backdrop-filter: blur(5px); transition: all 0.3s; letter-spacing: 1px; text-transform: uppercase; }
-        #btn-start:hover { background: #fff; color: #000; box-shadow: 0 0 25px rgba(255,255,255,0.6); border-color: #fff; }
+        #intro { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at center, #1b1026 0%, #020208 100%); z-index: 1000; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; text-align: center; transition: opacity 1.5s ease-in-out; }
+        #intro h1 { font-size: 3.5rem; margin-bottom: 15px; font-weight: 300; letter-spacing: 5px; text-transform: uppercase; background: linear-gradient(45deg, #ff758c, #ff7eb3); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        #intro p { font-size: 1.2rem; max-width: 600px; color: #dcd1f0; margin-bottom: 40px; line-height: 1.6; padding: 0 20px; font-weight: 300; }
+        #btn-start { padding: 18px 50px; font-size: 1.1rem; color: #fff; background: linear-gradient(45deg, rgba(255,117,140,0.3), rgba(255,126,179,0.3)); border: 1px solid rgba(255,255,255,0.4); border-radius: 50px; cursor: pointer; backdrop-filter: blur(10px); transition: all 0.4s; letter-spacing: 2px; text-transform: uppercase; box-shadow: 0 4px 15px rgba(0,0,0,0.4); }
+        #btn-start:hover { background: #fff; color: #ff758c; box-shadow: 0 0 30px rgba(255,117,140,0.8); border-color: #fff; transform: scale(1.05); }
 
-        /* HUD - Painel de Mensagens Premium */
-        #hud { position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 650px; text-align: center; color: white; z-index: 10; pointer-events: none; opacity: 0; transition: opacity 1s, transform 0.5s; background: rgba(10, 10, 15, 0.75); padding: 25px; border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.15); box-shadow: 0 10px 40px rgba(0,0,0,0.8); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); }
-        #msg-title { font-size: 1.8rem; font-weight: 600; margin: 0 0 10px 0; letter-spacing: 1px; color: #fff; text-shadow: 0 2px 10px rgba(255,255,255,0.3); }
-        #msg-body { font-size: 1.1rem; margin: 0; color: #d0d0d0; font-weight: 300; line-height: 1.5; }
+        /* HUD - Painel de Mensagens Super Lindo */
+        #hud { position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); width: 85%; max-width: 550px; text-align: center; color: white; z-index: 10; pointer-events: none; opacity: 0; transition: opacity 1s, transform 0.8s; background: rgba(12, 5, 20, 0.7); padding: 25px 35px; border-radius: 24px; border: 1px solid rgba(255, 117, 140, 0.3); box-shadow: 0 15px 50px rgba(0,0,0,0.9), inset 0 0 15px rgba(255,117,140,0.1); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+        #msg-title { font-size: 1.8rem; font-weight: 600; margin: 0 0 12px 0; letter-spacing: 1px; color: #ff9ebb; text-shadow: 0 2px 15px rgba(255,117,140,0.5); }
+        #msg-body { font-size: 1.1rem; margin: 0; color: #f0e6f2; font-weight: 400; line-height: 1.6; }
+
+        /* Menu de Navegação Interativo */
+        #nav-menu { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); z-index: 20; display: flex; gap: 10px; background: rgba(255, 255, 255, 0.05); padding: 10px 20px; border-radius: 50px; backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.1); flex-wrap: wrap; justify-content: center; }
+        .nav-btn { background: transparent; border: none; color: #ccc; padding: 8px 16px; border-radius: 20px; cursor: pointer; font-size: 0.9rem; transition: all 0.3s; font-weight: 500; }
+        .nav-btn:hover, .nav-btn.active { color: #fff; background: rgba(255, 117, 140, 0.4); text-shadow: 0 0 8px #fff; box-shadow: 0 0 10px rgba(255,117,140,0.3); }
+        .nav-btn.align-btn { background: linear-gradient(45deg, #ff758c, #ff7eb3); color: white; font-weight: bold; }
+        .nav-btn.align-btn:hover { background: #fff; color: #ff758c; box-shadow: 0 0 15px #ff758c; }
     </style>
 </head>
 <body>
 
     <div id="intro">
-        <h1>Nossa História</h1>
-        <p>Do nosso encontro na Terra à imensidão da Via Láctea.</p>
-        <button id="btn-start" onclick="iniciar()">Iniciar Jornada</button>
+        <h1>Nosso Universo</h1>
+        <p>Eu criei um espaço inteirinho para te mostrar o tamanho do meu amor por você. Viaje por ele e descubra.</p>
+        <button id="btn-start" onclick="iniciar()">Entrar no Seu Universo</button>
+    </div>
+
+    <div id="nav-menu">
+        <button class="nav-btn active" onclick="mudarFoco('earth')">Planeta Amor (Terra)</button>
+        <button class="nav-btn" onclick="mudarFoco('sun')">Sol</button>
+        <button class="nav-btn" onclick="mudarFoco('marte')">Marte</button>
+        <button class="nav-btn" onclick="mudarFoco('jupiter')">Júpiter</button>
+        <button class="nav-btn" onclick="mudarFoco('saturno')">Saturno</button>
+        <button class="nav-btn align-btn" onclick="alinharCamera()">✨ Alinhar e Voltar</button>
     </div>
     
     <div id="hud">
-        <h2 id="msg-title">Nós</h2>
-        <p id="msg-body">Em meio a bilhões de pessoas na Terra, nos encontramos.</p>
+        <h2 id="msg-title">Carregando...</h2>
+        <p id="msg-body">Prepare seu coração para a viagem.</p>
     </div>
 
     <script type="module">
         import * as THREE from 'https://cdn.skypack.dev/three@0.136.0';
         import { OrbitControls } from 'https://cdn.skypack.dev/three@0.136.0/examples/jsm/controls/OrbitControls.js';
 
-        // 1. CONFIGURAÇÃO BASE (Motor Otimizado)
+        // 1. CONFIGURAÇÃO BASE DO MOTOR
         const scene = new THREE.Scene();
-        // Câmera super potente para enxergar de 0.01 até 2 milhões de unidades de distância
-        const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.01, 2000000);
+        const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 300000);
         const renderer = new THREE.WebGLRenderer({ antialias: true, logarithmicDepthBuffer: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -48,23 +63,31 @@
 
         const loader = new THREE.TextureLoader();
 
-        // 2. A VIA LÁCTEA VOLUMÉTRICA (Efeito Espiral e Luzes Bonitas)
-        const galaxyParams = {
-            count: 150000,      // 150 mil partículas
-            size: 150,          // Tamanho do brilho das estrelas gigantes
-            radius: 40000,      // Tamanho absurdo da galáxia
-            branches: 4,        // 4 braços espirais
-            spin: 1.5,          // Curvatura da espiral
-            randomness: 0.2,    // Poeira cósmica dispersa
-            randomnessPower: 3,
-            insideColor: '#ff6030', // Núcleo brilhante laranja/amarelo
-            outsideColor: '#1b3984' // Bordas azul escuro profundo
+        // Alvos de câmera
+        let focoAtual = 'earth';
+        const posicoesGlobais = {
+            sun: new THREE.Vector3(15000, 0, 0),
+            earth: new THREE.Vector3(15150, 0, 0),
+            marte: new THREE.Vector3(15240, 0, 0),
+            jupiter: new THREE.Vector3(15450, 0, 0),
+            saturno: new THREE.Vector3(15700, 0, 0)
         };
 
-        let galaxyGeometry = new THREE.BufferGeometry();
+        // 2. A VIA LÁCTEA MÁGICA (Colorida e Romântica)
+        const galaxyParams = {
+            count: 180000,
+            size: 130,
+            radius: 50000,
+            branches: 5,
+            spin: 1.8,
+            randomness: 0.22,
+            insideColor: '#ff758c',  // Rosa/Magenta Apaixonado
+            outsideColor: '#251b64' // Roxo Cósmico Profundo
+        };
+
+        const galaxyGeometry = new THREE.BufferGeometry();
         const positions = new Float32Array(galaxyParams.count * 3);
         const colors = new Float32Array(galaxyParams.count * 3);
-
         const colorInside = new THREE.Color(galaxyParams.insideColor);
         const colorOutside = new THREE.Color(galaxyParams.outsideColor);
 
@@ -74,18 +97,20 @@
             const spinAngle = radius * galaxyParams.spin / galaxyParams.radius;
             const branchAngle = ((i % galaxyParams.branches) / galaxyParams.branches) * Math.PI * 2;
             
-            const randomX = Math.pow(Math.random(), galaxyParams.randomnessPower) * (Math.random() < 0.5 ? 1 : -1) * galaxyParams.randomness * radius;
-            const randomY = Math.pow(Math.random(), galaxyParams.randomnessPower) * (Math.random() < 0.5 ? 1 : -1) * galaxyParams.randomness * radius * 0.3; // achatada no Y
-            const randomZ = Math.pow(Math.random(), galaxyParams.randomnessPower) * (Math.random() < 0.5 ? 1 : -1) * galaxyParams.randomness * radius;
+            const randomX = Math.pow(Math.random(), 3) * (Math.random() < 0.5 ? 1 : -1) * galaxyParams.randomness * radius;
+            const randomY = Math.pow(Math.random(), 3) * (Math.random() < 0.5 ? 1 : -1) * galaxyParams.randomness * radius * 0.25;
+            const randomZ = Math.pow(Math.random(), 3) * (Math.random() < 0.5 ? 1 : -1) * galaxyParams.randomness * radius;
 
             positions[i3] = Math.cos(branchAngle + spinAngle) * radius + randomX;
             positions[i3+1] = randomY;
             positions[i3+2] = Math.sin(branchAngle + spinAngle) * radius + randomZ;
 
-            // Transição de cores (Núcleo Quente -> Borda Fria)
             const mixedColor = colorInside.clone();
             mixedColor.lerp(colorOutside, radius / galaxyParams.radius);
             
+            // Adicionar brilho extra aleatório nas estrelas
+            if(Math.random() > 0.98) { mixedColor.addScalar(0.5); }
+
             colors[i3] = mixedColor.r;
             colors[i3+1] = mixedColor.g;
             colors[i3+2] = mixedColor.b;
@@ -94,7 +119,16 @@
         galaxyGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
         galaxyGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
 
-        // Material com Blending aditivo (faz as luzes se somarem e brilharem muito no núcleo)
+        // Estrela cintilante redonda usando canvas para suavizar o ponto
+        const pCanvas = document.createElement('canvas');
+        pCanvas.width = 16; pCanvas.height = 16;
+        const ctx = pCanvas.getContext('2d');
+        const grad = ctx.createRadialGradient(8,8,0, 8,8,8);
+        grad.addColorStop(0, 'rgba(255,255,255,1)');
+        grad.addColorStop(1, 'rgba(255,255,255,0)');
+        ctx.fillStyle = grad; ctx.fillRect(0,0,16,16);
+        const pTex = new THREE.CanvasTexture(pCanvas);
+
         const galaxyMaterial = new THREE.PointsMaterial({
             size: galaxyParams.size,
             sizeAttenuation: true,
@@ -102,115 +136,257 @@
             blending: THREE.AdditiveBlending,
             vertexColors: true,
             transparent: true,
-            opacity: 0.8
+            map: pTex,
+            opacity: 0.9
         });
 
         const galaxy = new THREE.Points(galaxyGeometry, galaxyMaterial);
         scene.add(galaxy);
 
-        // 3. O SISTEMA SOLAR (Posicionado dentro de um braço da Galáxia)
+        // Estrelas de fundo brilhantes normais
+        const bgStarsGeo = new THREE.BufferGeometry();
+        const bgStarsPos = new Float32Array(5000 * 3);
+        for(let i=0; i<15000; i++) {
+            bgStarsPos[i] = (Math.random() - 0.5) * 160000;
+        }
+        bgStarsGeo.setAttribute('position', new THREE.BufferAttribute(bgStarsPos, 3));
+        const bgStars = new THREE.Points(bgStarsGeo, new THREE.PointsMaterial({color: 0xffffff, size: 40, transparent: true, opacity: 0.6}));
+        scene.add(bgStars);
+
+
+        // 3. O SISTEMA SOLAR ROMÂNTICO
         const solarSystemGroup = new THREE.Group();
-        // Colocando o Sol a 15.000 unidades do centro da Via Láctea (no meio do braço espiral)
         solarSystemGroup.position.set(15000, 0, 0); 
         scene.add(solarSystemGroup);
 
-        scene.add(new THREE.AmbientLight(0x222222));
-        const sunLight = new THREE.PointLight(0xffffff, 2, 50000);
+        const ambient = new THREE.AmbientLight(0x332244);
+        scene.add(ambient);
+
+        const sunLight = new THREE.PointLight(0xfff0ea, 2.5, 60000);
         solarSystemGroup.add(sunLight);
 
-        // O Sol
-        const sunGeo = new THREE.SphereGeometry(15, 64, 64);
-        const sunMat = new THREE.MeshBasicMaterial({ color: 0xffcc00 });
+        // Sol Majestoso
+        const sunGeo = new THREE.SphereGeometry(25, 64, 64);
+        const sunMat = new THREE.MeshBasicMaterial({ color: 0xffaa44 });
         const sun = new THREE.Mesh(sunGeo, sunMat);
         solarSystemGroup.add(sun);
 
-        // 4. A TERRA E A MULTIDÃO
+        // Brilho do Sol (Glow Effect)
+        const sunGlow = new THREE.Mesh(new THREE.SphereGeometry(28, 32, 32), new THREE.MeshBasicMaterial({color: 0xff7733, transparent: true, opacity: 0.25, side: THREE.BackSide}));
+        sun.add(sunGlow);
+
+        // 4. PLANETA AMOR (A TERRA E OS CORAÇÕES)
         const earthSystem = new THREE.Group();
-        earthSystem.position.set(120, 0, 0); // Distância da Terra para o Sol
+        earthSystem.position.set(150, 0, 0); 
         solarSystemGroup.add(earthSystem);
 
-        // Textura do mapa
-        const earthGeo = new THREE.SphereGeometry(2, 64, 64);
+        const earthGeo = new THREE.SphereGeometry(6, 64, 64);
         const earthMat = new THREE.MeshStandardMaterial({
             map: loader.load('https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/planets/earth_atmos_2048.jpg'),
-            roughness: 0.8
+            roughness: 0.6,
+            bumpScale: 0.05
         });
         const earth = new THREE.Mesh(earthGeo, earthMat);
         earthSystem.add(earth);
 
-        // A Multidão Cintilante
-        const crowdGeo = new THREE.BufferGeometry();
-        const crowdPos = new Float32Array(3000 * 3);
-        for(let i=0; i<3000; i++) {
-            const phi = Math.acos(-1 + (2 * i) / 3000);
-            const theta = Math.sqrt(3000 * Math.PI) * phi;
-            crowdPos[i*3] = 2.02 * Math.cos(theta) * Math.sin(phi);
-            crowdPos[i*3+1] = 2.02 * Math.sin(theta) * Math.sin(phi);
-            crowdPos[i*3+2] = 2.02 * Math.cos(phi);
-        }
-        crowdGeo.setAttribute('position', new THREE.BufferAttribute(crowdPos, 3));
-        const crowd = new THREE.Points(crowdGeo, new THREE.PointsMaterial({ color: 0xffffcc, size: 0.03, transparent: true, opacity: 0.7 }));
-        earthSystem.add(crowd);
+        // Atmosfera Rosa Romântica
+        const atmosGeo = new THREE.SphereGeometry(6.3, 64, 64);
+        const atmosMat = new THREE.MeshBasicMaterial({ color: 0xff758c, transparent: true, opacity: 0.2, side: THREE.BackSide });
+        const atmosphere = new THREE.Mesh(atmosGeo, atmosMat);
+        earthSystem.add(atmosphere);
 
-        // Lua
-        const moon = new THREE.Mesh(new THREE.SphereGeometry(0.5, 32, 32), new THREE.MeshStandardMaterial({ color: 0x888888 }));
-        moon.position.set(6, 0, 0);
+        // Gerador de Formato de Coração 3D Eficiente para as Rochas
+        function criarGeometriaCoracao() {
+            const x = 0, y = 0;
+            const heartShape = new THREE.Shape();
+            heartShape.moveTo( x + 5, y + 5 );
+            heartShape.bezierCurveTo( x + 5, y + 5, x + 4, y, x, y );
+            heartShape.bezierCurveTo( x - 6, y, x - 6, y + 7,x - 6, y + 7 );
+            heartShape.bezierCurveTo( x - 6, y + 11, x - 3, y + 15.4, x + 5, y + 19 );
+            heartShape.bezierCurveTo( x + 12, y + 15.4, x + 16, y + 11, x + 16, y + 7 );
+            heartShape.bezierCurveTo( x + 16, y + 7, x + 16, y, x + 10, y );
+            heartShape.bezierCurveTo( x + 7, y, x + 5, y + 5, x + 5, y + 5 );
+
+            const extrudeSettings = { depth: 2, bevelEnabled: true, bevelSegments: 3, steps: 1, bevelSize: 1, bevelThickness: 1 };
+            const geo = new THREE.ExtrudeGeometry(heartShape, extrudeSettings);
+            geo.center();
+            geo.scale(0.04, 0.04, 0.04);
+            return geo;
+        }
+
+        // Anel de Rochas em formato de Coração ao redor do Planeta Amor
+        const heartGroup = new THREE.Group();
+        earthSystem.add(heartGroup);
+
+        const heartGeo = criarGeometriaCoracao();
+        const totalCoracoes = 45;
+        const listaCoracoes = [];
+
+        for(let i=0; i<totalCoracoes; i++) {
+            // Variações de tons de vermelho e rosa brilhantes para as rochas
+            const tonsCores = [0xff2244, 0xff5577, 0xff758c, 0xcc1133];
+            const corEscolhida = tonsCores[Math.floor(Math.random() * tonsCores.length)];
+
+            const heartMat = new THREE.MeshStandardMaterial({ 
+                color: corEscolhida, 
+                roughness: 0.4, 
+                metalness: 0.2,
+                emissive: corEscolhida,
+                emissiveIntensity: 0.3
+            });
+
+            const meshCoracao = new THREE.Mesh(heartGeo, heartMat);
+            
+            // Espalhar em formato de anel inclinado bonito
+            const angulo = (i / totalCoracoes) * Math.PI * 2;
+            const raioAnel = 12 + Math.random() * 6;
+            
+            meshCoracao.position.set(Math.cos(angulo) * raioAnel, (Math.random() - 0.5) * 3, Math.sin(angulo) * raioAnel);
+            meshCoracao.rotation.set(Math.random()*Math.PI, Math.random()*Math.PI, 0);
+            
+            heartGroup.add(meshCoracao);
+            listaCoracoes.push({
+                mesh: meshCoracao,
+                rotSpeedX: (Math.random() - 0.5) * 0.02,
+                rotSpeedY: (Math.random() - 0.5) * 0.02
+            });
+        }
+
+        // Lua Linda
+        const moon = new THREE.Mesh(new THREE.SphereGeometry(1.2, 32, 32), new THREE.MeshStandardMaterial({ color: 0xddeeff, roughness: 0.9 }));
+        moon.position.set(28, 2, 0);
         earthSystem.add(moon);
 
-        // Outros Planetas em órbita do Sol
+
+        // 5. OUTROS PLANETAS DETALHADOS
         const planetConfigs = [
-            { size: 1.5, dist: 180, color: 0xcc5533 }, // Marte
-            { size: 7.0, dist: 350, color: 0xdda055 }, // Júpiter
-            { size: 5.5, dist: 550, color: 0xebd399 }  // Saturno
+            { name: 'marte', size: 4.5, dist: 240, color: 0xe25b38, speed: 0.0015 },
+            { name: 'jupiter', size: 14.0, dist: 450, color: 0xdfb887, speed: 0.0008 },
+            { name: 'saturno', size: 11.0, dist: 700, color: 0xe2bf7d, speed: 0.0005 }
         ];
-        const planetMeshes = [];
+        const planetMeshes = {};
+
         planetConfigs.forEach(p => {
-            const mesh = new THREE.Mesh(new THREE.SphereGeometry(p.size, 64, 64), new THREE.MeshStandardMaterial({ color: p.color }));
-            mesh.position.set(p.dist, 0, 0);
-            solarSystemGroup.add(mesh);
-            planetMeshes.push({ mesh: mesh, dist: p.dist, angle: Math.random() * Math.PI * 2, speed: 0.8 / p.dist });
+            const group = new THREE.Group();
+            const mesh = new THREE.Mesh(new THREE.SphereGeometry(p.size, 64, 64), new THREE.MeshStandardMaterial({ color: p.color, roughness: 0.7 }));
+            group.add(mesh);
+            group.position.set(p.dist, 0, 0);
+
+            // Adicionar anel estiloso em Saturno
+            if(p.name === 'saturno') {
+                const ringGeo = new THREE.RingGeometry(p.size + 3, p.size + 12, 64);
+                const ringMat = new THREE.MeshStandardMaterial({ color: 0xc2a066, side: THREE.DoubleSide, transparent: true, opacity: 0.7 });
+                const ring = new THREE.Mesh(ringGeo, ringMat);
+                ring.rotation.x = Math.PI / 2.3;
+                group.add(ring);
+            }
+
+            solarSystemGroup.add(group);
+            planetMeshes[p.name] = { group: group, mesh: mesh, dist: p.dist, angle: Math.random() * Math.PI * 2, speed: p.speed };
         });
 
-        // 5. CONTROLES DE VOO (Logarithmic e Damping)
+
+        // 6. CONTROLES DE CÂMERA INTELIGENTES
         const controls = new OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
         controls.dampingFactor = 0.05;
-        controls.minDistance = 2.3; // Fica bem colado na superfície da Terra
-        controls.maxDistance = 120000; // Afasta MUITO, pra ver a Via Láctea gigante
+        controls.minDistance = 9; 
+        controls.maxDistance = 90000; 
 
-        // Importante: A câmera precisa considerar o offset global do Sistema Solar (15000 no eixo X)
-        camera.position.set(15000 + 120 + 2.5, 0.5, 1); 
-        
-        // Foco inicial cravado na Terra
-        const globalEarthPosition = new THREE.Vector3();
+        // Posição Inicial da câmera focada no Planeta Amor (Terra)
+        camera.position.set(posicoesGlobais.earth.x + 15, posicoesGlobais.earth.y + 10, posicoesGlobais.earth.z + 25);
+        controls.target.copy(posicoesGlobais.earth);
 
-        // 6. INTERFACE E LÓGICA DE NARRATIVA
+        // Elementos de Texto do Painel
         const uiTitle = document.getElementById('msg-title');
         const uiBody = document.getElementById('msg-body');
 
+        // Textos Simples e Bonitos estilo Ensino Médio
+        const textosNarrativa = {
+            earth: {
+                title: "Nosso Planeta Amor ❤️",
+                body: "Olha só para a Terra... É gigante e cheia de pessoas. Mas no meio de tanta gente, a parte mais bonita do meu mundo é você. Esses corações girando em volta dela representam o quanto você me faz bem."
+            },
+            sun: {
+                title: "O Sol Radiante",
+                body: "O Sol é a estrela mais brilhante e quente do sistema solar. Ele aquece os planetas de longe, igualzinho ao seu sorriso, que aquece o meu coração mesmo nos dias mais frios."
+            },
+            marte: {
+                title: "O Planeta Marte",
+                body: "Marte é conhecido por ser todo vermelho e forte. Dizem que o vermelho significa paixão, e olhar para ele me lembra a força do que eu sinto por você todos os dias."
+            },
+            jupiter: {
+                title: "O Gigante Júpiter",
+                body: "Este é o maior planeta de todos, cabe tudo aqui dentro! Mas sabia que, mesmo ele sendo desse tamanho todo, o tamanho dele não chega nem perto do tamanho do amor que tenho guardado para você."
+            },
+            saturno: {
+                title: "Os Anéis de Saturno",
+                body: "Saturno é considerado o planeta mais charmoso por causa desses anéis brilhantes em volta dele. É como se o universo tivesse colocado acessórios nele só pra mostrar que a beleza está nos detalhes, assim como em você."
+            },
+            universo: {
+                title: "A Imensidão do Espaço",
+                body: "Tudo isso que você está vendo — as estrelas, as galáxias e o infinito — parece não ter fim, né? É exatamente esse o tamanho do meu amor por você: infinito e cheio de luz."
+            }
+        };
+
+        // Funções Globais do Menu
         window.iniciar = () => {
             document.getElementById('intro').style.opacity = '0';
             setTimeout(() => {
                 document.getElementById('intro').style.display = 'none';
                 document.getElementById('hud').style.opacity = '1';
-            }, 1200);
+                mudarFoco('earth');
+            }, 1500);
         };
 
-        function atualizarNarrativa() {
-            // Pegar a posição real da Terra no mundo 3D
-            earthSystem.getWorldPosition(globalEarthPosition);
-            // Medir a distância da câmera até a Terra
-            const dist = camera.position.distanceTo(globalEarthPosition);
+        window.mudarFoco = (alvo) => {
+            focoAtual = alvo;
+            
+            // Atualizar classes dos botões
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+            const btnAtivo = Array.from(document.querySelectorAll('.nav-btn')).find(btn => btn.textContent.toLowerCase().includes(alvo === 'earth' ? 'amor' : alvo));
+            if(btnAtivo) btnAtivo.classList.add('active');
 
-            if (dist < 15) {
-                uiTitle.innerText = "Nós";
-                uiBody.innerText = "Em meio a bilhões de pessoas na Terra, o universo permitiu que nos encontrássemos.";
-            } else if (dist >= 15 && dist < 1500) {
-                uiTitle.innerText = "O Sistema Solar";
-                uiBody.innerText = "A Terra, o Sol, os planetas... Tão imensos, mas um pequeno grão de areia perto do que construímos.";
-            } else {
-                uiTitle.innerText = "A Imensidão";
-                uiBody.innerText = "A Via Láctea inteira com suas milhares de luzes e tudo que existe nela é menor do que o nosso amor.";
+            // Atualiza textos imediatamente no click
+            if(textosNarrativa[alvo]) {
+                uiTitle.innerText = textosNarrativa[alvo].title;
+                uiBody.innerText = textosNarrativa[alvo].body;
+            }
+        };
+
+        window.alinharCamera = () => {
+            // Trazer a câmera de volta suavemente para perto do planeta atual ativo
+            const posFoco = obterPosicaoFocoAtual();
+            camera.position.set(posFoco.x + 20, posFoco.y + 10, posFoco.z + 25);
+            controls.target.copy(posFoco);
+            controls.update();
+        };
+
+        function obterPosicaoFocoAtual() {
+            if (focoAtual === 'sun') return posicoesGlobais.sun;
+            if (focoAtual === 'earth') return posicoesGlobais.earth;
+            return posicoesGlobais[focoAtual] || posicoesGlobais.earth;
+        }
+
+        function atualizarPosicoesLogicas() {
+            // Atualizar os vetores globais com o movimento de translação real dos planetas para a câmera seguir perfeitamente
+            earthSystem.getWorldPosition(posicoesGlobais.earth);
+            for (let chave in planetMeshes) {
+                planetMeshes[chave].group.getWorldPosition(posicoesGlobais[chave]);
+            }
+        }
+
+        function gerenciarNarrativaDinamica() {
+            const posFoco = obterPosicaoFocoAtual();
+            const distanciaDoFoco = camera.position.distanceTo(posFoco);
+
+            // Se ela se afastar demais fazendo zoom-out, foca na imensidão do universo automaticamente
+            if (distanciaDoFoco > 2000) {
+                uiTitle.innerText = textosNarrativa.universo.title;
+                uiBody.innerText = textosNarrativa.universo.body;
+            } else if(textosNarrativa[focoAtual]) {
+                uiTitle.innerText = textosNarrativa[focoAtual].title;
+                uiBody.innerText = textosNarrativa[focoAtual].body;
             }
         }
 
@@ -220,31 +396,50 @@
             renderer.setSize(window.innerWidth, window.innerHeight);
         });
 
-        // 7. MOTOR DE ANIMAÇÃO
+        // 7. MOTOR DE ANIMAÇÃO CONTÍNUA
         function animate() {
             requestAnimationFrame(animate);
 
-            // Rotações
-            earth.rotation.y += 0.001;
-            crowd.rotation.y += 0.001; // Multidão girando com a Terra
-            moon.rotation.y += 0.005;
-            sun.rotation.y += 0.0002;
-            galaxy.rotation.y += 0.0001; // Galáxia gira bem devagar
+            // Movimentos Independentes de Rotação (Giro do próprio corpo)
+            earth.rotation.y += 0.003;
+            atmosphere.rotation.y += 0.001;
+            sun.rotation.y += 0.0005;
+            galaxy.rotation.y += 0.0002; // A galáxia roda devagar e lindamente
 
-            // Translação dos planetas
-            planetMeshes.forEach(p => {
-                p.angle += p.speed;
-                p.mesh.position.x = Math.cos(p.angle) * p.dist;
-                p.mesh.position.z = Math.sin(p.angle) * p.dist;
-                p.mesh.rotation.y += 0.005;
+            // Rotacionar e balançar as rochas de coração individualmente
+            listaCoracoes.forEach(c => {
+                c.mesh.rotation.x += c.rotSpeedX;
+                c.mesh.rotation.y += c.rotSpeedY;
             });
+            // O anel inteiro de corações gira ao redor do planeta amor
+            heartGroup.rotation.y += 0.008;
 
-            // Atualiza o foco dos controles baseados na Terra
-            earthSystem.getWorldPosition(globalEarthPosition);
-            controls.target.copy(globalEarthPosition);
+            // Translação Real dos Planetas (Orbitando o Sol)
+            // Terra orbitando
+            const tempo = Date.now() * 0.0001;
+            earthSystem.position.x = Math.cos(tempo * 2) * 160;
+            earthSystem.position.z = Math.sin(tempo * 2) * 160;
+            moon.position.x = Math.cos(tempo * 12) * 14;
+            moon.position.z = Math.sin(tempo * 12) * 14;
+
+            // Outros planetas orbitando
+            for (let chave in planetMeshes) {
+                const p = planetMeshes[chave];
+                p.angle += p.speed;
+                p.group.position.x = Math.cos(p.angle) * p.dist;
+                p.group.position.z = Math.sin(p.angle) * p.dist;
+                p.mesh.rotation.y += 0.008;
+            }
+
+            // Atualiza as coordenadas que os botões de navegação usam
+            atualizarPosicoesLogicas();
+
+            // Faz os controles focarem continuamente no planeta selecionado
+            const pontoDestino = obterPosicaoFocoAtual();
+            controls.target.lerp(pontoDestino, 0.1); // Transição suave entre planetas
 
             controls.update();
-            atualizarNarrativa();
+            gerenciarNarrativaDinamica();
             renderer.render(scene, camera);
         }
         
