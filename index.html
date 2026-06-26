@@ -8,7 +8,7 @@
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background-color: #010105; font-family: 'Segoe UI', Roboto, sans-serif; }
         
         /* Tela de Introdução */
-        #intro { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at center, #11091c 0%, #010105 100%); z-index: 1000; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; text-align: center; transition: opacity 1.5s ease-in-out; }
+        #intro { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at center, #11091c 0%, #010105 100%); z-index: 1000; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; text-align: center; transition: opacity 1.5s ease-in-out; opacity: 1; }
         #intro h1 { font-size: 3.2rem; margin-bottom: 15px; font-weight: 300; letter-spacing: 4px; text-transform: uppercase; background: linear-gradient(45deg, #ff6b8b, #ff8e53); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         #intro p { font-size: 1.1rem; max-width: 500px; color: #cbbad6; margin-bottom: 35px; line-height: 1.6; padding: 0 20px; font-weight: 300; }
         #btn-start { padding: 15px 45px; font-size: 1rem; color: #fff; background: linear-gradient(45deg, rgba(255,107,139,0.4), rgba(255,142,83,0.4)); border: 1px solid rgba(255,255,255,0.3); border-radius: 50px; cursor: pointer; backdrop-filter: blur(10px); transition: all 0.4s; letter-spacing: 2px; text-transform: uppercase; }
@@ -25,16 +25,29 @@
         #nav-menu.hidden { max-height: 0; padding: 0; border: none; opacity: 0; pointer-events: none; }
         
         .nav-btn { background: transparent; border: none; color: #b5a9c0; padding: 6px 12px; border-radius: 15px; cursor: pointer; font-size: 0.82rem; transition: all 0.2s; font-weight: 500; }
-        .nav-btn:hover, .nav-btn.active { color: #fff; background: rgba(255, 107, 139, 0.35); text-shadow: 0 0 5px #fff; }
+        .nav-btn:hover { color: #fff; background: rgba(255, 107, 139, 0.2); }
+        /* Estado Ativo e Estado Lido (Verde) */
+        .nav-btn.active { color: #fff; text-shadow: 0 0 5px #fff; box-shadow: inset 0 0 0 1px rgba(255,255,255,0.2); }
+        .nav-btn.visto { color: #2ecc71 !important; text-shadow: 0 0 8px rgba(46, 204, 113, 0.6); }
         .nav-btn.align-btn { background: linear-gradient(45deg, #ff6b8b, #ff8e53); color: white; font-weight: bold; }
         
         /* Controles de Topo */
         .top-controls { display: flex; gap: 10px; }
         .top-btn { background: rgba(255, 107, 139, 0.2); border: 1px solid rgba(255, 107, 139, 0.4); color: #ff9ebb; padding: 4px 14px; border-radius: 20px; cursor: pointer; font-size: 0.75rem; font-weight: 600; letter-spacing: 1px; backdrop-filter: blur(5px); transition: all 0.3s; }
         .top-btn:hover { background: rgba(255, 107, 139, 0.4); color: #fff; }
+
+        /* Botão do Grand Finale (Big Bang) */
+        #btn-finale { position: fixed; top: 53%; left: 50%; transform: translate(-50%, -50%) scale(0.9); z-index: 500; padding: 18px 35px; font-size: 1.1rem; color: #fff; background: linear-gradient(45deg, #2ecc71, #1abc9c); border: 2px solid rgba(255,255,255,0.6); border-radius: 50px; cursor: pointer; font-weight: bold; letter-spacing: 1px; box-shadow: 0 0 30px rgba(46,204,113,0.6); transition: all 0.5s ease-in-out; opacity: 0; pointer-events: none; }
+        #btn-finale.show { opacity: 1; pointer-events: auto; transform: translate(-50%, -50%) scale(1); animation: pulsarBotao 2s infinite alternate; }
+        @keyframes pulsarBotao { from { box-shadow: 0 0 20px rgba(46,204,113,0.5); } to { box-shadow: 0 0 40px rgba(26,188,156,0.9), 0 0 10px #fff; } }
+
+        /* Cortina de transição escura para reset */
+        #fade-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: #010105; z-index: 2000; opacity: 0; pointer-events: none; transition: opacity 2s ease-in-out; }
     </style>
 </head>
 <body>
+
+    <div id="fade-overlay"></div>
 
     <audio id="musica-fundo" loop>
         <source src="principal.mp3" type="audio/mpeg">
@@ -46,23 +59,25 @@
         <button id="btn-start" onclick="iniciar()">Iniciar Passeio</button>
     </div>
 
+    <button id="btn-finale" onclick="dispararExplosao()">💥 Ativar o Big Bang do Nosso Amor</button>
+
     <div id="nav-container">
         <div class="top-controls">
             <button id="toggle-menu" class="top-btn" onclick="AlternarMenu()">Esconder Painel 👁️</button>
             <button id="toggle-audio" class="top-btn" onclick="AlternarAudio()">Pausar Música ⏸️</button>
         </div>
         <div id="nav-menu">
-            <button class="nav-btn" onclick="mudarFoco('galaxy')">🌌 Via-Láctea</button>
-            <button class="nav-btn" onclick="mudarFoco('sun')">☀️ Sol</button>
-            <button class="nav-btn" onclick="mudarFoco('mercurio')">Mercúrio</button>
-            <button class="nav-btn" onclick="mudarFoco('venus')">Vênus</button>
-            <button class="nav-btn active" onclick="mudarFoco('earth')">🌍 Terra</button>
-            <button class="nav-btn" onclick="mudarFoco('marte')">Marte</button>
-            <button class="nav-btn" onclick="mudarFoco('jupiter')">Júpiter</button>
-            <button class="nav-btn" onclick="mudarFoco('saturno')">🪐 Maria (Saturno)</button>
-            <button class="nav-btn" onclick="mudarFoco('urano')">Urano</button>
-            <button class="nav-btn" onclick="mudarFoco('netuno')">Netuno</button>
-            <button class="nav-btn" onclick="mudarFoco('plutao')">Plutão</button>
+            <button class="nav-btn" data-id="galaxy" onclick="mudarFoco('galaxy')">🌌 Via-Láctea</button>
+            <button class="nav-btn" data-id="sun" onclick="mudarFoco('sun')">☀️ Sol</button>
+            <button class="nav-btn" data-id="mercurio" onclick="mudarFoco('mercurio')">Mercúrio</button>
+            <button class="nav-btn" data-id="venus" onclick="mudarFoco('venus')">Vênus</button>
+            <button class="nav-btn active" data-id="earth" onclick="mudarFoco('earth')">🌍 Terra</button>
+            <button class="nav-btn" data-id="marte" onclick="mudarFoco('marte')">Marte</button>
+            <button class="nav-btn" data-id="jupiter" onclick="mudarFoco('jupiter')">Júpiter</button>
+            <button class="nav-btn" data-id="saturno" onclick="mudarFoco('saturno')">🪐 Maria (Saturno)</button>
+            <button class="nav-btn" data-id="urano" onclick="mudarFoco('urano')">Urano</button>
+            <button class="nav-btn" data-id="netuno" onclick="mudarFoco('netuno')">Netuno</button>
+            <button class="nav-btn" data-id="plutao" onclick="mudarFoco('plutao')">Plutão</button>
             <button class="nav-btn align-btn" onclick="alinharCamera()">✨ Focar de Perto</button>
         </div>
     </div>
@@ -86,7 +101,13 @@
 
         const loader = new THREE.TextureLoader();
         let focoAtual = 'earth';
+        let explodindo = false;
+        let velExplosao = 0;
         
+        // Controle de Planetas Vistos
+        const planetasParaVerificar = ['galaxy', 'sun', 'mercurio', 'venus', 'earth', 'marte', 'jupiter', 'saturno', 'urano', 'netuno', 'plutao'];
+        let planetasVistos = new Set();
+
         const posicoesGlobais = { 
             sun: new THREE.Vector3(20000, 0, 0),
             galaxy: new THREE.Vector3(0, 4000, 0)
@@ -164,7 +185,7 @@
         sun.add(sunGlow);
         solarSystem.add(sun);
 
-        // 4. TERRA E LUA ROCHOSA REALISTA (AVERMELHADA/ROSA)
+        // 4. TERRA E LUA ROCHOSA
         const earthGroup = new THREE.Group();
         const earthMat = new THREE.MeshStandardMaterial({ color: 0x2b82c9, roughness: 0.4 });
         loader.load('https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/planets/earth_atmos_2048.jpg', (tex) => {
@@ -174,19 +195,10 @@
         const earth = new THREE.Mesh(new THREE.SphereGeometry(7.5, 64, 64), earthMat);
         earthGroup.add(earth);
 
-        // LUA CORRIGIDA: Esférica, com textura e relevo de crateras rochosas reais
-        const luaGeo = new THREE.SphereGeometry(2.0, 48, 48); // Formato de lua real (esfera)
-        const luaMat = new THREE.MeshStandardMaterial({ 
-            color: 0xff4b72, // Mantém o tom apaixonante avermelhado/rosa
-            roughness: 0.9, 
-            metalness: 0.0 
-        });
-
-        // Carrega o mapa de relevo de crateras oficial do Three.js para dar o efeito de rocha tridimensional
+        const luaGeo = new THREE.SphereGeometry(2.0, 48, 48); 
+        const luaMat = new THREE.MeshStandardMaterial({ color: 0xff4b72, roughness: 0.9, metalness: 0.0 });
         loader.load('https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/planets/moon_1024.jpg', (tex) => {
-            luaMat.bumpMap = tex;
-            luaMat.bumpScale = 0.08; // Altura dos relevos e crateras das rochas
-            luaMat.needsUpdate = true;
+            luaMat.bumpMap = tex; luaMat.bumpScale = 0.08; luaMat.needsUpdate = true;
         });
 
         const moon = new THREE.Mesh(luaGeo, luaMat);
@@ -245,7 +257,7 @@
         // 7. TEXTOS
         const textos = {
             galaxy: { title: "Nossa Via-Láctea 🌌", body: "Olha que lindo tudo girando junto! No meio desse tanto de poeira e mistério, o universo caprichou na nossa história. Saber que você existe faz tudo parecer perfeito." },
-            sun: { title: "O Sol: Nosso Combustível ☀️", body: "O Sol é a estrela que dá energia para todo o espaço. Ele é o combustível do que eu sinto por você: enquanto ele continuar brilhando forte, nosso amor vai ser eterno." },
+            sun: { title: "O Sol: Nosso Combustível ☀️", body: "O Sol é a estrella que dá energia para todo o espaço. Ele é o combustível do que eu sinto por você: enquanto ele continuar brilhando forte, nosso amor vai ser eterno." },
             mercurio: { title: "Mercúrio", body: "Ele corre super rápido em volta do Sol. É igualzinho à velocidade que o meu coração bate toda vez que chega uma mensagem sua no meu celular!" },
             venus: { title: "Vênus", body: "O planeta mais brilhante do céu. Ele me lembra muito o brilho dos seus olhos quando a gente conversa e faz planos para o nosso futuro." },
             earth: { title: "Planeta Terra 🌍", body: "Existem bilhões de pessoas nesse mundo inteiro, mas foi com você que meu coração decidiu bater mais forte. É um milagre lindo a gente ter se encontrado no meio de tanta gente." },
@@ -283,10 +295,16 @@
         };
 
         window.mudarFoco = (alvo) => {
+            if(explodindo) return;
             focoAtual = alvo;
+            
+            // Gerencia botões lidos (Verdes)
+            planetasVistos.add(alvo);
+            const btnLido = document.querySelector(`.nav-btn[data-id="${alvo}"]`);
+            if(btnLido) btnLido.classList.add('visto');
+
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-            const btn = Array.from(document.querySelectorAll('.nav-btn')).find(b => b.onclick.toString().includes(`'${alvo}'`));
-            if(btn) btn.classList.add('active');
+            if(btnLido) btnLido.classList.add('active');
 
             if(textos[alvo]) {
                 uiTitle.innerText = textos[alvo].title;
@@ -297,9 +315,15 @@
                 camera.position.set(0, 55000, 65000);
                 controls.target.set(0, 0, 0);
             }
+
+            // Verifica se viu TODOS para liberar o Grand Finale
+            if (planetasParaVerificar.every(p => planetasVistos.has(p))) {
+                document.getElementById('btn-finale').classList.add('show');
+            }
         };
 
         window.alinharCamera = () => {
+            if(explodindo) return;
             if(focoAtual === 'galaxy') {
                 camera.position.set(0, 55000, 65000);
                 controls.target.set(0, 0, 0);
@@ -335,6 +359,69 @@
             }
         };
 
+        // EXCLUSIVO DO GRAND FINALE: DISPARAR O BIG BANG LENTO
+        window.dispararExplosao = () => {
+            explodindo = true;
+            velExplosao = 1; // Ativa a expansão
+            document.getElementById('btn-finale').classList.remove('show');
+            document.getElementById('nav-container').style.display = 'none';
+            
+            uiTitle.innerText = "💥 O Big Bang do Nosso Amor...";
+            uiBody.innerText = "Tudo o que criamos se expande lentamente pelo infinito. O que eu sinto por você reconstrói galáxias inteiras.";
+
+            // Visão panorâmica de cinema bem lenta
+            camera.position.set(20000, 45000, 95000);
+            controls.target.set(20000, 0, 0);
+
+            // Transição suave para reiniciar após a Maria apreciar cada detalhe por 9 segundos
+            setTimeout(() => {
+                const overlay = document.getElementById('fade-overlay');
+                overlay.style.pointerEvents = 'auto';
+                overlay.style.opacity = '1';
+
+                setTimeout(() => {
+                    // CORTA A MÚSICA TOTALMENTE E RESETA O PROJETO
+                    audioTag.pause();
+                    audioTag.currentTime = 0;
+                    document.getElementById('toggle-audio').innerText = "Pausar Música ⏸️";
+
+                    // Restaura posições e variáveis
+                    explodindo = false;
+                    velExplosao = 0;
+                    planetasVistos.clear();
+                    
+                    // Reseta cores dos botões de navegação
+                    document.querySelectorAll('.nav-menu, .nav-btn').forEach(btn => {
+                        btn.classList.remove('visto');
+                        btn.classList.remove('active');
+                    });
+                    document.querySelector('.nav-btn[data-id="earth"]').classList.add('active');
+
+                    // Posiciona os planetas de volta no lugar
+                    solarSystem.position.set(20000, 0, 0);
+                    for(let chave in meshesPlanetas) {
+                        const p = meshesPlanetas[chave];
+                        p.group.position.set(0, 0, 0);
+                    }
+
+                    // Prepara tela inicial de novo
+                    document.getElementById('nav-container').style.display = 'flex';
+                    const intro = document.getElementById('intro');
+                    intro.style.display = 'flex';
+                    intro.style.opacity = '1';
+                    document.getElementById('hud').style.opacity = '0';
+
+                    camera.position.set(20140, 15, 25);
+                    controls.target.set(20140, 0, 0);
+
+                    // Remove a cortina escura de transição
+                    overlay.style.opacity = '0';
+                    overlay.style.pointerEvents = 'none';
+                }, 2000);
+
+            }, 9000);
+        };
+
         function obterPosicaoFoco() {
             if(focoAtual === 'galaxy') return new THREE.Vector3(0,0,0);
             if(focoAtual === 'sun') return solarSystem.position;
@@ -348,13 +435,43 @@
 
             const tempo = Date.now() * 0.0005;
 
-            sun.rotation.y += 0.001;
-            
-            galaxy.rotation.y += 0.00015;
-            const pulse = 1 + Math.sin(tempo * 2) * 0.03;
-            galaxy.scale.set(pulse, 1, pulse);
+            // Se o Grand Finale estiver ativado, expande tudo para longe em câmera lenta
+            if (explodindo) {
+                velExplosao += 0.4;
+                
+                // Os planetas se afastam radialmente em câmera lenta do Sol
+                for(let chave in meshesPlanetas) {
+                    const p = meshesPlanetas[chave];
+                    p.group.position.x += Math.cos(p.angle) * velExplosao * 0.15;
+                    p.group.position.z += Math.sin(p.angle) * velExplosao * 0.15;
+                }
+                
+                // O Sol e o sistema inteiro se afastam do centro da Via-Láctea
+                solarSystem.position.x += velExplosao * 0.1;
+                
+                // As partículas da galáxia se dispersam lentamente
+                galaxy.rotation.y += 0.003;
+                galaxy.scale.addScalar(0.002);
+            } else {
+                // Movimento orbital normal se não estiver explodindo
+                sun.rotation.y += 0.001;
+                galaxy.rotation.y += 0.00015;
+                const pulse = 1 + Math.sin(tempo * 2) * 0.03;
+                galaxy.scale.set(pulse, 1, pulse);
 
-            // Estrelas cadentes
+                for(let chave in meshesPlanetas) {
+                    const p = meshesPlanetas[chave];
+                    p.angle += p.speed;
+                    p.group.position.x = Math.cos(p.angle) * p.dist;
+                    p.group.position.z = Math.sin(p.angle) * p.dist;
+                    p.mesh.rotation.y += 0.008;
+
+                    if(!posicoesGlobais[chave]) posicoesGlobais[chave] = new THREE.Vector3();
+                    p.group.getWorldPosition(posicoesGlobais[chave]);
+                }
+            }
+
+            // Estrelas cadentes normais
             shootingStars.forEach(s => {
                 s.mesh.position.x -= s.speed;
                 s.mesh.position.z -= s.speed;
@@ -363,33 +480,21 @@
                 }
             });
 
-            // Movimento orbital e rotação da lua realista
+            // Movimento da lua
             moon.position.x = Math.cos(tempo * 2.5) * 16;
             moon.position.z = Math.sin(tempo * 2.5) * 16;
-            moon.rotation.y += 0.005; // Gira de forma suave revelando as crateras rochosas
+            moon.rotation.y += 0.005;
 
             nameSprite.lookAt(camera.position);
 
-            // Mover os planetas
-            for(let chave in meshesPlanetas) {
-                const p = meshesPlanetas[chave];
-                p.angle += p.speed;
-                p.group.position.x = Math.cos(p.angle) * p.dist;
-                p.group.position.z = Math.sin(p.angle) * p.dist;
-                p.mesh.rotation.y += 0.008;
-
-                if(!posicoesGlobais[chave]) posicoesGlobais[chave] = new THREE.Vector3();
-                p.group.getWorldPosition(posicoesGlobais[chave]);
-            }
-
             const alvoCam = obterPosicaoFoco();
-            if(focoAtual !== 'galaxy') {
+            if(focoAtual !== 'galaxy' && !explodindo) {
                 controls.target.lerp(alvoCam, 0.08);
-            } else {
+            } else if (!explodindo) {
                 controls.target.lerp(new THREE.Vector3(0,0,0), 0.05);
             }
 
-            if(focoAtual !== 'galaxy' && camera.position.distanceTo(alvoCam) > 3000) {
+            if(focoAtual !== 'galaxy' && camera.position.distanceTo(alvoCam) > 3000 && !explodindo) {
                 uiTitle.innerText = textos.galaxy.title;
                 uiBody.innerText = textos.galaxy.body;
             }
