@@ -2,66 +2,57 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Nossa Jornada</title>
+    <title>Jornada Infinito</title>
     <style>
-        body { margin: 0; background: #000; overflow: hidden; font-family: sans-serif; }
-        #msg { position: absolute; bottom: 5%; width: 100%; text-align: center; color: white; pointer-events: none; font-size: 20px; transition: 1s; }
+        body { margin: 0; background: #000; overflow: hidden; color: white; font-family: sans-serif; }
+        #info { position: absolute; bottom: 5%; width: 100%; text-align: center; pointer-events: none; }
     </style>
 </head>
 <body>
-    <div id="msg">...</div>
+    <div id="info"><p id="text">...</p></div>
     <script type="module">
         import * as THREE from 'https://cdn.skypack.dev/three@0.136.0';
 
+        // Cena com LogarithmicDepthBuffer (ESSENCIAL para não travar o zoom)
         const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(45, window.innerWidth/window.innerHeight, 0.1, 20000);
-        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.01, 1000000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true, logarithmicDepthBuffer: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
         document.body.appendChild(renderer.domElement);
 
-        // Terra Realista (Gerada via código com sombreamento)
-        const earth = new THREE.Mesh(new THREE.SphereGeometry(1, 64, 64), new THREE.MeshPhongMaterial({ color: 0x2244ff, shininess: 10 }));
+        // Terra
+        const earth = new THREE.Mesh(new THREE.SphereGeometry(1, 64, 64), new THREE.MeshBasicMaterial({ color: 0x2244ff }));
         scene.add(earth);
-        
-        // Iluminação para dar volume
-        const light = new THREE.DirectionalLight(0xffffff, 1);
-        light.position.set(5, 3, 5);
-        scene.add(light);
-        scene.add(new THREE.AmbientLight(0x333333));
 
-        // Sistema Solar (Esferas sólidas)
-        const planets = new THREE.Group();
-        [{d: 5, c: 0xff4422}, {d: 8, c: 0xffcc00}].forEach(p => {
-            const m = new THREE.Mesh(new THREE.SphereGeometry(0.3, 32, 32), new THREE.MeshBasicMaterial({color: p.c}));
-            m.position.x = p.d;
-            planets.add(m);
-        });
-        scene.add(planets);
-
-        // Via Láctea (Fundo denso)
-        const starsGeo = new THREE.BufferGeometry();
-        const pos = new Float32Array(10000 * 3);
-        for(let i=0; i<10000 * 3; i++) pos[i] = (Math.random()-0.5) * 5000;
-        starsGeo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-        const stars = new THREE.Points(starsGeo, new THREE.PointsMaterial({size: 0.5}));
+        // Galáxia (Estrelas em volta)
+        const stars = new THREE.Points(
+            new THREE.BufferGeometry().setAttribute('position', new THREE.BufferAttribute(new Float32Array(50000 * 3).map(() => (Math.random()-0.5)*20000), 3)),
+            new THREE.PointsMaterial({ size: 1 })
+        );
         scene.add(stars);
 
-        camera.position.z = 1.5; // Começa dentro da Terra
-        let zPos = 1.5;
+        camera.position.z = 1.2;
+        let zoomSpeed = 1.05; // Fator multiplicativo para zoom infinito
+        let currentZ = 1.2;
 
         window.addEventListener('wheel', (e) => {
-            zPos = Math.max(1.5, Math.min(zPos + e.deltaY * 0.1, 4000));
-            camera.position.z = zPos;
-            const m = document.getElementById('msg');
-            if(zPos < 5) m.innerText = "Em meio a bilhões de pessoas, nos encontramos.";
-            else if(zPos < 200) m.innerText = "Nosso sistema solar é um grão de areia.";
-            else m.innerText = "Nada é maior que o universo que criamos juntos.";
+            // A lógica de zoom agora é multiplicativa, não fixa
+            if (e.deltaY > 0) currentZ *= zoomSpeed; 
+            else currentZ /= zoomSpeed;
+            
+            currentZ = Math.max(1.2, currentZ); // Permite afastar quase infinitamente
+            camera.position.z = currentZ;
+
+            // Texto dinâmico
+            const t = document.getElementById('text');
+            if (currentZ < 10) t.innerText = "Em meio a bilhões de pessoas, nos encontramos.";
+            else if (currentZ < 1000) t.innerText = "Tão pequenos no Sistema Solar...";
+            else t.innerText = "O Universo inteiro conspira pelo nosso amor.";
         }, {passive: false});
 
         function animate() {
             requestAnimationFrame(animate);
-            earth.rotation.y += 0.002;
-            planets.rotation.y += 0.001;
+            earth.rotation.y += 0.005;
             renderer.render(scene, camera);
         }
         animate();
