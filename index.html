@@ -28,7 +28,7 @@
         .nav-btn:hover, .nav-btn.active { color: #fff; background: rgba(255, 107, 139, 0.35); text-shadow: 0 0 5px #fff; }
         .nav-btn.align-btn { background: linear-gradient(45deg, #ff6b8b, #ff8e53); color: white; font-weight: bold; }
         
-        /* Controles de Topo (Esconder e Som) */
+        /* Controles de Topo */
         .top-controls { display: flex; gap: 10px; }
         .top-btn { background: rgba(255, 107, 139, 0.2); border: 1px solid rgba(255, 107, 139, 0.4); color: #ff9ebb; padding: 4px 14px; border-radius: 20px; cursor: pointer; font-size: 0.75rem; font-weight: 600; letter-spacing: 1px; backdrop-filter: blur(5px); transition: all 0.3s; }
         .top-btn:hover { background: rgba(255, 107, 139, 0.4); color: #fff; }
@@ -164,23 +164,7 @@
         sun.add(sunGlow);
         solarSystem.add(sun);
 
-        // 4. TERRA E LUA DE CORAÇÃO
-        function gerarGeometriaCoracao3D() {
-            const x = 0, y = 0;
-            const shape = new THREE.Shape();
-            shape.moveTo( x + 5, y + 5 );
-            shape.bezierCurveTo( x + 5, y + 5, x + 4, y, x, y );
-            shape.bezierCurveTo( x - 6, y, x - 6, y + 7, x - 6, y + 7 );
-            shape.bezierCurveTo( x - 6, y + 11, x - 3, y + 15.4, x + 5, y + 19 );
-            shape.bezierCurveTo( x + 12, y + 15.4, x + 16, y + 11, x + 16, y + 7 );
-            shape.bezierCurveTo( x + 16, y + 7, x + 16, y, x + 10, y );
-            shape.bezierCurveTo( x + 7, y, x + 5, y + 5, x + 5, y + 5 );
-            const settings = { depth: 4, bevelEnabled: true, bevelSegments: 5, steps: 1, bevelSize: 1.5, bevelThickness: 1.5 };
-            const geo = new THREE.ExtrudeGeometry(shape, settings);
-            geo.center(); geo.scale(0.2, 0.2, 0.2);
-            return geo;
-        }
-
+        // 4. TERRA E LUA ROCHOSA REALISTA (AVERMELHADA/ROSA)
         const earthGroup = new THREE.Group();
         const earthMat = new THREE.MeshStandardMaterial({ color: 0x2b82c9, roughness: 0.4 });
         loader.load('https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/planets/earth_atmos_2048.jpg', (tex) => {
@@ -190,15 +174,24 @@
         const earth = new THREE.Mesh(new THREE.SphereGeometry(7.5, 64, 64), earthMat);
         earthGroup.add(earth);
 
-        const heartMoonGeo = gerarGeometriaCoracao3D();
-        const heartMoonMat = new THREE.MeshStandardMaterial({ color: 0xff3355, roughness: 0.9, metalness: 0.1, bumpScale: 0.15 });
-        loader.load('https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/water/waterbump.chile.jpg', (tex) => {
-            heartMoonMat.bumpMap = tex; heartMoonMat.needsUpdate = true;
+        // LUA CORRIGIDA: Esférica, com textura e relevo de crateras rochosas reais
+        const luaGeo = new THREE.SphereGeometry(2.0, 48, 48); // Formato de lua real (esfera)
+        const luaMat = new THREE.MeshStandardMaterial({ 
+            color: 0xff4b72, // Mantém o tom apaixonante avermelhado/rosa
+            roughness: 0.9, 
+            metalness: 0.0 
         });
 
-        const heartMoon = new THREE.Mesh(heartMoonGeo, heartMoonMat);
-        heartMoon.position.set(22, 2, 0);
-        earthGroup.add(heartMoon);
+        // Carrega o mapa de relevo de crateras oficial do Three.js para dar o efeito de rocha tridimensional
+        loader.load('https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/planets/moon_1024.jpg', (tex) => {
+            luaMat.bumpMap = tex;
+            luaMat.bumpScale = 0.08; // Altura dos relevos e crateras das rochas
+            luaMat.needsUpdate = true;
+        });
+
+        const moon = new THREE.Mesh(luaGeo, luaMat);
+        moon.position.set(22, 2, 0);
+        earthGroup.add(moon);
         solarSystem.add(earthGroup);
 
         // 5. SATURNO COM O NOME "MARIA"
@@ -279,7 +272,6 @@
         window.iniciar = () => {
             document.getElementById('intro').style.opacity = '0';
             
-            // CONFIGURAÇÃO DO SOM DELICADO (Volume 30%)
             audioTag.volume = 0.3; 
             audioTag.play().catch(e => console.log("O áudio precisou de clique:", e));
 
@@ -332,7 +324,6 @@
             }
         };
 
-        // BOTÃO DE TOCAR / PARAR A MÚSICA
         window.AlternarAudio = () => {
             const btn = document.getElementById('toggle-audio');
             if (audioTag.paused) {
@@ -372,10 +363,10 @@
                 }
             });
 
-            // Movimento da lua
-            heartMoon.position.x = Math.cos(tempo * 2.5) * 16;
-            heartMoon.position.z = Math.sin(tempo * 2.5) * 16;
-            heartMoon.rotation.y += 0.01;
+            // Movimento orbital e rotação da lua realista
+            moon.position.x = Math.cos(tempo * 2.5) * 16;
+            moon.position.z = Math.sin(tempo * 2.5) * 16;
+            moon.rotation.y += 0.005; // Gira de forma suave revelando as crateras rochosas
 
             nameSprite.lookAt(camera.position);
 
