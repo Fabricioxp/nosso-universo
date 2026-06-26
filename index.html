@@ -3,333 +3,261 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Nosso Universo Privado</title>
+    <title>Universo da Maria</title>
     <style>
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background-color: #020208; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background-color: #010105; font-family: 'Segoe UI', Roboto, sans-serif; }
         
         /* Tela de Introdução */
-        #intro { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at center, #1b1026 0%, #020208 100%); z-index: 1000; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; text-align: center; transition: opacity 1.5s ease-in-out; }
-        #intro h1 { font-size: 3.5rem; margin-bottom: 15px; font-weight: 300; letter-spacing: 5px; text-transform: uppercase; background: linear-gradient(45deg, #ff758c, #ff7eb3); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        #intro p { font-size: 1.2rem; max-width: 600px; color: #dcd1f0; margin-bottom: 40px; line-height: 1.6; padding: 0 20px; font-weight: 300; }
-        #btn-start { padding: 18px 50px; font-size: 1.1rem; color: #fff; background: linear-gradient(45deg, rgba(255,117,140,0.3), rgba(255,126,179,0.3)); border: 1px solid rgba(255,255,255,0.4); border-radius: 50px; cursor: pointer; backdrop-filter: blur(10px); transition: all 0.4s; letter-spacing: 2px; text-transform: uppercase; box-shadow: 0 4px 15px rgba(0,0,0,0.4); }
-        #btn-start:hover { background: #fff; color: #ff758c; box-shadow: 0 0 30px rgba(255,117,140,0.8); border-color: #fff; transform: scale(1.05); }
+        #intro { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at center, #11091c 0%, #010105 100%); z-index: 1000; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; text-align: center; transition: opacity 1.5s ease-in-out; }
+        #intro h1 { font-size: 3.2rem; margin-bottom: 15px; font-weight: 300; letter-spacing: 4px; text-transform: uppercase; background: linear-gradient(45deg, #ff6b8b, #ff8e53); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        #intro p { font-size: 1.1rem; max-width: 500px; color: #cbbad6; margin-bottom: 35px; line-height: 1.6; padding: 0 20px; font-weight: 300; }
+        #btn-start { padding: 15px 45px; font-size: 1rem; color: #fff; background: linear-gradient(45deg, rgba(255,107,139,0.4), rgba(255,142,83,0.4)); border: 1px solid rgba(255,255,255,0.3); border-radius: 50px; cursor: pointer; backdrop-filter: blur(10px); transition: all 0.4s; letter-spacing: 2px; text-transform: uppercase; }
+        #btn-start:hover { background: #fff; color: #ff6b8b; box-shadow: 0 0 30px rgba(255,107,139,0.6); border-color: #fff; transform: scale(1.03); }
 
-        /* HUD - Painel de Mensagens Super Lindo */
-        #hud { position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); width: 85%; max-width: 550px; text-align: center; color: white; z-index: 10; pointer-events: none; opacity: 0; transition: opacity 1s, transform 0.8s; background: rgba(12, 5, 20, 0.7); padding: 25px 35px; border-radius: 24px; border: 1px solid rgba(255, 117, 140, 0.3); box-shadow: 0 15px 50px rgba(0,0,0,0.9), inset 0 0 15px rgba(255,117,140,0.1); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
-        #msg-title { font-size: 1.8rem; font-weight: 600; margin: 0 0 12px 0; letter-spacing: 1px; color: #ff9ebb; text-shadow: 0 2px 15px rgba(255,117,140,0.5); }
-        #msg-body { font-size: 1.1rem; margin: 0; color: #f0e6f2; font-weight: 400; line-height: 1.6; }
+        /* HUD Pequeno e Delicado */
+        #hud { position: absolute; bottom: 25px; left: 50%; transform: translateX(-50%); width: 85%; max-width: 480px; text-align: center; color: white; z-index: 10; pointer-events: none; opacity: 0; transition: opacity 0.8s, transform 0.8s; background: rgba(6, 3, 11, 0.75); padding: 15px 25px; border-radius: 16px; border: 1px solid rgba(255, 107, 139, 0.25); box-shadow: 0 10px 30px rgba(0,0,0,0.8); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); }
+        #msg-title { font-size: 1.4rem; font-weight: 600; margin: 0 0 6px 0; color: #ff9ebb; text-shadow: 0 2px 10px rgba(255,107,139,0.4); }
+        #msg-body { font-size: 0.95rem; margin: 0; color: #e5def0; font-weight: 400; line-height: 1.5; }
 
-        /* Menu de Navegação Interativo */
-        #nav-menu { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); z-index: 20; display: flex; gap: 10px; background: rgba(255, 255, 255, 0.05); padding: 10px 20px; border-radius: 50px; backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.1); flex-wrap: wrap; justify-content: center; }
-        .nav-btn { background: transparent; border: none; color: #ccc; padding: 8px 16px; border-radius: 20px; cursor: pointer; font-size: 0.9rem; transition: all 0.3s; font-weight: 500; }
-        .nav-btn:hover, .nav-btn.active { color: #fff; background: rgba(255, 117, 140, 0.4); text-shadow: 0 0 8px #fff; box-shadow: 0 0 10px rgba(255,117,140,0.3); }
-        .nav-btn.align-btn { background: linear-gradient(45deg, #ff758c, #ff7eb3); color: white; font-weight: bold; }
-        .nav-btn.align-btn:hover { background: #fff; color: #ff758c; box-shadow: 0 0 15px #ff758c; }
+        /* Menu de Navegação Otimizado */
+        #nav-container { position: absolute; top: 15px; left: 50%; transform: translateX(-50%); z-index: 20; display: flex; flex-direction: column; align-items: center; gap: 8px; width: 90%; max-width: 700px; }
+        #nav-menu { display: flex; gap: 6px; background: rgba(5, 3, 10, 0.6); padding: 6px 12px; border-radius: 30px; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.08); flex-wrap: wrap; justify-content: center; transition: all 0.4s ease; max-height: 200px; overflow: hidden; }
+        #nav-menu.hidden { max-height: 0; padding: 0; border: none; opacity: 0; pointer-events: none; }
+        
+        .nav-btn { background: transparent; border: none; color: #b5a9c0; padding: 6px 12px; border-radius: 15px; cursor: pointer; font-size: 0.82rem; transition: all 0.2s; font-weight: 500; }
+        .nav-btn:hover, .nav-btn.active { color: #fff; background: rgba(255, 107, 139, 0.35); text-shadow: 0 0 5px #fff; }
+        .nav-btn.align-btn { background: linear-gradient(45deg, #ff6b8b, #ff8e53); color: white; font-weight: bold; }
+        
+        /* Botão Lindo de Esconder/Mostrar */
+        #toggle-menu { background: rgba(255, 107, 139, 0.2); border: 1px solid rgba(255, 107, 139, 0.4); color: #ff9ebb; padding: 4px 14px; border-radius: 20px; cursor: pointer; font-size: 0.75rem; font-weight: 600; letter-spacing: 1px; backdrop-filter: blur(5px); transition: all 0.3s; }
+        #toggle-menu:hover { background: rgba(255, 107, 139, 0.4); color: #fff; }
     </style>
 </head>
 <body>
 
     <div id="intro">
-        <h1>Nosso Universo</h1>
-        <p>Eu criei um espaço inteirinho para te mostrar o tamanho do meu amor por você. Viaje por ele e descubra.</p>
-        <button id="btn-start" onclick="iniciar()">Entrar no Seu Universo</button>
+        <h1>O Universo de Nós Dois</h1>
+        <p>Um espaço inteiro com todas as estrelas e planetas feito para te mostrar que o meu amor por você não cabe apenas na Terra.</p>
+        <button id="btn-start" onclick="iniciar()">Iniciar Passeio</button>
     </div>
 
-    <div id="nav-menu">
-        <button class="nav-btn active" onclick="mudarFoco('earth')">Planeta Amor (Terra)</button>
-        <button class="nav-btn" onclick="mudarFoco('sun')">Sol</button>
-        <button class="nav-btn" onclick="mudarFoco('marte')">Marte</button>
-        <button class="nav-btn" onclick="mudarFoco('jupiter')">Júpiter</button>
-        <button class="nav-btn" onclick="mudarFoco('saturno')">Saturno</button>
-        <button class="nav-btn align-btn" onclick="alinharCamera()">✨ Alinhar e Voltar</button>
+    <div id="nav-container">
+        <button id="toggle-menu" onclick="AlternarMenu()">Esconder Painel 👁️</button>
+        <div id="nav-menu">
+            <button class="nav-btn" onclick="mudarFoco('sun')">☀️ Sol</button>
+            <button class="nav-btn" onclick="mudarFoco('mercurio')">Mercúrio</button>
+            <button class="nav-btn" onclick="mudarFoco('venus')">Vênus</button>
+            <button class="nav-btn active" onclick="mudarFoco('earth')">🌍 Terra</button>
+            <button class="nav-btn" onclick="mudarFoco('marte')">Marte</button>
+            <button class="nav-btn" onclick="mudarFoco('jupiter')">🪐 Maria (Júpiter)</button>
+            <button class="nav-btn" onclick="mudarFoco('saturno')">Saturno</button>
+            <button class="nav-btn" onclick="mudarFoco('urano')">Urano</button>
+            <button class="nav-btn" onclick="mudarFoco('netuno')">Netuno</button>
+            <button class="nav-btn" onclick="mudarFoco('plutao')">Plutão</button>
+            <button class="nav-btn align-btn" onclick="alinharCamera()">✨ Focar de Perto</button>
+        </div>
     </div>
     
     <div id="hud">
-        <h2 id="msg-title">Carregando...</h2>
-        <p id="msg-body">Prepare seu coração para a viagem.</p>
+        <h2 id="msg-title">Calculando órbitas...</h2>
+        <p id="msg-body">Alinhando estrelas para a Maria.</p>
     </div>
 
     <script type="module">
         import * as THREE from 'https://cdn.skypack.dev/three@0.136.0';
         import { OrbitControls } from 'https://cdn.skypack.dev/three@0.136.0/examples/jsm/controls/OrbitControls.js';
 
-        // 1. CONFIGURAÇÃO BASE DO MOTOR
+        // 1. MOTOR DO ESPAÇO
         const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 300000);
+        const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 500000);
         const renderer = new THREE.WebGLRenderer({ antialias: true, logarithmicDepthBuffer: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         document.body.appendChild(renderer.domElement);
 
         const loader = new THREE.TextureLoader();
-
-        // Alvos de câmera
         let focoAtual = 'earth';
-        const posicoesGlobais = {
-            sun: new THREE.Vector3(15000, 0, 0),
-            earth: new THREE.Vector3(15150, 0, 0),
-            marte: new THREE.Vector3(15240, 0, 0),
-            jupiter: new THREE.Vector3(15450, 0, 0),
-            saturno: new THREE.Vector3(15700, 0, 0)
-        };
+        
+        // Coordenadas mundiais dos planetas (vão atualizar dinamicamente no motor)
+        const posicoesGlobais = { sun: new THREE.Vector3(20000, 0, 0) };
 
-        // 2. A VIA LÁCTEA MÁGICA (Colorida e Romântica)
-        const galaxyParams = {
-            count: 180000,
-            size: 130,
-            radius: 50000,
-            branches: 5,
-            spin: 1.8,
-            randomness: 0.22,
-            insideColor: '#ff758c',  // Rosa/Magenta Apaixonado
-            outsideColor: '#251b64' // Roxo Cósmico Profundo
-        };
-
+        // 2. VIA LÁCTEA REALISTA ESPIRALADA (Remodelada para ficar perfeita)
         const galaxyGeometry = new THREE.BufferGeometry();
-        const positions = new Float32Array(galaxyParams.count * 3);
-        const colors = new Float32Array(galaxyParams.count * 3);
-        const colorInside = new THREE.Color(galaxyParams.insideColor);
-        const colorOutside = new THREE.Color(galaxyParams.outsideColor);
+        const gPoints = 160000;
+        const gPositions = new Float32Array(gPoints * 3);
+        const gColors = new Float32Array(gPoints * 3);
+        
+        const colCore = new THREE.Color('#ff7ea5'); // Brilho central suave
+        const colArm = new THREE.Color('#4c3b99');  // Braços roxos azulados profundos
 
-        for(let i = 0; i < galaxyParams.count; i++) {
+        for(let i = 0; i < gPoints; i++) {
             const i3 = i * 3;
-            const radius = Math.random() * galaxyParams.radius;
-            const spinAngle = radius * galaxyParams.spin / galaxyParams.radius;
-            const branchAngle = ((i % galaxyParams.branches) / galaxyParams.branches) * Math.PI * 2;
+            const r = Math.pow(Math.random(), 2.5) * 65000; // Distribuição orgânica densa no centro
+            const arms = 4;
+            const theta = ((i % arms) / arms) * Math.PI * 2 + (r * 0.00006); // Curvatura perfeita
+
+            // Dispersão suave de poeira estelar nas bordas (Adeus formato esquisito)
+            const spread = Math.pow(Math.random(), 2) * (Math.random() < 0.5 ? 1 : -1) * r * 0.12;
+            const ySpread = (Math.random() - 0.5) * (65000 - r) * 0.05;
+
+            gPositions[i3] = Math.cos(theta) * r + spread;
+            gPositions[i3+1] = ySpread;
+            gPositions[i3+2] = Math.sin(theta) * r + (Math.random() - 0.5) * r * 0.12;
+
+            const finalCol = colCore.clone().lerp(colArm, r / 65000);
+            if(Math.random() > 0.95) finalCol.addScalar(0.4); // Estrelas brilhando forte isoladas
             
-            const randomX = Math.pow(Math.random(), 3) * (Math.random() < 0.5 ? 1 : -1) * galaxyParams.randomness * radius;
-            const randomY = Math.pow(Math.random(), 3) * (Math.random() < 0.5 ? 1 : -1) * galaxyParams.randomness * radius * 0.25;
-            const randomZ = Math.pow(Math.random(), 3) * (Math.random() < 0.5 ? 1 : -1) * galaxyParams.randomness * radius;
-
-            positions[i3] = Math.cos(branchAngle + spinAngle) * radius + randomX;
-            positions[i3+1] = randomY;
-            positions[i3+2] = Math.sin(branchAngle + spinAngle) * radius + randomZ;
-
-            const mixedColor = colorInside.clone();
-            mixedColor.lerp(colorOutside, radius / galaxyParams.radius);
-            
-            // Adicionar brilho extra aleatório nas estrelas
-            if(Math.random() > 0.98) { mixedColor.addScalar(0.5); }
-
-            colors[i3] = mixedColor.r;
-            colors[i3+1] = mixedColor.g;
-            colors[i3+2] = mixedColor.b;
+            gColors[i3] = finalCol.r;
+            gColors[i3+1] = finalCol.g;
+            gColors[i3+2] = finalCol.b;
         }
+        galaxyGeometry.setAttribute('position', new THREE.BufferAttribute(gPositions, 3));
+        galaxyGeometry.setAttribute('color', new THREE.BufferAttribute(gColors, 3));
 
-        galaxyGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-        galaxyGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-
-        // Estrela cintilante redonda usando canvas para suavizar o ponto
-        const pCanvas = document.createElement('canvas');
-        pCanvas.width = 16; pCanvas.height = 16;
-        const ctx = pCanvas.getContext('2d');
-        const grad = ctx.createRadialGradient(8,8,0, 8,8,8);
-        grad.addColorStop(0, 'rgba(255,255,255,1)');
-        grad.addColorStop(1, 'rgba(255,255,255,0)');
-        ctx.fillStyle = grad; ctx.fillRect(0,0,16,16);
-        const pTex = new THREE.CanvasTexture(pCanvas);
+        // Textura redonda suave para as estrelas
+        const pCanvas = document.createElement('canvas'); pCanvas.width = 16; pCanvas.height = 16;
+        const gCtx = pCanvas.getContext('2d');
+        const grad = gCtx.createRadialGradient(8,8,0, 8,8,8);
+        grad.addColorStop(0, 'rgba(255,255,255,1)'); grad.addColorStop(1, 'rgba(255,255,255,0)');
+        gCtx.fillStyle = grad; gCtx.fillRect(0,0,16,16);
 
         const galaxyMaterial = new THREE.PointsMaterial({
-            size: galaxyParams.size,
-            sizeAttenuation: true,
-            depthWrite: false,
-            blending: THREE.AdditiveBlending,
-            vertexColors: true,
-            transparent: true,
-            map: pTex,
-            opacity: 0.9
+            size: 110, sizeAttenuation: true, depthWrite: false,
+            blending: THREE.AdditiveBlending, vertexColors: true,
+            transparent: true, map: new THREE.CanvasTexture(pCanvas), opacity: 0.85
         });
-
         const galaxy = new THREE.Points(galaxyGeometry, galaxyMaterial);
         scene.add(galaxy);
 
-        // Estrelas de fundo brilhantes normais
-        const bgStarsGeo = new THREE.BufferGeometry();
-        const bgStarsPos = new Float32Array(5000 * 3);
-        for(let i=0; i<15000; i++) {
-            bgStarsPos[i] = (Math.random() - 0.5) * 160000;
-        }
-        bgStarsGeo.setAttribute('position', new THREE.BufferAttribute(bgStarsPos, 3));
-        const bgStars = new THREE.Points(bgStarsGeo, new THREE.PointsMaterial({color: 0xffffff, size: 40, transparent: true, opacity: 0.6}));
-        scene.add(bgStars);
+        // 3. GRUPO DO SISTEMA SOLAR (Centralizado num braço bonito da Via Láctea)
+        const solarSystem = new THREE.Group();
+        solarSystem.position.set(20000, 0, 0);
+        scene.add(solarSystem);
 
+        scene.add(new THREE.AmbientLight(0x2d2540));
+        const sunLight = new THREE.PointLight(0xfff5ea, 3, 80000);
+        solarSystem.add(sunLight);
 
-        // 3. O SISTEMA SOLAR ROMÂNTICO
-        const solarSystemGroup = new THREE.Group();
-        solarSystemGroup.position.set(15000, 0, 0); 
-        scene.add(solarSystemGroup);
-
-        const ambient = new THREE.AmbientLight(0x332244);
-        scene.add(ambient);
-
-        const sunLight = new THREE.PointLight(0xfff0ea, 2.5, 60000);
-        solarSystemGroup.add(sunLight);
-
-        // Sol Majestoso
-        const sunGeo = new THREE.SphereGeometry(25, 64, 64);
-        const sunMat = new THREE.MeshBasicMaterial({ color: 0xffaa44 });
-        const sun = new THREE.Mesh(sunGeo, sunMat);
-        solarSystemGroup.add(sun);
-
-        // Brilho do Sol (Glow Effect)
-        const sunGlow = new THREE.Mesh(new THREE.SphereGeometry(28, 32, 32), new THREE.MeshBasicMaterial({color: 0xff7733, transparent: true, opacity: 0.25, side: THREE.BackSide}));
+        // O SOL - COMBUSTÍVEL DO AMOR
+        const sun = new THREE.Mesh(new THREE.SphereGeometry(35, 64, 64), new THREE.MeshBasicMaterial({ color: 0xff9922 }));
+        const sunGlow = new THREE.Mesh(new THREE.SphereGeometry(39, 32, 32), new THREE.MeshBasicMaterial({ color: 0xff4400, transparent: true, opacity: 0.3, side: THREE.BackSide }));
         sun.add(sunGlow);
+        solarSystem.add(sun);
 
-        // 4. PLANETA AMOR (A TERRA E OS CORAÇÕES)
-        const earthSystem = new THREE.Group();
-        earthSystem.position.set(150, 0, 0); 
-        solarSystemGroup.add(earthSystem);
-
-        const earthGeo = new THREE.SphereGeometry(6, 64, 64);
-        const earthMat = new THREE.MeshStandardMaterial({
-            map: loader.load('https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/planets/earth_atmos_2048.jpg'),
-            roughness: 0.6,
-            bumpScale: 0.05
-        });
-        const earth = new THREE.Mesh(earthGeo, earthMat);
-        earthSystem.add(earth);
-
-        // Atmosfera Rosa Romântica
-        const atmosGeo = new THREE.SphereGeometry(6.3, 64, 64);
-        const atmosMat = new THREE.MeshBasicMaterial({ color: 0xff758c, transparent: true, opacity: 0.2, side: THREE.BackSide });
-        const atmosphere = new THREE.Mesh(atmosGeo, atmosMat);
-        earthSystem.add(atmosphere);
-
-        // Gerador de Formato de Coração 3D Eficiente para as Rochas
-        function criarGeometriaCoracao() {
+        // 4. LUA DE CORAÇÃO REALISTA DA TERRA
+        function gerarGeometriaCoracao3D() {
             const x = 0, y = 0;
-            const heartShape = new THREE.Shape();
-            heartShape.moveTo( x + 5, y + 5 );
-            heartShape.bezierCurveTo( x + 5, y + 5, x + 4, y, x, y );
-            heartShape.bezierCurveTo( x - 6, y, x - 6, y + 7,x - 6, y + 7 );
-            heartShape.bezierCurveTo( x - 6, y + 11, x - 3, y + 15.4, x + 5, y + 19 );
-            heartShape.bezierCurveTo( x + 12, y + 15.4, x + 16, y + 11, x + 16, y + 7 );
-            heartShape.bezierCurveTo( x + 16, y + 7, x + 16, y, x + 10, y );
-            heartShape.bezierCurveTo( x + 7, y, x + 5, y + 5, x + 5, y + 5 );
-
-            const extrudeSettings = { depth: 2, bevelEnabled: true, bevelSegments: 3, steps: 1, bevelSize: 1, bevelThickness: 1 };
-            const geo = new THREE.ExtrudeGeometry(heartShape, extrudeSettings);
-            geo.center();
-            geo.scale(0.04, 0.04, 0.04);
+            const shape = new THREE.Shape();
+            shape.moveTo( x + 5, y + 5 );
+            shape.bezierCurveTo( x + 5, y + 5, x + 4, y, x, y );
+            shape.bezierCurveTo( x - 6, y, x - 6, y + 7, x - 6, y + 7 );
+            shape.bezierCurveTo( x - 6, y + 11, x - 3, y + 15.4, x + 5, y + 19 );
+            shape.bezierCurveTo( x + 12, y + 15.4, x + 16, y + 11, x + 16, y + 7 );
+            shape.bezierCurveTo( x + 16, y + 7, x + 16, y, x + 10, y );
+            shape.bezierCurveTo( x + 7, y, x + 5, y + 5, x + 5, y + 5 );
+            const settings = { depth: 4, bevelEnabled: true, bevelSegments: 5, steps: 1, bevelSize: 1.5, bevelThickness: 1.5 };
+            const geo = new THREE.ExtrudeGeometry(shape, settings);
+            geo.center(); geo.scale(0.2, 0.2, 0.2);
             return geo;
         }
 
-        // Anel de Rochas em formato de Coração ao redor do Planeta Amor
-        const heartGroup = new THREE.Group();
-        earthSystem.add(heartGroup);
+        // Criando a Terra
+        const earthGroup = new THREE.Group();
+        const earth = new THREE.Mesh(new THREE.SphereGeometry(7.5, 64, 64), new THREE.MeshStandardMaterial({
+            map: loader.load('https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/planets/earth_atmos_2048.jpg'), roughness: 0.5
+        }));
+        earthGroup.add(earth);
 
-        const heartGeo = criarGeometriaCoracao();
-        const totalCoracoes = 45;
-        const listaCoracoes = [];
+        // Lua de Coração Rochosa Vermelha/Rosa
+        const heartMoonGeo = gerarGeometriaCoracao3D();
+        const heartMoonMat = new THREE.MeshStandardMaterial({
+            color: 0xff4466, roughness: 0.9, metalness: 0.1,
+            bumpMap: loader.load('https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/water/waterbump.chile.jpg'), bumpScale: 0.2
+        });
+        const heartMoon = new THREE.Mesh(heartMoonGeo, heartMoonMat);
+        heartMoon.position.set(22, 2, 0);
+        earthGroup.add(heartMoon);
+        solarSystem.add(earthGroup);
 
-        for(let i=0; i<totalCoracoes; i++) {
-            // Variações de tons de vermelho e rosa brilhantes para as rochas
-            const tonsCores = [0xff2244, 0xff5577, 0xff758c, 0xcc1133];
-            const corEscolhida = tonsCores[Math.floor(Math.random() * tonsCores.length)];
+        // 5. JÚPITER COM O NOME "MARIA" DENTRO
+        const jupiterGroup = new THREE.Group();
+        const jupiter = new THREE.Mesh(new THREE.SphereGeometry(18, 64, 64), new THREE.MeshStandardMaterial({ color: 0xe0a96d, roughness: 0.6 }));
+        jupiterGroup.add(jupiter);
+        solarSystem.add(jupiterGroup);
 
-            const heartMat = new THREE.MeshStandardMaterial({ 
-                color: corEscolhida, 
-                roughness: 0.4, 
-                metalness: 0.2,
-                emissive: corEscolhida,
-                emissiveIntensity: 0.3
-            });
-
-            const meshCoracao = new THREE.Mesh(heartGeo, heartMat);
-            
-            // Espalhar em formato de anel inclinado bonito
-            const angulo = (i / totalCoracoes) * Math.PI * 2;
-            const raioAnel = 12 + Math.random() * 6;
-            
-            meshCoracao.position.set(Math.cos(angulo) * raioAnel, (Math.random() - 0.5) * 3, Math.sin(angulo) * raioAnel);
-            meshCoracao.rotation.set(Math.random()*Math.PI, Math.random()*Math.PI, 0);
-            
-            heartGroup.add(meshCoracao);
-            listaCoracoes.push({
-                mesh: meshCoracao,
-                rotSpeedX: (Math.random() - 0.5) * 0.02,
-                rotSpeedY: (Math.random() - 0.5) * 0.02
-            });
-        }
-
-        // Lua Linda
-        const moon = new THREE.Mesh(new THREE.SphereGeometry(1.2, 32, 32), new THREE.MeshStandardMaterial({ color: 0xddeeff, roughness: 0.9 }));
-        moon.position.set(28, 2, 0);
-        earthSystem.add(moon);
+        // Criando o Canvas para projetar o Nome Maria brilhando na atmosfera do planeta
+        const nameCanvas = document.createElement('canvas'); nameCanvas.width = 512; nameCanvas.height = 256;
+        const nCtx = nameCanvas.getContext('2d');
+        nCtx.fillStyle = 'rgba(0,0,0,0)'; nCtx.fillRect(0,0,512,256);
+        nCtx.font = 'Bold 75px sans-serif'; nCtx.fillStyle = '#ffffff'; nCtx.textAlign = 'center';
+        nCtx.shadowColor = '#ff4477'; nCtx.shadowBlur = 20;
+        nCtx.fillText('MARIA', 256, 140);
+        
+        const nameTex = new THREE.CanvasTexture(nameCanvas);
+        const nameRing = new THREE.Mesh(new THREE.BufferGeometry(), new THREE.MeshBasicMaterial({ map: nameTex, transparent: true, side: THREE.DoubleSide, blending: THREE.AdditiveBlending }));
+        // Criar uma faixa sutil ao redor de júpiter exibindo o nome
+        nameRing.geometry = new THREE.SphereGeometry(18.4, 32, 32);
+        jupiter.add(nameRing);
 
 
-        // 5. OUTROS PLANETAS DETALHADOS
-        const planetConfigs = [
-            { name: 'marte', size: 4.5, dist: 240, color: 0xe25b38, speed: 0.0015 },
-            { name: 'jupiter', size: 14.0, dist: 450, color: 0xdfb887, speed: 0.0008 },
-            { name: 'saturno', size: 11.0, dist: 700, color: 0xe2bf7d, speed: 0.0005 }
+        // 6. ADICIONANDO TODOS OS OUTROS PLANETAS DO SISTEMA SOLAR
+        const infoPlanetas = [
+            { name: 'mercurio', size: 2.5, dist: 60, color: 0x888888, speed: 0.004 },
+            { name: 'venus', size: 5.8, dist: 95, color: 0xe3bb87, speed: 0.003 },
+            { name: 'marte', size: 4.0, dist: 195, color: 0xc1440e, speed: 0.0016 },
+            { name: 'saturno', size: 14.5, dist: 330, color: 0xe2bf7d, speed: 0.0009, ring: true },
+            { name: 'urano', size: 9.0, dist: 420, color: 0x4fe3d6, speed: 0.0005 }, // Azul Preferido Dela!
+            { name: 'netuno', size: 8.5, dist: 500, color: 0x6a2da8, speed: 0.0003 }, // Roxinho Seu!
+            { name: 'plutao', size: 1.5, dist: 560, color: 0x7a6b58, speed: 0.0002 }
         ];
-        const planetMeshes = {};
 
-        planetConfigs.forEach(p => {
-            const group = new THREE.Group();
-            const mesh = new THREE.Mesh(new THREE.SphereGeometry(p.size, 64, 64), new THREE.MeshStandardMaterial({ color: p.color, roughness: 0.7 }));
-            group.add(mesh);
-            group.position.set(p.dist, 0, 0);
-
-            // Adicionar anel estiloso em Saturno
-            if(p.name === 'saturno') {
-                const ringGeo = new THREE.RingGeometry(p.size + 3, p.size + 12, 64);
-                const ringMat = new THREE.MeshStandardMaterial({ color: 0xc2a066, side: THREE.DoubleSide, transparent: true, opacity: 0.7 });
-                const ring = new THREE.Mesh(ringGeo, ringMat);
-                ring.rotation.x = Math.PI / 2.3;
-                group.add(ring);
+        const meshesPlanetas = {};
+        infoPlanetas.forEach(p => {
+            const grupo = new THREE.Group();
+            const mesh = new THREE.Mesh(new THREE.SphereGeometry(p.size, 48, 48), new THREE.MeshStandardMaterial({ color: p.color, roughness: 0.7 }));
+            grupo.add(mesh);
+            
+            if(p.ring) { // Anel de Saturno
+                const rGeo = new THREE.RingGeometry(p.size + 3, p.size + 14, 64);
+                const rMat = new THREE.MeshStandardMaterial({ color: 0xa88e67, side: THREE.DoubleSide, transparent: true, opacity: 0.6 });
+                const rMesh = new THREE.Mesh(rGeo, rMat); rMesh.rotation.x = Math.PI/2.2;
+                grupo.add(rMesh);
             }
-
-            solarSystemGroup.add(group);
-            planetMeshes[p.name] = { group: group, mesh: mesh, dist: p.dist, angle: Math.random() * Math.PI * 2, speed: p.speed };
+            solarSystem.add(grupo);
+            meshesPlanetas[p.name] = { group: grupo, mesh: mesh, dist: p.dist, angle: Math.random()*10, speed: p.speed };
         });
 
+        // Incluindo dados da Terra e Júpiter na lista de atualização
+        meshesPlanetas['earth'] = { group: earthGroup, mesh: earth, dist: 140, angle: 1, speed: 0.002 };
+        meshesPlanetas['jupiter'] = { group: jupiterGroup, mesh: jupiter, dist: 260, angle: 4, speed: 0.001 };
 
-        // 6. CONTROLES DE CÂMERA INTELIGENTES
+
+        // 7. TEXTOS SIMPLES, LINDOS E SUPER ESPECIAIS (Estilo Ensino Médio)
+        const textos = {
+            sun: { title: "O Sol: Nosso Combustível ☀️", body: "O Sol é o coração do sistema solar. Ele brilha sem parar e dá energia para tudo. Eu fiz dele o nosso combustível: enquanto ele estiver brilhando no céu, o meu amor por você vai ser eterno e nunca vai apagar." },
+            mercurio: { title: "Mercúrio Pequenino", body: "Ele é o planeta mais rapidinho e fica bem perto do Sol. É como eu correndo pra te ver sempre que dá saudade!" },
+            venus: { title: "Vênus Brilhante", body: "Vênus é o planeta mais quente e brilha tanto que parece uma joia no céu. Ele lembra o brilho dos seus olhos quando você sorri pra mim." },
+            earth: { title: "Planeta Amor (Terra) 🌍", body: "Olha que lindo! Em vez de uma lua normal, a Terra agora tem uma Lua de Coração feita de rocha pura. Ela está aí para provar que até a força da gravidade do nosso mundo é feita de amor." },
+            marte: { title: "Marte Vermelho", body: "O planeta vermelho e cheio de mistérios. Ele representa a nossa força e a paixão que faz a nossa história ser tão viva e bonita." },
+            jupiter: { title: "Júpiter da Minha Maria ✨❤️", body: "Este é o maior planeta do universo, e eu escrevi o seu nome bem ali no meio dele! Eu amo esse planeta, mas amo muito, muito mais você. Júpiter é gigante, mas é menor do que o espaço que você ocupa na minha vida." },
+            saturno: { title: "Saturno e Seus Anéis", body: "Saturno é lindo e cheio de anéis charmosos. É o planeta que mostra que as coisas mais bonitas do mundo merecem ser cuidadas com todo o carinho." },
+            urano: { title: "Urano Azul-Piscina 💎", body: "Este é o gigante de gelo que eu pintei com o seu azul preferido. Ele é calmo, lindo e tem uma cor que transmite paz, exatamente o que eu sinto quando estou com você." },
+            netuno: { title: "Netuno Roxo Cósmico 🔮", body: "O outro gigante de gelo, brilhando no meu roxo preferido. Viu como ele e Urano ficam lindos juntos no espaço? Somos eu e você na imensidão." },
+            plutao: { title: "Plutão Solitário", body: "Ele está lá no finalzinho, pequenino e esquecido. Mas aqui no nosso universo ele é importante, porque até a menor parte do espaço me lembra você." },
+            universo: { title: "A Via-Láctea Espiral", body: "Olha como as estrelas se formam em espiral de forma tão perfeita e suave ao fundo. O universo inteiro faz sentido quando estou do seu lado." }
+        };
+
+        // CONTROLES
         const controls = new OrbitControls(camera, renderer.domElement);
-        controls.enableDamping = true;
-        controls.dampingFactor = 0.05;
-        controls.minDistance = 9; 
-        controls.maxDistance = 90000; 
+        controls.enableDamping = true; controls.dampingFactor = 0.05;
+        controls.minDistance = 10; controls.maxDistance = 120000;
 
-        // Posição Inicial da câmera focada no Planeta Amor (Terra)
-        camera.position.set(posicoesGlobais.earth.x + 15, posicoesGlobais.earth.y + 10, posicoesGlobais.earth.z + 25);
-        controls.target.copy(posicoesGlobais.earth);
+        camera.position.set(20140, 15, 25);
+        controls.target.set(20140, 0, 0);
 
-        // Elementos de Texto do Painel
         const uiTitle = document.getElementById('msg-title');
         const uiBody = document.getElementById('msg-body');
 
-        // Textos Simples e Bonitos estilo Ensino Médio
-        const textosNarrativa = {
-            earth: {
-                title: "Nosso Planeta Amor ❤️",
-                body: "Olha só para a Terra... É gigante e cheia de pessoas. Mas no meio de tanta gente, a parte mais bonita do meu mundo é você. Esses corações girando em volta dela representam o quanto você me faz bem."
-            },
-            sun: {
-                title: "O Sol Radiante",
-                body: "O Sol é a estrela mais brilhante e quente do sistema solar. Ele aquece os planetas de longe, igualzinho ao seu sorriso, que aquece o meu coração mesmo nos dias mais frios."
-            },
-            marte: {
-                title: "O Planeta Marte",
-                body: "Marte é conhecido por ser todo vermelho e forte. Dizem que o vermelho significa paixão, e olhar para ele me lembra a força do que eu sinto por você todos os dias."
-            },
-            jupiter: {
-                title: "O Gigante Júpiter",
-                body: "Este é o maior planeta de todos, cabe tudo aqui dentro! Mas sabia que, mesmo ele sendo desse tamanho todo, o tamanho dele não chega nem perto do tamanho do amor que tenho guardado para você."
-            },
-            saturno: {
-                title: "Os Anéis de Saturno",
-                body: "Saturno é considerado o planeta mais charmoso por causa desses anéis brilhantes em volta dele. É como se o universo tivesse colocado acessórios nele só pra mostrar que a beleza está nos detalhes, assim como em você."
-            },
-            universo: {
-                title: "A Imensidão do Espaço",
-                body: "Tudo isso que você está vendo — as estrelas, as galáxias e o infinito — parece não ter fim, né? É exatamente esse o tamanho do meu amor por você: infinito e cheio de luz."
-            }
-        };
-
-        // Funções Globais do Menu
         window.iniciar = () => {
             document.getElementById('intro').style.opacity = '0';
             setTimeout(() => {
@@ -341,53 +269,83 @@
 
         window.mudarFoco = (alvo) => {
             focoAtual = alvo;
-            
-            // Atualizar classes dos botões
-            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
-            const btnAtivo = Array.from(document.querySelectorAll('.nav-btn')).find(btn => btn.textContent.toLowerCase().includes(alvo === 'earth' ? 'amor' : alvo));
-            if(btnAtivo) btnAtivo.classList.add('active');
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            const btn = Array.from(document.querySelectorAll('.nav-btn')).find(b => b.onclick.toString().includes(`'${alvo}'`));
+            if(btn) btn.classList.add('active');
 
-            // Atualiza textos imediatamente no click
-            if(textosNarrativa[alvo]) {
-                uiTitle.innerText = textosNarrativa[alvo].title;
-                uiBody.innerText = textosNarrativa[alvo].body;
+            if(textos[alvo]) {
+                uiTitle.innerText = textos[alvo].title;
+                uiBody.innerText = textos[alvo].body;
             }
         };
 
         window.alinharCamera = () => {
-            // Trazer a câmera de volta suavemente para perto do planeta atual ativo
-            const posFoco = obterPosicaoFocoAtual();
-            camera.position.set(posFoco.x + 20, posFoco.y + 10, posFoco.z + 25);
-            controls.target.copy(posFoco);
+            const p = obterPosicaoFoco();
+            const offset = focoAtual === 'sun' ? 75 : 25;
+            camera.position.set(p.x + offset, p.y + 12, p.z + offset);
+            controls.target.copy(p);
             controls.update();
         };
 
-        function obterPosicaoFocoAtual() {
-            if (focoAtual === 'sun') return posicoesGlobais.sun;
-            if (focoAtual === 'earth') return posicoesGlobais.earth;
-            return posicoesGlobais[focoAtual] || posicoesGlobais.earth;
+        window.AlternarMenu = () => {
+            const menu = document.getElementById('nav-menu');
+            const btn = document.getElementById('toggle-menu');
+            if(menu.classList.contains('hidden')) {
+                menu.classList.remove('hidden');
+                btn.innerText = "Esconder Painel 👁️";
+            } else {
+                menu.classList.add('hidden');
+                btn.innerText = "Mostrar Planetas 🪐";
+            }
+        };
+
+        function obterPosicaoFoco() {
+            if(focoAtual === 'sun') return solarSystem.position;
+            const p = posicoesGlobais[focoAtual];
+            return p ? p : solarSystem.position;
         }
 
-        function atualizarPosicoesLogicas() {
-            // Atualizar os vetores globais com o movimento de translação real dos planetas para a câmera seguir perfeitamente
-            earthSystem.getWorldPosition(posicoesGlobais.earth);
-            for (let chave in planetMeshes) {
-                planetMeshes[chave].group.getWorldPosition(posicoesGlobais[chave]);
-            }
-        }
+        // 8. LOOP DE ANIMAÇÃO DO ESPAÇO
+        function animate() {
+            requestAnimationFrame(animate);
 
-        function gerenciarNarrativaDinamica() {
-            const posFoco = obterPosicaoFocoAtual();
-            const distanciaDoFoco = camera.position.distanceTo(posFoco);
+            const tempo = Date.now() * 0.0005;
 
-            // Se ela se afastar demais fazendo zoom-out, foca na imensidão do universo automaticamente
-            if (distanciaDoFoco > 2000) {
-                uiTitle.innerText = textosNarrativa.universo.title;
-                uiBody.innerText = textosNarrativa.universo.body;
-            } else if(textosNarrativa[focoAtual]) {
-                uiTitle.innerText = textosNarrativa[focoAtual].title;
-                uiBody.innerText = textosNarrativa[focoAtual].body;
+            // Girar o Sol e a Galáxia suavemente
+            sun.rotation.y += 0.001;
+            galaxy.rotation.y += 0.00015;
+
+            // Mover a Lua de coração da terra e rotacioná-la
+            heartMoon.position.x = Math.cos(tempo * 2.5) * 16;
+            heartMoon.position.z = Math.sin(tempo * 2.5) * 16;
+            heartMoon.rotation.y += 0.01;
+            heartMoon.rotation.x += 0.005;
+
+            // Calcular Translação Real de todos os planetas na Órbita
+            for(let chave in meshesPlanetas) {
+                const p = meshesPlanetas[chave];
+                p.angle += p.speed;
+                p.group.position.x = Math.cos(p.angle) * p.dist;
+                p.group.position.z = Math.sin(p.angle) * p.dist;
+                p.mesh.rotation.y += 0.01;
+
+                // Guardar posição real para a câmera rastrear no espaço
+                if(!posicoesGlobais[chave]) posicoesGlobais[chave] = new THREE.Vector3();
+                p.group.getWorldPosition(posicoesGlobais[chave]);
             }
+
+            // Seguir dinamicamente o planeta selecionado
+            const alvoCam = obterPosicaoFoco();
+            controls.target.lerp(alvoCam, 0.08);
+
+            // Se ela afastar demais a câmera no infinito, muda o texto para a Via-Láctea
+            if(camera.position.distanceTo(alvoCam) > 2200) {
+                uiTitle.innerText = textos.universo.title;
+                uiBody.innerText = textos.universo.body;
+            }
+
+            controls.update();
+            renderer.render(scene, camera);
         }
 
         window.addEventListener('resize', () => {
@@ -396,53 +354,6 @@
             renderer.setSize(window.innerWidth, window.innerHeight);
         });
 
-        // 7. MOTOR DE ANIMAÇÃO CONTÍNUA
-        function animate() {
-            requestAnimationFrame(animate);
-
-            // Movimentos Independentes de Rotação (Giro do próprio corpo)
-            earth.rotation.y += 0.003;
-            atmosphere.rotation.y += 0.001;
-            sun.rotation.y += 0.0005;
-            galaxy.rotation.y += 0.0002; // A galáxia roda devagar e lindamente
-
-            // Rotacionar e balançar as rochas de coração individualmente
-            listaCoracoes.forEach(c => {
-                c.mesh.rotation.x += c.rotSpeedX;
-                c.mesh.rotation.y += c.rotSpeedY;
-            });
-            // O anel inteiro de corações gira ao redor do planeta amor
-            heartGroup.rotation.y += 0.008;
-
-            // Translação Real dos Planetas (Orbitando o Sol)
-            // Terra orbitando
-            const tempo = Date.now() * 0.0001;
-            earthSystem.position.x = Math.cos(tempo * 2) * 160;
-            earthSystem.position.z = Math.sin(tempo * 2) * 160;
-            moon.position.x = Math.cos(tempo * 12) * 14;
-            moon.position.z = Math.sin(tempo * 12) * 14;
-
-            // Outros planetas orbitando
-            for (let chave in planetMeshes) {
-                const p = planetMeshes[chave];
-                p.angle += p.speed;
-                p.group.position.x = Math.cos(p.angle) * p.dist;
-                p.group.position.z = Math.sin(p.angle) * p.dist;
-                p.mesh.rotation.y += 0.008;
-            }
-
-            // Atualiza as coordenadas que os botões de navegação usam
-            atualizarPosicoesLogicas();
-
-            // Faz os controles focarem continuamente no planeta selecionado
-            const pontoDestino = obterPosicaoFocoAtual();
-            controls.target.lerp(pontoDestino, 0.1); // Transição suave entre planetas
-
-            controls.update();
-            gerenciarNarrativaDinamica();
-            renderer.render(scene, camera);
-        }
-        
         animate();
     </script>
 </body>
