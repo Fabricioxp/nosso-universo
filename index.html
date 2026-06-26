@@ -19,14 +19,13 @@
         #msg-title { font-size: 1.4rem; font-weight: 600; margin: 0 0 6px 0; color: #ff9ebb; text-shadow: 0 2px 10px rgba(255,107,139,0.4); }
         #msg-body { font-size: 0.95rem; margin: 0; color: #e5def0; font-weight: 400; line-height: 1.5; }
 
-        /* Menu de Navegação Otimizado */
+        /* Menu de Navegação */
         #nav-container { position: absolute; top: 15px; left: 50%; transform: translateX(-50%); z-index: 20; display: flex; flex-direction: column; align-items: center; gap: 8px; width: 90%; max-width: 750px; }
         #nav-menu { display: flex; gap: 6px; background: rgba(5, 3, 10, 0.6); padding: 6px 12px; border-radius: 30px; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.08); flex-wrap: wrap; justify-content: center; transition: all 0.4s ease; max-height: 200px; overflow: hidden; }
         #nav-menu.hidden { max-height: 0; padding: 0; border: none; opacity: 0; pointer-events: none; }
         
         .nav-btn { background: transparent; border: none; color: #b5a9c0; padding: 6px 12px; border-radius: 15px; cursor: pointer; font-size: 0.82rem; transition: all 0.2s; font-weight: 500; }
         .nav-btn:hover { color: #fff; background: rgba(255, 107, 139, 0.2); }
-        /* Estado Ativo e Estado Lido (Verde) */
         .nav-btn.active { color: #fff; text-shadow: 0 0 5px #fff; box-shadow: inset 0 0 0 1px rgba(255,255,255,0.2); }
         .nav-btn.visto { color: #2ecc71 !important; text-shadow: 0 0 8px rgba(46, 204, 113, 0.6); }
         .nav-btn.align-btn { background: linear-gradient(45deg, #ff6b8b, #ff8e53); color: white; font-weight: bold; }
@@ -36,13 +35,13 @@
         .top-btn { background: rgba(255, 107, 139, 0.2); border: 1px solid rgba(255, 107, 139, 0.4); color: #ff9ebb; padding: 4px 14px; border-radius: 20px; cursor: pointer; font-size: 0.75rem; font-weight: 600; letter-spacing: 1px; backdrop-filter: blur(5px); transition: all 0.3s; }
         .top-btn:hover { background: rgba(255, 107, 139, 0.4); color: #fff; }
 
-        /* Botão do Grand Finale (Big Bang) */
-        #btn-finale { position: fixed; top: 53%; left: 50%; transform: translate(-50%, -50%) scale(0.9); z-index: 500; padding: 18px 35px; font-size: 1.1rem; color: #fff; background: linear-gradient(45deg, #2ecc71, #1abc9c); border: 2px solid rgba(255,255,255,0.6); border-radius: 50px; cursor: pointer; font-weight: bold; letter-spacing: 1px; box-shadow: 0 0 30px rgba(46,204,113,0.6); transition: all 0.5s ease-in-out; opacity: 0; pointer-events: none; }
-        #btn-finale.show { opacity: 1; pointer-events: auto; transform: translate(-50%, -50%) scale(1); animation: pulsarBotao 2s infinite alternate; }
-        @keyframes pulsarBotao { from { box-shadow: 0 0 20px rgba(46,204,113,0.5); } to { box-shadow: 0 0 40px rgba(26,188,156,0.9), 0 0 10px #fff; } }
+        /* Botão do Big Bang - Agora SEGURO e DISCRETO no menu superior */
+        #btn-finale { background: linear-gradient(45deg, #2ecc71, #1abc9c); border: 1px solid #fff; color: #fff; display: none; }
+        #btn-finale.show { display: inline-block; animation: pulsarBotao 1.5s infinite alternate; }
+        @keyframes pulsarBotao { from { box-shadow: 0 0 8px rgba(46,204,113,0.6); transform: scale(1); } to { box-shadow: 0 0 20px rgba(26,188,156,1); transform: scale(1.04); } }
 
-        /* Cortina de transição escura para reset */
-        #fade-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: #010105; z-index: 2000; opacity: 0; pointer-events: none; transition: opacity 2s ease-in-out; }
+        /* Cortina de transição */
+        #fade-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: #010105; z-index: 2000; opacity: 0; pointer-events: none; transition: opacity 2.5s ease-in-out; }
     </style>
 </head>
 <body>
@@ -59,12 +58,11 @@
         <button id="btn-start" onclick="iniciar()">Iniciar Passeio</button>
     </div>
 
-    <button id="btn-finale" onclick="dispararExplosao()">💥 Ativar o Big Bang do Nosso Amor</button>
-
     <div id="nav-container">
         <div class="top-controls">
             <button id="toggle-menu" class="top-btn" onclick="AlternarMenu()">Esconder Painel 👁️</button>
             <button id="toggle-audio" class="top-btn" onclick="AlternarAudio()">Pausar Música ⏸️</button>
+            <button id="btn-finale" class="top-btn" onclick="dispararExplosao()">💥 ATIVAR BIG BANG</button>
         </div>
         <div id="nav-menu">
             <button class="nav-btn" data-id="galaxy" onclick="mudarFoco('galaxy')">🌌 Via-Láctea</button>
@@ -91,7 +89,6 @@
         import * as THREE from 'https://cdn.skypack.dev/three@0.136.0';
         import { OrbitControls } from 'https://cdn.skypack.dev/three@0.136.0/examples/jsm/controls/OrbitControls.js';
 
-        // 1. MOTOR DO ESPAÇO
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 500000);
         const renderer = new THREE.WebGLRenderer({ antialias: true, logarithmicDepthBuffer: true });
@@ -104,7 +101,6 @@
         let explodindo = false;
         let velExplosao = 0;
         
-        // Controle de Planetas Vistos
         const planetasParaVerificar = ['galaxy', 'sun', 'mercurio', 'venus', 'earth', 'marte', 'jupiter', 'saturno', 'urano', 'netuno', 'plutao'];
         let planetasVistos = new Set();
 
@@ -113,7 +109,7 @@
             galaxy: new THREE.Vector3(0, 4000, 0)
         };
 
-        // 2. VIA LÁCTEA
+        // VIA LÁCTEA
         const galaxyGeometry = new THREE.BufferGeometry();
         const gPoints = 170000;
         const gPositions = new Float32Array(gPoints * 3);
@@ -170,7 +166,7 @@
             shootingStars.push({ mesh: line, speed: 20 + Math.random()*20 });
         }
 
-        // 3. SISTEMA SOLAR
+        // SISTEMA SOLAR
         const solarSystem = new THREE.Group();
         solarSystem.position.set(20000, 0, 0);
         scene.add(solarSystem);
@@ -180,12 +176,13 @@
         solarSystem.add(sunLight);
 
         // O SOL
-        const sun = new THREE.Mesh(new THREE.SphereGeometry(35, 64, 64), new THREE.MeshBasicMaterial({ color: 0xffa033 }));
+        const sunMat = new THREE.MeshBasicMaterial({ color: 0xffa033 });
+        const sun = new THREE.Mesh(new THREE.SphereGeometry(35, 64, 64), sunMat);
         const sunGlow = new THREE.Mesh(new THREE.SphereGeometry(39, 32, 32), new THREE.MeshBasicMaterial({ color: 0xff5500, transparent: true, opacity: 0.3, side: THREE.BackSide }));
         sun.add(sunGlow);
         solarSystem.add(sun);
 
-        // 4. TERRA E LUA ROCHOSA
+        // TERRA E LUA ROCHOSA
         const earthGroup = new THREE.Group();
         const earthMat = new THREE.MeshStandardMaterial({ color: 0x2b82c9, roughness: 0.4 });
         loader.load('https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/planets/earth_atmos_2048.jpg', (tex) => {
@@ -206,7 +203,7 @@
         earthGroup.add(moon);
         solarSystem.add(earthGroup);
 
-        // 5. SATURNO COM O NOME "MARIA"
+        // SATURNO COM O NOME "MARIA"
         const saturnoGroup = new THREE.Group();
         const saturnoMesh = new THREE.Mesh(new THREE.SphereGeometry(13.5, 64, 64), new THREE.MeshStandardMaterial({ color: 0xe2bf7d, roughness: 0.5 }));
         saturnoGroup.add(saturnoMesh);
@@ -231,7 +228,7 @@
         saturnoGroup.add(nameSprite);
         solarSystem.add(saturnoGroup);
 
-        // 6. PLANETAS
+        // PLANETAS
         const infoPlanetas = [
             { name: 'mercurio', size: 2.5, dist: 60, color: 0x999999, speed: 0.004 },
             { name: 'venus', size: 5.8, dist: 95, color: 0xe3bb87, speed: 0.003 },
@@ -254,10 +251,10 @@
         meshesPlanetas['earth'] = { group: earthGroup, mesh: earth, dist: 145, angle: 1, speed: 0.002 };
         meshesPlanetas['saturno'] = { group: saturnoGroup, mesh: saturnoMesh, dist: 340, angle: 5, speed: 0.0008 };
 
-        // 7. TEXTOS
+        // TEXTOS
         const textos = {
             galaxy: { title: "Nossa Via-Láctea 🌌", body: "Olha que lindo tudo girando junto! No meio desse tanto de poeira e mistério, o universo caprichou na nossa história. Saber que você existe faz tudo parecer perfeito." },
-            sun: { title: "O Sol: Nosso Combustível ☀️", body: "O Sol é a estrella que dá energia para todo o espaço. Ele é o combustível do que eu sinto por você: enquanto ele continuar brilhando forte, nosso amor vai ser eterno." },
+            sun: { title: "O Sol: Nosso Combustível ☀️", body: "O Sol é a estrela que dá energia para todo o espaço. Ele é o combustível do que eu sinto por você: enquanto ele continuar brilhando forte, nosso amor vai ser eterno." },
             mercurio: { title: "Mercúrio", body: "Ele corre super rápido em volta do Sol. É igualzinho à velocidade que o meu coração bate toda vez que chega uma mensagem sua no meu celular!" },
             venus: { title: "Vênus", body: "O planeta mais brilhante do céu. Ele me lembra muito o brilho dos seus olhos quando a gente conversa e faz planos para o nosso futuro." },
             earth: { title: "Planeta Terra 🌍", body: "Existem bilhões de pessoas nesse mundo inteiro, mas foi com você que meu coração decidiu bater mais forte. É um milagre lindo a gente ter se encontrado no meio de tanta gente." },
@@ -283,9 +280,8 @@
 
         window.iniciar = () => {
             document.getElementById('intro').style.opacity = '0';
-            
             audioTag.volume = 0.3; 
-            audioTag.play().catch(e => console.log("O áudio precisou de clique:", e));
+            audioTag.play().catch(e => console.log("Erro áudio:", e));
 
             setTimeout(() => {
                 document.getElementById('intro').style.display = 'none';
@@ -298,7 +294,6 @@
             if(explodindo) return;
             focoAtual = alvo;
             
-            // Gerencia botões lidos (Verdes)
             planetasVistos.add(alvo);
             const btnLido = document.querySelector(`.nav-btn[data-id="${alvo}"]`);
             if(btnLido) btnLido.classList.add('visto');
@@ -316,7 +311,7 @@
                 controls.target.set(0, 0, 0);
             }
 
-            // Verifica se viu TODOS para liberar o Grand Finale
+            // Ativa o botão no topo apenas quando terminar de ver tudo
             if (planetasParaVerificar.every(p => planetasVistos.has(p))) {
                 document.getElementById('btn-finale').classList.add('show');
             }
@@ -359,53 +354,61 @@
             }
         };
 
-        // EXCLUSIVO DO GRAND FINALE: DISPARAR O BIG BANG LENTO
+        // O GRAND FINALE APERFEIÇOADO E DIRECIONADO
         window.dispararExplosao = () => {
             explodindo = true;
-            velExplosao = 1; // Ativa a expansão
+            velExplosao = 1;
             document.getElementById('btn-finale').classList.remove('show');
-            document.getElementById('nav-container').style.display = 'none';
+            document.getElementById('nav-menu').classList.add('hidden');
             
             uiTitle.innerText = "💥 O Big Bang do Nosso Amor...";
-            uiBody.innerText = "Tudo o que criamos se expande lentamente pelo infinito. O que eu sinto por você reconstrói galáxias inteiras.";
+            uiBody.innerText = "O que eu sinto por você é tão gigante que explode e reconstrói o próprio espaço de forma perfeita. Aprecie cada detalhe.";
 
-            // Visão panorâmica de cinema bem lenta
-            camera.position.set(20000, 45000, 95000);
-            controls.target.set(20000, 0, 0);
+            // DIRECIONAMENTO DE CÂMERA CINEMATOGRÁFICA DE ALTA ENVERGADURA
+            controls.enabled = false; // Bloqueia o mouse temporariamente para a animação do filme rodar solo
+            camera.position.set(20000, 18000, 32000); // Ângulo perfeito inclinado do sistema explodindo
+            controls.target.set(20000, 0, 0); // Foca exatamente no centro da ação (Sol)
+            controls.update();
 
-            // Transição suave para reiniciar após a Maria apreciar cada detalhe por 9 segundos
+            // Desvanecimento lento de 11 segundos para ela curtir o efeito antes do reset
             setTimeout(() => {
                 const overlay = document.getElementById('fade-overlay');
                 overlay.style.pointerEvents = 'auto';
                 overlay.style.opacity = '1';
 
                 setTimeout(() => {
-                    // CORTA A MÚSICA TOTALMENTE E RESETA O PROJETO
+                    // CORTA A MÚSICA TOTALMENTE SEM COMPROMETER REINÍCIOS
                     audioTag.pause();
                     audioTag.currentTime = 0;
                     document.getElementById('toggle-audio').innerText = "Pausar Música ⏸️";
 
-                    // Restaura posições e variáveis
+                    // Reseta variáveis e mecânicas
                     explodindo = false;
                     velExplosao = 0;
                     planetasVistos.clear();
+                    controls.enabled = true;
                     
-                    // Reseta cores dos botões de navegação
-                    document.querySelectorAll('.nav-menu, .nav-btn').forEach(btn => {
+                    // Reseta interface e limpa os botões verdes
+                    document.querySelectorAll('.nav-btn').forEach(btn => {
                         btn.classList.remove('visto');
                         btn.classList.remove('active');
                     });
                     document.querySelector('.nav-btn[data-id="earth"]').classList.add('active');
 
-                    // Posiciona os planetas de volta no lugar
+                    // Volta o Sol, texturas e grupos para o estado original
                     solarSystem.position.set(20000, 0, 0);
+                    sun.scale.set(1, 1, 1);
+                    sunMat.color.setHex(0xffa033);
+                    galaxy.scale.set(1, 1, 1);
+                    
                     for(let chave in meshesPlanetas) {
                         const p = meshesPlanetas[chave];
                         p.group.position.set(0, 0, 0);
+                        p.mesh.scale.set(1, 1, 1);
                     }
 
-                    // Prepara tela inicial de novo
-                    document.getElementById('nav-container').style.display = 'flex';
+                    // Prepara o palco para reiniciar o ciclo
+                    document.getElementById('nav-menu').classList.remove('hidden');
                     const intro = document.getElementById('intro');
                     intro.style.display = 'flex';
                     intro.style.opacity = '1';
@@ -414,12 +417,11 @@
                     camera.position.set(20140, 15, 25);
                     controls.target.set(20140, 0, 0);
 
-                    // Remove a cortina escura de transição
                     overlay.style.opacity = '0';
                     overlay.style.pointerEvents = 'none';
-                }, 2000);
+                }, 2500);
 
-            }, 9000);
+            }, 11000);
         };
 
         function obterPosicaoFoco() {
@@ -429,31 +431,43 @@
             return p ? p : solarSystem.position;
         }
 
-        // 8. LOOP DE ANIMAÇÃO DO ESPAÇO
+        // LOOP COORDENADO DE ANIMAÇÃO DO ESPAÇO
         function animate() {
             requestAnimationFrame(animate);
 
             const tempo = Date.now() * 0.0005;
 
-            // Se o Grand Finale estiver ativado, expande tudo para longe em câmera lenta
             if (explodindo) {
-                velExplosao += 0.4;
+                velExplosao += 0.5;
                 
-                // Os planetas se afastam radialmente em câmera lenta do Sol
+                // 1. O Sol infla e muda de cor para branco incandescente devido à energia do Big Bang
+                sun.scale.addScalar(0.015);
+                sunMat.color.lerp(new THREE.Color(0xffffff), 0.02);
+                sun.rotation.y += 0.04;
+                
+                // 2. Planetas entram em rotação caótica espiral enquanto se afastam violentamente do Sol
                 for(let chave in meshesPlanetas) {
                     const p = meshesPlanetas[chave];
-                    p.group.position.x += Math.cos(p.angle) * velExplosao * 0.15;
-                    p.group.position.z += Math.sin(p.angle) * velExplosao * 0.15;
+                    p.group.position.x += Math.cos(p.angle) * velExplosao * 0.4;
+                    p.group.position.z += Math.sin(p.angle) * velExplosao * 0.4;
+                    p.group.position.y += (Math.random() - 0.5) * velExplosao * 0.1; // Desvio tridimensional
+                    p.mesh.rotation.y += 0.1;
+                    p.mesh.rotation.x += 0.05;
                 }
                 
-                // O Sol e o sistema inteiro se afastam do centro da Via-Láctea
-                solarSystem.position.x += velExplosao * 0.1;
+                // 3. O próprio sistema solar se expande pelo macro-espaço
+                solarSystem.position.x += velExplosao * 0.15;
                 
-                // As partículas da galáxia se dispersam lentamente
-                galaxy.rotation.y += 0.003;
-                galaxy.scale.addScalar(0.002);
+                // 4. A Via-Láctea acelera a rotação e ejeta suas 170.000 estrelas
+                galaxy.rotation.y += 0.006;
+                galaxy.scale.addScalar(0.008);
+                
+                // 5. Suavização sutil da câmera acompanhando a expansão cósmica para trás
+                camera.position.z += velExplosao * 0.2;
+                camera.position.y += velExplosao * 0.05;
+
             } else {
-                // Movimento orbital normal se não estiver explodindo
+                // Rotação ordinária estável
                 sun.rotation.y += 0.001;
                 galaxy.rotation.y += 0.00015;
                 const pulse = 1 + Math.sin(tempo * 2) * 0.03;
@@ -471,7 +485,7 @@
                 }
             }
 
-            // Estrelas cadentes normais
+            // Estrelas cadentes
             shootingStars.forEach(s => {
                 s.mesh.position.x -= s.speed;
                 s.mesh.position.z -= s.speed;
