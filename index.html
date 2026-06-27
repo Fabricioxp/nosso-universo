@@ -516,13 +516,12 @@
                 overlay.style.backgroundColor = '#010105'; 
                 overlay.style.opacity = '1';
 
-                // CORREÇÃO DO LOOP: Ao invés de tentar reconstruir o ThreeJS na mão,
-                // nós limpamos o áudio e damos F5 na página injetando um parâmetro de autoplay.
+                // CORREÇÃO CRÍTICA DO LOOP: Pausa tudo e dá um Refresh limpo pelo Navegador 
                 setTimeout(() => {
                     audioTag.pause();
                     audioExploTag.pause();
                     audioCriadorTag.pause();
-                    window.location.href = window.location.pathname + "?autoplay=true";
+                    window.location.reload(); // Atualização nativa limpa
                 }, 1000);
             };
         };
@@ -685,19 +684,6 @@
             netuno: { title: "Netuno Roxo Cósmico 🔮", body: "Esse aqui tem a minha cor preferida. Viu como o meu planeta roxo e o seu planeta azul combinam perfeitamente juntos no espaço? Fomos feitos um para o outro." },
             plutao: { title: "Plutão 🤏", body: "Plutão é bem pequenininho e fica lá no cantinho dele kkkk. Olhei para ele e lembrei de você, minha baixinha! Mas o tamanho não importa, meu carinho por você é gigante!" }
         };
-
-        // LÓGICA DE DETECÇÃO DO REINÍCIO (AUTOMÁTICO)
-        window.addEventListener('DOMContentLoaded', () => {
-            const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.get('autoplay') === 'true') {
-                // Remove o parâmetro da URL discretamente para o caso dela dar F5 manual depois
-                window.history.replaceState({}, document.title, window.location.pathname);
-                // Dispara a introdução direto sem exigir o clique no botão
-                setTimeout(() => {
-                    window.iniciarIntroducao();
-                }, 800);
-            }
-        });
 
         animate();
     </script>
