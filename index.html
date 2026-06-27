@@ -237,10 +237,33 @@
         const sunLight = new THREE.PointLight(0xfff5ea, 3, 80000);
         solarSystem.add(sunLight);
 
-        // O SOL
-        const sunMat = new THREE.MeshBasicMaterial({ color: 0xffa033 });
+        // O SOL REALISTA
+        const sunMat = new THREE.MeshStandardMaterial({ 
+            color: 0xffffff, 
+            roughness: 0.9,
+            metalness: 0.1,
+            emissive: 0xff7700, 
+            emissiveIntensity: 1.5 
+        });
+
+        loader.load('https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/lava/lavatile.jpg', (tex) => {
+            tex.wrapS = THREE.RepeatWrapping;
+            tex.wrapT = THREE.RepeatWrapping;
+            tex.repeat.set(2, 1);
+            sunMat.map = tex; 
+            sunMat.needsUpdate = true;
+        });
+
         const sun = new THREE.Mesh(new THREE.SphereGeometry(35, 64, 64), sunMat);
-        const sunGlow = new THREE.Mesh(new THREE.SphereGeometry(39, 32, 32), new THREE.MeshBasicMaterial({ color: 0xff5500, transparent: true, opacity: 0.3, side: THREE.BackSide }));
+        
+        const sunGlowMat = new THREE.MeshBasicMaterial({ 
+            color: 0xff5500, 
+            transparent: true, 
+            opacity: 0.4, 
+            side: THREE.BackSide,
+            blending: THREE.AdditiveBlending 
+        });
+        const sunGlow = new THREE.Mesh(new THREE.SphereGeometry(42, 32, 32), sunGlowMat);
         sun.add(sunGlow);
         solarSystem.add(sun);
 
@@ -451,7 +474,7 @@
                 controls.target.set(0, 0, 0);
             } else {
                 const offset = (focoAtual === 'sun' || focoAtual === 'saturno') ? 65 : 25;
-                camera.position.set(p.x + offset, p.y + 10, p.z + offset);
+                camera.position.set(focoAtual === 'sun' ? p.x + offset : p.x + offset, p.y + 10, p.z + offset);
                 controls.target.copy(p);
             }
             controls.update();
@@ -516,12 +539,11 @@
                 overlay.style.backgroundColor = '#010105'; 
                 overlay.style.opacity = '1';
 
-                // CORREÇÃO CRÍTICA DO LOOP: Pausa tudo e dá um Refresh limpo pelo Navegador 
                 setTimeout(() => {
                     audioTag.pause();
                     audioExploTag.pause();
                     audioCriadorTag.pause();
-                    window.location.reload(); // Atualização nativa limpa
+                    window.location.reload(); 
                 }, 1000);
             };
         };
@@ -619,7 +641,8 @@
                 }
 
             } else {
-                sun.rotation.y += 0.001;
+                sun.rotation.y += 0.0015;
+                sun.rotation.x += 0.0005;
                 galaxy.rotation.y += 0.00015;
                 const pulse = 1 + Math.sin(tempo * 2) * 0.03;
                 galaxy.scale.set(pulse, 1, pulse);
