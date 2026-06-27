@@ -288,16 +288,48 @@
         earthGroup.add(moon);
         solarSystem.add(earthGroup);
 
-        // SATURNO
+        // SATURNO REALISTA (MELHORIAS GRÁFICAS)
         const saturnoGroup = new THREE.Group();
-        const saturnoMesh = new THREE.Mesh(new THREE.SphereGeometry(13.5, 64, 64), new THREE.MeshStandardMaterial({ color: 0xe2bf7d, roughness: 0.5 }));
+        const saturnoMat = new THREE.MeshStandardMaterial({ roughness: 0.6, metalness: 0.1 });
+        
+        loader.load('https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/planets/earth_atmos_2048.jpg', (tex) => {
+            saturnoMat.map = tex;
+            saturnoMat.color.setHex(0xe2bf7d); 
+            saturnoMat.needsUpdate = true;
+        });
+        
+        const saturnoMesh = new THREE.Mesh(new THREE.SphereGeometry(13.5, 64, 64), saturnoMat);
         saturnoGroup.add(saturnoMesh);
 
-        const rGeo = new THREE.RingGeometry(16, 30, 64);
-        const rMat = new THREE.MeshStandardMaterial({ color: 0xd2af6d, side: THREE.DoubleSide, transparent: true, opacity: 0.75 });
-        const rMesh = new THREE.Mesh(rGeo, rMat); rMesh.rotation.x = Math.PI/2.2;
+        // Anéis Realistas com Mapeamento UV Circular
+        const rGeo = new THREE.RingGeometry(18, 35, 64);
+        const pos = rGeo.attributes.position;
+        const v3 = new THREE.Vector3();
+        for (let i = 0; i < pos.count; i++) {
+            v3.fromBufferAttribute(pos, i);
+            rGeo.attributes.uv.setXY(i, v3.length() < 26 ? 0 : 1, 1);
+        }
+
+        const rMat = new THREE.MeshStandardMaterial({ 
+            color: 0xe2bf7d, 
+            side: THREE.DoubleSide, 
+            transparent: true, 
+            opacity: 0.85,
+            roughness: 0.4
+        });
+        
+        loader.load('https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/lava/lavatile.jpg', (tex) => {
+            tex.wrapS = THREE.RepeatWrapping;
+            tex.repeat.set(10, 1);
+            rMat.map = tex;
+            rMat.needsUpdate = true;
+        });
+
+        const rMesh = new THREE.Mesh(rGeo, rMat); 
+        rMesh.rotation.x = Math.PI / 2.2; 
         saturnoGroup.add(rMesh);
 
+        // Texto Maria Flutuante
         const nameCanvas = document.createElement('canvas'); nameCanvas.width = 512; nameCanvas.height = 128;
         const nCtx = nameCanvas.getContext('2d');
         nCtx.fillStyle = 'rgba(0,0,0,0)'; nCtx.fillRect(0,0,512,128);
@@ -308,12 +340,12 @@
         const nameTex = new THREE.CanvasTexture(nameCanvas);
         const nameSpriteMat = new THREE.SpriteMaterial({ map: nameTex, transparent: true });
         const nameSprite = new THREE.Sprite(nameSpriteMat);
-        nameSprite.position.set(0, 22, 0); 
+        nameSprite.position.set(0, 25, 0); 
         nameSprite.scale.set(35, 9, 1);
         saturnoGroup.add(nameSprite);
         solarSystem.add(saturnoGroup);
 
-        // PLANETAS
+        // PLANETAS RESTANTES
         const infoPlanetas = [
             { name: 'mercurio', size: 2.5, dist: 60, color: 0x999999, speed: 0.004 },
             { name: 'venus', size: 5.8, dist: 95, color: 0xe3bb87, speed: 0.003 },
@@ -474,7 +506,7 @@
                 controls.target.set(0, 0, 0);
             } else {
                 const offset = (focoAtual === 'sun' || focoAtual === 'saturno') ? 65 : 25;
-                camera.position.set(focoAtual === 'sun' ? p.x + offset : p.x + offset, p.y + 10, p.z + offset);
+                camera.position.set(p.x + offset, p.y + 10, p.z + offset);
                 controls.target.copy(p);
             }
             controls.update();
@@ -696,7 +728,7 @@
 
         const textos = {
             galaxy: { title: "Nossa Via-Láctea 🌌", body: "Olha que lindo tudo girando junto! No meio desse tanto de poeira e mistério, o universo caprichou na nossa história. Saber que você existe faz tudo parecer perfeito." },
-            sun: { title: "O Sol: Nosso Combustível ☀️", body: "O Sol é a estrela que dá energia para todo o espaço. Ele é o combustível do que eu sinto por você: enquanto ele continuar brilhando forte, nosso amor vai ser eterno." },
+            sun: { title: "O Sol: Nosso Combustível ☀️", body: "O Sol é a estrella que dá energia para todo o espaço. Ele é o combustível do que eu sinto por você: enquanto ele continuar brilhando forte, nosso amor vai ser eterno." },
             mercurio: { title: "Mercúrio", body: "Ele corre super rápido em volta do Sol. É igualzinho à velocidade que o meu coração bate toda vez que chega uma mensagem sua no meu celular!" },
             venus: { title: "Vênus", body: "O planeta mais brilhante do céu. Ele me lembra muito o brilho dos seus olhos quando a gente conversa e faz planos para o nosso futuro." },
             earth: { title: "Planeta Terra 🌍", body: "Existem bilhões de pessoas nesse mundo inteiro, mas foi com você que meu coração decidiu bater mais forte. É um milagre lindo a gente ter se encontrado no meio de tanta gente." },
