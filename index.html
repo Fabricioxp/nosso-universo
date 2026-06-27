@@ -341,7 +341,6 @@
                 audioCtx.resume();
             }
 
-            // Garante que o estado anterior do loop de legendas e variáveis foi limpo
             if (intervalLegendas) clearInterval(intervalLegendas);
             transicaoIniciada = false;
 
@@ -353,7 +352,6 @@
                 screenNarrativa.style.display = 'flex';
                 screenNarrativa.style.opacity = '1';
 
-                // Reseta o texto da legenda anterior
                 document.getElementById('legenda-texto').innerText = "";
                 document.getElementById('legenda-texto').classList.remove('show', 'luz');
 
@@ -362,7 +360,6 @@
                 audioCriadorTag.play().catch(e => console.log("Erro áudio introdução:", e));
             }, 1500);
 
-            // Relógio de sincronia contínua de alta precisão
             intervalLegendas = setInterval(() => {
                 const tempoAtual = audioCriadorTag.currentTime;
                 let legendaAtiva = null;
@@ -386,7 +383,6 @@
                     }
                 }
 
-                // Lógica de transição independente
                 if (tempoAtual >= 15.3 && !transicaoIniciada) {
                     transicaoIniciada = true;
                     
@@ -409,7 +405,7 @@
             document.getElementById('nav-container').style.display = 'flex';
             document.getElementById('hud').style.opacity = '1';
             
-            audioTag.currentTime = 0; // Garante que a música comece exatamente do começo
+            audioTag.currentTime = 0; 
             audioTag.volume = 0.3; 
             audioTag.play().catch(e => console.log("Erro música principal:", e));
             mudarFoco('earth');
@@ -518,95 +514,16 @@
             audioExploTag.onended = () => {
                 overlay.style.transition = 'opacity 1.5s ease-out';
                 overlay.style.backgroundColor = '#010105'; 
+                overlay.style.opacity = '1';
 
-                document.getElementById('toggle-audio').innerText = "Pausar Música ⏸️";
-
-                explodindo = false;
-                intensidadeTremor = 0;
-                planetasVistos.clear();
-                controls.enabled = true;
-                
-                if (filterNode && gainNode) {
-                    filterNode.frequency.setValueAtTime(22000, audioCtx.currentTime);
-                    gainNode.gain.setValueAtTime(1.0, audioCtx.currentTime);
-                }
-
-                document.querySelectorAll('.nav-btn').forEach(btn => {
-                    btn.classList.remove('visto');
-                    btn.classList.remove('active');
-                });
-                document.querySelector('.nav-btn[data-id="earth"]').classList.add('active');
-
-                // Restauração do Universo pós-explosão
-                solarSystem.position.set(20000, 0, 0);
-                solarSystem.scale.set(1, 1, 1);
-                sun.scale.set(1, 1, 1);
-                sunMat.color.setHex(0xffa033);
-                galaxy.scale.set(1, 1, 1);
-                galaxyMaterial.color.setRGB(1, 1, 1);
-                galaxyMaterial.size = 110;
-                galaxyMaterial.opacity = 0.85;
-                
-                const posAttr = galaxyGeometry.attributes.position;
-                for (let i = 0; i < gPoints; i++) {
-                    const i3 = i * 3;
-                    const r = Math.pow(Math.random(), 2.5) * 65000;
-                    const arms = 4;
-                    const theta = ((i % arms) / arms) * Math.PI * 2 + (r * 0.00006);
-                    const spread = Math.pow(Math.random(), 2) * (Math.random() < 0.5 ? 1 : -1) * r * 0.12;
-                    posAttr.array[i3] = Math.cos(theta) * r + spread;
-                    posAttr.array[i3+1] = (Math.random() - 0.5) * (65000 - r) * 0.04;
-                    posAttr.array[i3+2] = Math.sin(theta) * r + (Math.random() - 0.5) * r * 0.12;
-                }
-                posAttr.needsUpdate = true;
-                
-                const colAttr = galaxyGeometry.attributes.color;
-                for(let i=0; i<gPoints; i++) {
-                    const i3 = i*3;
-                    const r = Math.pow(Math.random(), 2.5) * 65000;
-                    const finalCol = colCore.clone().lerp(colArm, r / 65000);
-                    colAttr.array[i3] = finalCol.r; colAttr.array[i3+1] = finalCol.g; colAttr.array[i3+2] = finalCol.b;
-                }
-                colAttr.needsUpdate = true;
-
-                for(let chave in meshesPlanetas) {
-                    const p = meshesPlanetas[chave];
-                    p.dist = p.originalDist;
-                    p.group.position.set(0, 0, 0);
-                    p.mesh.scale.set(1, 1, 1);
-                    p.mesh.material.color.setHex(infoPlanetas.find(inf => inf.name === chave)?.color || (chave==='earth'? 0xffffff : 0xe2bf7d));
-                }
-
-                document.getElementById('nav-container').style.display = 'flex';
-                document.getElementById('btn-finale').classList.remove('show');
-                document.getElementById('nav-menu').classList.remove('hidden');
-                
-                // CORREÇÃO CRÍTICA DO BUG DE LOOP:
-                // Pausa e zera todas as tracks de música para não vazar nada antes da hora no recomeço
-                audioTag.pause();
-                audioTag.currentTime = 0;
-                audioCriadorTag.pause();
-                audioCriadorTag.currentTime = 0;
-                if (intervalLegendas) clearInterval(intervalLegendas);
-                transicaoIniciada = false;
-
-                // Oculta o canvas novamente e o HUD para aguardar a nova introdução
-                document.querySelector('canvas').classList.remove('show');
-                document.getElementById('nav-container').style.display = 'none';
-                document.getElementById('hud').style.opacity = '0';
-
-                const intro = document.getElementById('intro');
-                intro.style.display = 'flex';
-                intro.style.opacity = '1';
-
-                camera.position.set(20140, 15, 25);
-                controls.target.set(20140, 0, 0);
-
+                // CORREÇÃO DO LOOP: Ao invés de tentar reconstruir o ThreeJS na mão,
+                // nós limpamos o áudio e damos F5 na página injetando um parâmetro de autoplay.
                 setTimeout(() => {
-                    overlay.style.opacity = '0';
-                    overlay.style.pointerEvents = 'none';
-                    overlay.style.transition = 'opacity 2.5s cubic-bezier(0.25, 1, 0.5, 1)'; 
-                }, 100);
+                    audioTag.pause();
+                    audioExploTag.pause();
+                    audioCriadorTag.pause();
+                    window.location.href = window.location.pathname + "?autoplay=true";
+                }, 1000);
             };
         };
 
@@ -768,6 +685,19 @@
             netuno: { title: "Netuno Roxo Cósmico 🔮", body: "Esse aqui tem a minha cor preferida. Viu como o meu planeta roxo e o seu planeta azul combinam perfeitamente juntos no espaço? Fomos feitos um para o outro." },
             plutao: { title: "Plutão 🤏", body: "Plutão é bem pequenininho e fica lá no cantinho dele kkkk. Olhei para ele e lembrei de você, minha baixinha! Mas o tamanho não importa, meu carinho por você é gigante!" }
         };
+
+        // LÓGICA DE DETECÇÃO DO REINÍCIO (AUTOMÁTICO)
+        window.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('autoplay') === 'true') {
+                // Remove o parâmetro da URL discretamente para o caso dela dar F5 manual depois
+                window.history.replaceState({}, document.title, window.location.pathname);
+                // Dispara a introdução direto sem exigir o clique no botão
+                setTimeout(() => {
+                    window.iniciarIntroducao();
+                }, 800);
+            }
+        });
 
         animate();
     </script>
