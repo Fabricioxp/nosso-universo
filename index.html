@@ -271,7 +271,7 @@
             { name: 'venus', size: 5.8, dist: 95, color: 0xffffff, speed: 0.003, venusCustom: true },
             { name: 'marte', size: 4.0, dist: 195, color: 0xc1440e, speed: 0.0016, relevo: true },
             { name: 'jupiter', size: 17.5, dist: 260, color: 0xd4a373, speed: 0.001, procedural: true, corFaixa: '#8a6442' },
-            { name: 'urano', size: 9.0, dist: 420, color: 0x102c42, speed: 0.0005, corSolida: true }, // COR AZUL PETRÓLEO ESCURO CORRIGIDA
+            { name: 'urano', size: 9.0, dist: 420, color: 0x102c42, speed: 0.0005, procedural: true, corFaixa: '#1b4363' }, // TEXTURIZADO COM AZUL PETRÓLEO ESCURO + FAIXAS DETALHADAS
             { name: 'netuno', size: 8.5, dist: 500, color: 0x7832cc, speed: 0.0003, procedural: true, corFaixa: '#471682' },
             { name: 'plutao', size: 1.5, dist: 560, color: 0x8a7b68, speed: 0.0002, relevo: true }
         ];
@@ -279,9 +279,7 @@
         const meshesPlanetas = {};
         infoPlanetas.forEach(p => {
             const grupo = new THREE.Group(); let mat;
-            if (p.corSolida) {
-                mat = new THREE.MeshStandardMaterial({ color: p.color, roughness: 0.5, metalness: 0.1 });
-            } else if (p.venusCustom) {
+            if (p.venusCustom) {
                 mat = new THREE.MeshStandardMaterial({ map: gerarTexturaVenus(), roughness: 0.8, metalness: 0.1 });
             } else if (p.procedural) {
                 mat = new THREE.MeshStandardMaterial({ map: gerarTexturaFaixas('#' + p.color.toString(16).padStart(6, '0'), p.corFaixa), roughness: 0.6 });
@@ -547,7 +545,7 @@
             marte: { title: "Marte", body: "Marte é forte e cheio de cor. Ele me lembra a nossa força para fazer tudo dar certo e construir uma história linda passo a passo." },
             jupiter: { title: "Júpiter", body: "Júpiter é o maior planeta de todos, cabe tudo lá dentro! Mas sabia que ele ainda é pequeno perto do tamanho do futuro que eu imagino do seu lado?" },
             saturno: { title: "Saturno da Minha Maria ✨💍", body: "Esse é o planeta mais lindo do universo por causa desses anéis. Como ele é o meu preferido, coloquei o seu nome brilhando nele. Você é a dona do meu lugar favorito no espaço." },
-            urano: { title: "Urano Profundo 💎", body: "Esse planeta traz uma calmaria linda para o espaço com seu azul escuro marcante, igualzinho à paz que sinto no peito quando estou com você." },
+            urano: { title: "Urano Profundo 💎", body: "Esse planeta traz uma calmaria linda para o espaço com seu azul escuro marcante — que carrega a sua cor favorita —, trazendo exatamente a paz que sinto no peito quando estou com você." },
             netuno: { title: "Netuno Roxo Cósmico 🔮", body: "Esse aqui tem a minha cor preferida. Viu como o meu planeta roxo e o seu planeta azul combinam perfeitamente juntos no espaço? Fomos feitos um para o outro." },
             plutao: { title: "Plutão 🤏", body: "Plutão é bem pequenininho e fica lá no cantinho dele kkkk. Olhei para ele e lembrei de você, minha baixinha! Mas o tamanho não importa, meu carinho por você é gigante!" }
         };
